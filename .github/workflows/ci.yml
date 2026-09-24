@@ -1,48 +1,64 @@
-name: ci
+name: CI
 
-# Controls when the workflow will run
 on:
   push:
-    branches: ["main", "develop"]
+    branches: [main, dev]
   pull_request:
-    branches: ["main", "develop"]
-
-  # Allows you to run this workflow manually from the Actions tab
+    branches: [main, dev]
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  lint-and-typecheck:
     runs-on: ubuntu-latest
-
-    # Use matrix strategy to test multiple Node.js versions
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x, 22.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 22
+          cache: npm
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci --include=optional
 
-      - name: Dry-run build
-        run: npm run build
-        env:
-          # These env variables must be set in the repository's secrets
-          # - Settings -> Secrets and variables -> New repository secret
-          MONGO_URI: ${{ secrets.MONGO_URI }}
-          # Add additional environment variables here
-      
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Prettier check
+        run: npx prettier --check "**/*.{js,jsx,ts,tsx,json,md,yml,yaml}"
+
       - name: Run tests
         run: npm test
+
+      - name: Dependency audit
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+  build:
+    needs: lint-and-typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --include=optional
+
+      - name: Build
+        run: npm run build --if-present

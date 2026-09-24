@@ -1,20 +1,26 @@
 import mongoose from "mongoose";
 
-const url: string = process.env.MONGO_URI as string;
-let connection: typeof mongoose;
+let connectionPromise: Promise<typeof mongoose> | undefined;
 
 /**
- * Makes a connection to a MongoDB database. If a connection already exists, does nothing
+ * Reuses the MongoDB connection across API requests.
  * Call this function before all api routes
  * @returns {Promise<typeof mongoose>}
  */
 const connectDB = async () => {
-  if (!connection) {
-    // uncomment this line once you have the MONGO_URI set up
-    // connection = await mongoose.connect(url);
-    connection = "remove me" as any; // remove me
-    return connection;
+  const uri = process.env.MONGO_URI;
+  if (!uri || uri === "{mongo-uri-here}" || uri.includes("<ATLAS_PASSWORD>")) {
+    throw new Error("MONGO_URI is not configured");
   }
+
+  if (mongoose.connection.readyState === 1) return mongoose;
+
+  connectionPromise ??= mongoose.connect(uri).catch((error) => {
+    connectionPromise = undefined;
+    throw error;
+  });
+
+  return connectionPromise;
 };
 
 export default connectDB;
