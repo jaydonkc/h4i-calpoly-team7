@@ -1,42 +1,83 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import type { FitnessClass } from "@/types/fitness-class";
 import Icon from "./Icon";
 
 type ClassCardProps = {
   fitnessClass: FitnessClass;
-  onViewDetails: (fitnessClass: FitnessClass) => void;
 };
 
-export default function ClassCard({ fitnessClass, onViewDetails }: ClassCardProps) {
+export default function ClassCard({ fitnessClass }: ClassCardProps) {
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isBooked, setIsBooked] = useState(false);
+
+  useEffect(() => {
+    if (!showConfirmation) return;
+
+    const timeout = window.setTimeout(() => setShowConfirmation(false), 2500);
+    return () => window.clearTimeout(timeout);
+  }, [showConfirmation]);
+
+  function toggleReservation() {
+    if (isBooked) {
+      setIsBooked(false);
+      setShowConfirmation(false);
+      return;
+    }
+
+    setIsBooked(true);
+    setShowConfirmation(true);
+  }
+
   return (
     <article className="classcard">
-      <div className={`time ${fitnessClass.color}`}>
+      <div className="table-cell class-time" data-label="Time">
         <strong>{fitnessClass.time}</strong>
-        <span>{fitnessClass.duration}</span>
+        <span>to {fitnessClass.end}</span>
       </div>
-      <div className="classmain">
+      <div className="table-cell classmain" data-label="Class">
         <div>
           <mark className={fitnessClass.color}>{fitnessClass.category}</mark>
-          {fitnessClass.spots <= 4 && <small>Only {fitnessClass.spots} spots left</small>}
         </div>
         <h3>{fitnessClass.title}</h3>
-        <p className="meta">
-          <span>
-            <Icon name="user" />
-            {fitnessClass.coach}
-          </span>
-          <span>
-            <Icon name="pin" />
-            {fitnessClass.room}
-          </span>
-          <span>
-            <Icon name="clock" />
-            {fitnessClass.level}
-          </span>
-        </p>
+        <p className="class-description">{fitnessClass.description}</p>
       </div>
-      <button className="details" onClick={() => onViewDetails(fitnessClass)}>
-        View details <Icon name="arrow" />
+      <div className="table-cell" data-label="Instructor">
+        <Icon name="user" />
+        <span>{fitnessClass.coach}</span>
+      </div>
+      <div className="table-cell" data-label="Location">
+        <Icon name="pin" />
+        <span>{fitnessClass.room}</span>
+      </div>
+      <div className="table-cell" data-label="Duration">
+        {fitnessClass.duration}
+      </div>
+      <div className="table-cell" data-label="Difficulty">
+        {fitnessClass.level}
+      </div>
+      <div className="table-cell availability" data-label="Availability">
+        <strong>{fitnessClass.spots}</strong>
+        <span> spots</span>
+      </div>
+      <button className={`reserve ${isBooked ? "cancel" : ""}`} aria-pressed={isBooked} onClick={toggleReservation}>
+        {isBooked ? "Cancel" : "Reserve"}
       </button>
+      {showConfirmation && (
+        <div className="booking-popup" role="status" aria-live="polite">
+          <span>
+            <Icon name="check" />
+          </span>
+          <div>
+            <strong>Class Booked!</strong>
+            <small>{fitnessClass.title}</small>
+          </div>
+          <button aria-label="Dismiss confirmation" onClick={() => setShowConfirmation(false)}>
+            ×
+          </button>
+        </div>
+      )}
     </article>
   );
 }
