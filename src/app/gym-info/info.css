@@ -3,12 +3,53 @@
 .fitness-page {
 	position: relative;
 	padding-top: 6rem;
+	padding-bottom: 2rem;
 }
 
-.fitness-logo {
+.fitness-actions {
+	position: absolute;
+	top: 1.5rem;
+	right: 1.5rem;
+}
+
+.top-logo {
 	position: absolute;
 	top: 1.5rem;
 	left: 1.5rem;
+}
+
+.account-button {
+	display: inline-block;
+	padding: 0.65rem 1.1rem;
+	border: 1px solid #19211e;
+	border-radius: 999px;
+	background-color: #19211e;
+	color: #d8f64b;
+	font-family: "DM Sans", sans-serif;
+	font-size: 0.9rem;
+	font-weight: 600;
+	text-decoration: none;
+	transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.account-button:hover,
+.account-button:focus-visible {
+	background-color: #d8f64b;
+	color: #19211e;
+}
+
+.fitness-footer {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	align-items: center;
+	gap: 1rem;
+	max-width: 1200px;
+	margin: 2rem auto 0;
+	padding: 1.5rem 0 0;
+	border-top: 1px solid #d8d6cf;
+}
+
+.fitness-logo {
 	display: flex;
 	align-items: center;
 	gap: 0.6rem;
@@ -33,6 +74,23 @@
 	font-size: 0.85rem;
 	font-weight: 700;
 	line-height: 0.95;
+}
+
+.fitness-slogan,
+.fitness-copyright {
+	margin: 0;
+	font-family: "DM Sans", sans-serif;
+	font-size: 0.85rem;
+	color: #6f746f;
+}
+
+.fitness-slogan {
+	text-align: center;
+	font-style: italic;
+}
+
+.fitness-copyright {
+	text-align: right;
 }
 
 .info {
@@ -124,8 +182,24 @@ main:has(.offer-info:hover, .visit-info:hover) .about-info .gym-details::after {
 		padding-top: 5.25rem;
 	}
 
-	.fitness-logo {
+	.fitness-actions {
+		top: 1rem;
+		right: 1rem;
+	}
+
+	.top-logo {
 		top: 1rem;
 		left: 1rem;
+	}
+
+	.fitness-footer {
+		grid-template-columns: 1fr;
+		justify-items: center;
+		text-align: center;
+	}
+
+	.fitness-copyright,
+	.fitness-slogan {
+		text-align: center;
 	}
 }
