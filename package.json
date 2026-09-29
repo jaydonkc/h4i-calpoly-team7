@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "mongoose": "^8",
-    "next": "^16.3.7",
+    "next": "^14",
     "react": "^18",
     "react-dom": "^18"
   },
