@@ -1,4 +1,7 @@
+"use client";
+
 import "../globals.css";
+import { useState } from "react";
 
 const tiers = [
   {
@@ -15,13 +18,15 @@ const tiers = [
   },
   {
     name: "Premium",
-    price: "$29/mo",
+    price: "$30/mo",
     description: "Access to a spa or smth.",
     perks: ["perk1", "perk2", "perk3"],
   },
 ];
 
 export default function MembershipsPage() {
+  // adds button functionality
+  const [selectedTier, setSelectedTier] = useState<(typeof tiers)[number] | null>(null);
   return (
     <main>
       <section>
@@ -50,11 +55,64 @@ export default function MembershipsPage() {
                 ))}
               </ul>
 
-              <button className="tierButton">Select {tier.name}</button>
+              <button className="tierButton" onClick={() => setSelectedTier(tier)}>
+                Select {tier.name}
+              </button>
             </article>
           ))}
         </div>
       </section>
+
+      {selectedTier && (
+        <section>
+          <h2>Purchase {selectedTier.name}</h2>
+
+          <div>
+            <h3>Billing summary</h3>
+            <p>{selectedTier.name} membership</p>
+            <p>{selectedTier.description}</p>
+            <p>Total: {selectedTier.price}</p>
+          </div>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              alert("Mock purchase complete. No payment was processed.");
+              setSelectedTier(null);
+            }}
+          >
+            <h3>Card details</h3>
+            <label>
+              Card number <input type="password" maxLength={19} required />
+            </label>
+            <label>
+              Expiry <input placeholder="MM/YY" maxLength={5} required />
+            </label>
+            <label>
+              CVC <input required maxLength={4} size={4} />
+            </label>
+
+            <h3>Billing address</h3>
+            <label>
+              Street <input required />
+            </label>
+            <label>
+              City <input required />
+            </label>
+            <label>
+              State <input required />
+            </label>
+            <label>
+              ZIP <input required />
+            </label>
+
+            <button type="submit">Pay {selectedTier.price}</button>
+            <button type="button" onClick={() => setSelectedTier(null)}>
+              Cancel
+            </button>
+          </form>
+        </section>
+      )}
     </main>
   );
 }
