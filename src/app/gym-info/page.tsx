@@ -3,7 +3,16 @@ import "../globals.css";
 
 export default function GymInfoPage() {
   return (
-    <main>
+    <main className="fitness-page">
+      <div className="fitness-logo" aria-label="Fitness Maxxing">
+        <span className="fitness-logo-mark">FM</span>
+        <span className="fitness-logo-name">
+          Fitness
+          <br />
+          Maxxing
+        </span>
+      </div>
+
       <div className="info about-info">
         <h1>About Our Gym</h1>
         <div className="gym-details" tabIndex={0}>
@@ -28,6 +37,13 @@ export default function GymInfoPage() {
         <h1>Visit Us</h1>
         <div className="gym-details" tabIndex={0}>
           <p>Stop by during our open hours to take a tour, meet our team, and learn more about becoming a member.</p>
+          <p>
+            <strong>Hours:</strong> Monday-Friday, 5:00 AM-10:00 PM; Saturday-Sunday, 7:00 AM-8:00 PM
+          </p>
+          <p>
+            <strong>Sample locations:</strong> Downtown Fitness Maxxing, 123 Main Street; Northside Fitness Maxxing, 456
+            Oak Avenue
+          </p>
         </div>
       </div>
     </main>

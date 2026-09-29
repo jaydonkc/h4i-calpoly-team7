@@ -1,5 +1,40 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap");
 
+.fitness-page {
+	position: relative;
+	padding-top: 6rem;
+}
+
+.fitness-logo {
+	position: absolute;
+	top: 1.5rem;
+	left: 1.5rem;
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	color: #19211e;
+	font-family: "Manrope", sans-serif;
+}
+
+.fitness-logo-mark {
+	display: grid;
+	width: 2.75rem;
+	height: 2.75rem;
+	place-items: center;
+	border-radius: 50%;
+	background-color: #19211e;
+	color: #d8f64b;
+	font-size: 0.8rem;
+	font-weight: 700;
+	letter-spacing: 0.05em;
+}
+
+.fitness-logo-name {
+	font-size: 0.85rem;
+	font-weight: 700;
+	line-height: 0.95;
+}
+
 .info {
 	max-width: 1200px;
 	margin: 0 auto;
@@ -13,9 +48,15 @@
 	box-shadow: 0 4px 12px rgba(25, 33, 30, 0.08);
 }
 
+.info + .info {
+	margin-top: 1.25rem;
+}
+
 .info h1 {
+	margin: 0 0 1.25rem;
 	font-family: "Manrope", sans-serif;
 	color: #19211e;
+	line-height: 1.1;
 	opacity: 0.55;
 	transition: opacity 0.3s ease;
 }
@@ -35,9 +76,12 @@ main:has(.offer-info:hover, .visit-info:hover) .about-info h1 {
 
 .gym-details {
 	position: relative;
+	max-width: 720px;
+	margin: 0 auto;
 	max-height: 300px;
 	overflow: hidden;
 	padding: 0.5rem;
+	line-height: 1.65;
 }
 
 .gym-details::after {
@@ -62,7 +106,26 @@ main:has(.offer-info:hover, .visit-info:hover) .about-info .gym-details::after {
 	list-style: none;
 }
 
+.offer-info li + li {
+	margin-top: 0.65rem;
+}
+
+.visit-info p {
+	margin: 0;
+}
+
 .info:hover .gym-details::after,
 .info:focus-within .gym-details::after {
 	opacity: 0;
+}
+
+@media (max-width: 760px) {
+	.fitness-page {
+		padding-top: 5.25rem;
+	}
+
+	.fitness-logo {
+		top: 1rem;
+		left: 1rem;
+	}
 }
