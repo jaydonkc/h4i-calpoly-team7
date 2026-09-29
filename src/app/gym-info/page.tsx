@@ -7,7 +7,7 @@ export default function GymInfoPage() {
       <div className="info">
         <h1>About Our Gym</h1>
         <div className="gym-details" tabIndex={0}>
-          Welcome to our gym, a friendly space where people of all fitness levels can work toward their health and
+          Welcome to Fitness Maxxing, a friendly space where people of all fitness levels can work toward their health and
           wellness goals.
         </div>
       </div>
@@ -21,16 +21,6 @@ export default function GymInfoPage() {
             <li>Group workouts for all experience levels</li>
             <li>A clean and welcoming environment</li>
           </ul>
-        </div>
-      </div>
-
-      <div className="info">
-        <h1>Our Mission</h1>
-        <div className="gym-details" tabIndex={0}>
-          <p>
-            Our mission is to help our community build healthy habits, stay active, and feel confident throughout every
-            step of their fitness journey.
-          </p>
         </div>
       </div>
 
