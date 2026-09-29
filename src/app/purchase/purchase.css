@@ -1,0 +1,142 @@
+/* This is just vibecoded placeholder css */
+
+main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1rem 3rem;
+  font-family: system-ui, sans-serif;
+}
+
+/* Banner */
+.membershipBanner {
+  padding: 3rem 1rem;
+  text-align: center;
+  background: #f3f3f3;
+}
+
+/* Plan heading */
+.planChoice {
+  margin: 2rem 0;
+  text-align: center;
+}
+
+/* Tier cards */
+.planTier {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.planTier article {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.planTier ul {
+  flex-grow: 1; /* pushes the button to the bottom of every card */
+  padding-left: 1.25rem;
+}
+
+.tierName {
+  margin: 0;
+}
+
+.tierPrice {
+  margin: 0.5rem 0;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.tierDescription {
+  color: #555;
+}
+
+/* Buttons */
+.tierButton,
+.paymentForm button {
+  padding: 0.6rem 1rem;
+  border: 1px solid #111;
+  border-radius: 6px;
+  background: #111;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.tierButton:hover,
+.paymentForm button:hover {
+  background: #333;
+}
+
+/* Cancel button (type="button" inside the form) */
+.paymentForm button[type="button"] {
+  background: transparent;
+  color: #111;
+}
+
+.paymentForm button[type="button"]:hover {
+  background: #f3f3f3;
+}
+
+/* Payment section */
+.paymentForm {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  box-sizing: border-box;
+  width: min(480px, calc(100% - 2rem));
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.5);
+}
+
+/* Billing summary (the div directly inside the section) */
+.paymentForm > div {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border-radius: 6px;
+  background: #f3f3f3;
+}
+
+.paymentForm > div p {
+  margin: 0.25rem 0;
+}
+
+.paymentForm > div p:last-child {
+  font-weight: 700; /* the "Total" line */
+}
+
+/* Form fields */
+.paymentForm label {
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.paymentForm input {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.5rem;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  font: inherit;
+}
+
+/* Only shows after the person has interacted with the field */
+.paymentForm input:user-invalid {
+  border-color: #c00;
+}
+
+.paymentForm form button {
+  margin-top: 1rem;
+  margin-right: 0.5rem;
+}

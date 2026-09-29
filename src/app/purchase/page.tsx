@@ -1,6 +1,7 @@
 "use client";
 
 import "../globals.css";
+import "./purchase.css";
 import { useState } from "react";
 
 const tiers = [
@@ -62,9 +63,9 @@ export default function MembershipsPage() {
           ))}
         </div>
       </section>
-
+      {/* haven't had the chance to really run through how this form works but its fairly simple*/}
       {selectedTier && (
-        <section>
+        <section className="paymentForm">
           <h2>Purchase {selectedTier.name}</h2>
 
           <div>
