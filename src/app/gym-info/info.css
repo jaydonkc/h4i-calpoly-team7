@@ -1,0 +1,31 @@
+﻿.info {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 2rem;
+	color: #1f2937;
+	text-align: center;
+	background-color: #f8fafc;
+	border: 1px solid #e2e8f0;
+	border-radius: 12px;
+	box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+.gym-details {
+	position: relative;
+	max-height: 300px;
+	overflow: hidden;
+	padding: 0.5rem;
+}
+
+.gym-details::after {
+	position: absolute;
+	inset: 0;
+	content: "";
+	background-color: rgba(248, 250, 252, 0.82);
+	transition: opacity 0.3s ease;
+}
+
+.info:hover .gym-details::after,
+.info:focus-within .gym-details::after {
+	opacity: 0;
+}
