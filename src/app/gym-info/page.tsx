@@ -54,6 +54,22 @@ export default function GymInfoPage() {
         </div>
       </div>
 
+      <section className="info faq-info">
+        <h2>Frequently Asked Questions</h2>
+        <details>
+          <summary>Do I need a membership to visit?</summary>
+          <p>No. Visitors can schedule a tour or ask about a day pass at the front desk.</p>
+        </details>
+        <details>
+          <summary>Do you offer personal training?</summary>
+          <p>Yes. Our trainers can help create a fitness plan based on your goals and experience.</p>
+        </details>
+        <details>
+          <summary>Can beginners join?</summary>
+          <p>Absolutely. Our equipment, classes, and staff support members at every fitness level.</p>
+        </details>
+      </section>
+
       <footer className="fitness-footer">
         <div className="fitness-logo" aria-label="Fitness Maxxing">
           <span className="fitness-logo-mark">FM</span>
