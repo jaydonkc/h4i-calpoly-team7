@@ -30,6 +30,8 @@ export default function MembershipsPage() {
   const [selectedTier, setSelectedTier] = useState<(typeof tiers)[number] | null>(null);
   // disables background click
   const dialogRef = useRef<HTMLDialogElement>(null);
+  // payment error react element
+  const [paymentError, setPaymentError] = useState("");
 
   useEffect(() => {
     if (selectedTier) dialogRef.current?.showModal();
@@ -84,19 +86,43 @@ export default function MembershipsPage() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              alert("Mock purchase complete. No payment was processed.");
+              const cardNumber = String(new FormData(e.currentTarget).get("cardNumber"));
+              if (cardNumber.endsWith("67")) {
+                setPaymentError("Your card was declined.");
+                return;
+              }
+              setPaymentError("");
+              alert("Mock purchase successful. No payment was processed.");
               setSelectedTier(null);
             }}
           >
             <h3>Card details</h3>
             <label>
-              Card number <input type="password" maxLength={19} required />
+              Card number
+              <input
+                name="cardNumber"
+                type="password"
+                inputMode="numeric"
+                maxLength={16}
+                pattern="[0-9]{16}"
+                title="Enter 16 digits" // feedback when pattern is wrong
+                required
+              />
             </label>
+
             <label>
-              Expiry <input placeholder="MM/YY" maxLength={5} required />
+              Expiry
+              <input
+                placeholder="MM/YY"
+                pattern="0[1-9]|1[0-2]/[0-9]{2}"
+                title="Enter in MM/YY format"
+                maxLength={5}
+                required
+              />
             </label>
+
             <label>
-              CVC <input required maxLength={4} size={4} />
+              CVC <input pattern="[0-9]{3}|[0-9]{4}" maxLength={4} required />
             </label>
 
             <h3>Billing address</h3>
@@ -104,14 +130,16 @@ export default function MembershipsPage() {
               Street <input required />
             </label>
             <label>
-              City <input required />
+              City <input pattern="[^0-9]+" title="No numbers permitted" required />
             </label>
             <label>
-              State <input required />
+              State <input pattern="[^0-9]+" title="No numbers permitted" required />
             </label>
             <label>
-              ZIP <input required />
+              ZIP <input pattern="[0-9]{5}" maxLength={5} required />
             </label>
+
+            {paymentError && <p role="alert">{paymentError}</p>}
 
             <button type="submit">Pay {selectedTier.price}</button>
             <button type="button" onClick={() => setSelectedTier(null)}>
