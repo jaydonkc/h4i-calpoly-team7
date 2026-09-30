@@ -136,8 +136,7 @@ main:has(.offer-info:hover, .visit-info:hover) .about-info h1 {
 	position: relative;
 	max-width: 720px;
 	margin: 0 auto;
-	max-height: 300px;
-	overflow: hidden;
+	
 	padding: 0.5rem;
 	line-height: 1.65;
 }
