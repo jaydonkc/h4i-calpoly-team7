@@ -114,7 +114,7 @@ export default function MembershipsPage() {
               Expiry
               <input
                 placeholder="MM/YY"
-                pattern="0[1-9]|1[0-2]/[0-9]{2}"
+                pattern="(0[1-9]|1[0-2])/[0-9]{2}"
                 title="Enter in MM/YY format"
                 maxLength={5}
                 required
