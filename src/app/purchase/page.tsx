@@ -2,7 +2,7 @@
 
 import "../globals.css";
 import "./purchase.css";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const tiers = [
   {
@@ -28,6 +28,12 @@ const tiers = [
 export default function MembershipsPage() {
   // adds button functionality
   const [selectedTier, setSelectedTier] = useState<(typeof tiers)[number] | null>(null);
+  // disables background click
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    if (selectedTier) dialogRef.current?.showModal();
+  }, [selectedTier]);
   return (
     <main>
       <section>
@@ -65,7 +71,7 @@ export default function MembershipsPage() {
       </section>
       {/* haven't had the chance to really run through how this form works but its fairly simple*/}
       {selectedTier && (
-        <section className="paymentForm">
+        <dialog ref={dialogRef} className="paymentForm" onClose={() => setSelectedTier(null)}>
           <h2>Purchase {selectedTier.name}</h2>
 
           <div>
@@ -112,7 +118,7 @@ export default function MembershipsPage() {
               Cancel
             </button>
           </form>
-        </section>
+        </dialog>
       )}
     </main>
   );
