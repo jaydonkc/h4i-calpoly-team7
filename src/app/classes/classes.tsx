@@ -6,18 +6,7 @@ import MultiSelectFilter from "@/components/classes/MultiSelectFilter";
 import { classCategories, type ClassCategory, type ClassSchedule } from "@/types/fitness-class";
 type FilterMenu = "categories" | "durations" | "levels" | "instructors";
 type FilterDimension = "category" | "duration" | "level" | "instructor";
-function Brand() {
-  return (
-    <a className="brand" href="#top">
-      <b>FM</b>
-      <span>
-        FITNESS
-        <br />
-        MAXXING
-      </span>
-    </a>
-  );
-}
+
 export default function ClassesPage({ initialSchedule }: { initialSchedule: ClassSchedule }) {
   const today = initialSchedule.days.find((item) => item.isToday)?.date ?? initialSchedule.days[0]?.date ?? "";
   const [day, setDay] = useState(today),
@@ -100,21 +89,6 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
   }
   return (
     <main id="top">
-      <nav className="nav shell">
-        <Brand />
-        <div className="navlinks">
-          <a className="active" href="#schedule">
-            Schedule
-          </a>
-          <a href="#membership">Membership</a>
-          <a href="#trainers">Trainers</a>
-          <a href="#about">About</a>
-        </div>
-        <button className="account">
-          <i>H</i>
-          <span>My account</span>
-        </button>
-      </nav>
       <header className="classes-header">
         <div className="shell">
           <h1>Classes</h1>
@@ -240,7 +214,6 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
         )}
       </section>
       <footer className="shell">
-        <Brand />
         <p>Move well. Live loud.</p>
         <span>© 2026 Fitness Maxxing</span>
       </footer>
