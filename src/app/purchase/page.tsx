@@ -32,12 +32,13 @@ export default function MembershipsPage() {
   const dialogRef = useRef<HTMLDialogElement>(null);
   // payment error react element
   const [paymentError, setPaymentError] = useState("");
+  const [purchaseSuccess, setPurchaseSuccess] = useState("");
 
   useEffect(() => {
     if (selectedTier) dialogRef.current?.showModal();
   }, [selectedTier]);
   return (
-    <main>
+    <section className="membershipPage" aria-label="Membership plans">
       <section>
         <div className="membershipBanner">
           <p>Start working out</p>
@@ -49,6 +50,8 @@ export default function MembershipsPage() {
         <div className="planChoice">
           <h2>Choose your plan</h2>
           <p>Flexible options for all.</p>
+          <p>Demo checkout: use sample details. No payment will be processed.</p>
+          <p role="status">{purchaseSuccess}</p>
         </div>
 
         <div className="planTier">
@@ -64,17 +67,28 @@ export default function MembershipsPage() {
                 ))}
               </ul>
 
-              <button className="tierButton" onClick={() => setSelectedTier(tier)}>
+              <button
+                className="tierButton"
+                onClick={() => {
+                  setPaymentError("");
+                  setPurchaseSuccess("");
+                  setSelectedTier(tier);
+                }}
+              >
                 Select {tier.name}
               </button>
             </article>
           ))}
         </div>
       </section>
-      {/* haven't had the chance to really run through how this form works but its fairly simple*/}
       {selectedTier && (
-        <dialog ref={dialogRef} className="paymentForm" onClose={() => setSelectedTier(null)}>
-          <h2>Purchase {selectedTier.name}</h2>
+        <dialog
+          ref={dialogRef}
+          className="paymentForm"
+          aria-labelledby="purchase-dialog-title"
+          onClose={() => setSelectedTier(null)}
+        >
+          <h2 id="purchase-dialog-title">Purchase {selectedTier.name}</h2>
 
           <div>
             <h3>Billing summary</h3>
@@ -84,15 +98,28 @@ export default function MembershipsPage() {
           </div>
 
           <form
+            onChange={() => setPaymentError("")}
             onSubmit={(e) => {
               e.preventDefault();
-              const cardNumber = String(new FormData(e.currentTarget).get("cardNumber"));
+              const values = new FormData(e.currentTarget);
+              const cardNumber = String(values.get("cardNumber"));
+              const expiry = String(values.get("expiry"));
+              const [month, year] = expiry.split("/").map(Number);
+              const now = new Date();
+              if (
+                !/^(0[1-9]|1[0-2])\/[0-9]{2}$/.test(expiry) ||
+                2000 + year < now.getFullYear() ||
+                (2000 + year === now.getFullYear() && month < now.getMonth() + 1)
+              ) {
+                setPaymentError("Enter a valid expiry date that has not passed.");
+                return;
+              }
               if (cardNumber.endsWith("67")) {
                 setPaymentError("Your card was declined.");
                 return;
               }
               setPaymentError("");
-              alert("Mock purchase successful. No payment was processed.");
+              setPurchaseSuccess(`Mock ${selectedTier.name} purchase successful. No payment was processed.`);
               setSelectedTier(null);
             }}
           >
@@ -113,6 +140,7 @@ export default function MembershipsPage() {
             <label>
               Expiry
               <input
+                name="expiry"
                 placeholder="MM/YY"
                 pattern="(0[1-9]|1[0-2])/[0-9]{2}"
                 title="Enter in MM/YY format"
@@ -148,6 +176,6 @@ export default function MembershipsPage() {
           </form>
         </dialog>
       )}
-    </main>
+    </section>
   );
 }
