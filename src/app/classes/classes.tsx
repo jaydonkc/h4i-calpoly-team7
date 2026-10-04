@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import ClassCard from "@/components/classes/ClassCard";
 import Icon from "@/components/classes/Icon";
+import WeekDays from "@/components/classes/WeekDays";
 import MultiSelectFilter from "@/components/classes/MultiSelectFilter";
 import { classCategories, type ClassCategory, type ClassSchedule } from "@/types/fitness-class";
 type FilterMenu = "categories" | "durations" | "levels" | "instructors";
@@ -28,7 +29,7 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
     [appliedInstructors, setAppliedInstructors] = useState<string[]>([]),
     [openFilter, setOpenFilter] = useState<FilterMenu | null>(null);
   const classes = useMemo(() => {
-    const list = initialSchedule.classes.filter((item) => item.date === day);
+    const list = initialSchedule.classes.filter((item) => Number(item.date.split("-")[2]) === day);
     return list.filter(
       (item) =>
         (appliedCategories.length === 0 || appliedCategories.includes(item.category)) &&
@@ -75,7 +76,7 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
 
   function getFacetCount(dimension: FilterDimension, value: string) {
     return initialSchedule.classes.filter((item) => {
-      if (item.date !== day) return false;
+      if (Number(item.date.split("-")[2]) !== day) return false;
 
       const matchesCategory =
         dimension === "category"
@@ -110,10 +111,11 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
       <section className="schedule shell" id="schedule">
         <div className="heading">
           <div>
-            <small>THIS WEEK</small>
-            <h2>{initialSchedule.weekLabel}</h2>
+            <h2>
+              {formattedDate} - {today.getDate() + 6}
+            </h2>
           </div>
-          <button className="today" onClick={() => setDay(today)}>
+          <button className="today" onClick={() => setDay(today.getDate())}>
             <Icon name="calendar" /> Jump to today
           </button>
         </div>

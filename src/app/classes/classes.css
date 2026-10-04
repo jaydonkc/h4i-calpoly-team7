@@ -616,6 +616,33 @@
   text-align: center;
 }
 
+.reload {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--classes-line);
+  border-radius: 99px;
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--classes-paper);
+}
+
+.reload:hover {
+  background: var(--classes-soft-green);
+  border-color: #aab3aa;
+}
+
+.empty > b {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--lime);
+  font-size: 22px;
+}
 .empty .sleep-icon {
   display: flex;
   align-items: flex-end;
