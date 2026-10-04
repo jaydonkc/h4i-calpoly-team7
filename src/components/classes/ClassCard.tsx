@@ -38,7 +38,7 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
       </div>
       <div className="table-cell classmain" data-label="Class">
         <div>
-          <mark className={fitnessClass.color}>{fitnessClass.category}</mark>
+          <mark>{fitnessClass.category}</mark>
         </div>
         <h3>{fitnessClass.title}</h3>
         <p className="class-description">{fitnessClass.description}</p>

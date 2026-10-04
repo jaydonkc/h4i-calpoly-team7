@@ -2,14 +2,20 @@
 import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import ClassCard from "@/components/classes/ClassCard";
 import Icon from "@/components/classes/Icon";
+import WeekDays from "@/components/classes/WeekDays";
 import MultiSelectFilter from "@/components/classes/MultiSelectFilter";
 import { classCategories, type ClassCategory, type ClassSchedule } from "@/types/fitness-class";
 type FilterMenu = "categories" | "durations" | "levels" | "instructors";
 type FilterDimension = "category" | "duration" | "level" | "instructor";
 
 export default function ClassesPage({ initialSchedule }: { initialSchedule: ClassSchedule }) {
-  const today = initialSchedule.days.find((item) => item.isToday)?.date ?? initialSchedule.days[0]?.date ?? "";
-  const [day, setDay] = useState(today),
+  const today = new Date();
+  const formattedDate = today.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+
+  const [day, setDay] = useState(today.getDate()),
     [draftCategories, setDraftCategories] = useState<ClassCategory[]>([]),
     [draftDurations, setDraftDurations] = useState<string[]>([]),
     [draftLevels, setDraftLevels] = useState<string[]>([]),
@@ -20,7 +26,7 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
     [appliedInstructors, setAppliedInstructors] = useState<string[]>([]),
     [openFilter, setOpenFilter] = useState<FilterMenu | null>(null);
   const classes = useMemo(() => {
-    const list = initialSchedule.classes.filter((item) => item.date === day);
+    const list = initialSchedule.classes.filter((item) => Number(item.date.split("-")[2]) === day);
     return list.filter(
       (item) =>
         (appliedCategories.length === 0 || appliedCategories.includes(item.category)) &&
@@ -67,7 +73,7 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
 
   function getFacetCount(dimension: FilterDimension, value: string) {
     return initialSchedule.classes.filter((item) => {
-      if (item.date !== day) return false;
+      if (Number(item.date.split("-")[2]) !== day) return false;
 
       const matchesCategory =
         dimension === "category"
@@ -97,27 +103,79 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
       <section className="schedule shell" id="schedule">
         <div className="heading">
           <div>
-            <small>THIS WEEK</small>
-            <h2>{initialSchedule.weekLabel}</h2>
+            <h2>
+              {formattedDate} - {today.getDate() + 6}
+            </h2>
           </div>
-          <button className="today" onClick={() => setDay(today)}>
+          <button className="today" onClick={() => setDay(today.getDate())}>
             <Icon name="calendar" /> Jump to today
           </button>
         </div>
         <div className="days" role="tablist">
-          {initialSchedule.days.map((x) => (
-            <button
-              role="tab"
-              aria-selected={day === x.date}
-              className={day === x.date ? "selected" : ""}
-              key={x.date}
-              onClick={() => setDay(x.date)}
-            >
-              <small>{x.label}</small>
-              <strong>{x.date}</strong>
-              {x.isToday && <i>Today</i>}
-            </button>
-          ))}
+          <button
+            role="tab"
+            aria-selected={day === today.getDate()}
+            className={day === today.getDate() ? "selected" : ""}
+            onClick={() => setDay(today.getDate())}
+          >
+            <small>{WeekDays[today.getDay()]}</small>
+            <strong>{today.getDate()}</strong>
+            <i>Today</i>
+          </button>
+          <button
+            role="tab"
+            aria-selected={day === today.getDate() + 1}
+            className={day === today.getDate() + 1 ? "selected" : ""}
+            onClick={() => setDay(today.getDate() + 1)}
+          >
+            <small>{WeekDays[(today.getDay() + 1) % 7]}</small>
+            <strong>{today.getDate() + 1}</strong>
+          </button>
+          <button
+            role="tab"
+            aria-selected={day === today.getDate() + 2}
+            className={day === today.getDate() + 2 ? "selected" : ""}
+            onClick={() => setDay(today.getDate() + 2)}
+          >
+            <small>{WeekDays[(today.getDay() + 2) % 7]}</small>
+            <strong>{today.getDate() + 2}</strong>
+          </button>
+          <button
+            role="tab"
+            aria-selected={day === today.getDate() + 3}
+            className={day === today.getDate() + 3 ? "selected" : ""}
+            onClick={() => setDay(today.getDate() + 3)}
+          >
+            <small>{WeekDays[(today.getDay() + 3) % 7]}</small>
+            <strong>{today.getDate() + 3}</strong>
+          </button>
+          <button
+            role="tab"
+            aria-selected={day === today.getDate() + 4}
+            className={day === today.getDate() + 4 ? "selected" : ""}
+            onClick={() => setDay(today.getDate() + 4)}
+          >
+            <small>{WeekDays[(today.getDay() + 4) % 7]}</small>
+            <strong>{today.getDate() + 4}</strong>
+          </button>
+          <button
+            role="tab"
+            aria-selected={day === today.getDate() + 5}
+            className={day === today.getDate() + 5 ? "selected" : ""}
+            onClick={() => setDay(today.getDate() + 5)}
+          >
+            <small>{WeekDays[(today.getDay() + 5) % 7]}</small>
+            <strong>{today.getDate() + 5}</strong>
+          </button>
+          <button
+            role="tab"
+            aria-selected={day === today.getDate() + 6}
+            className={day === today.getDate() + 6 ? "selected" : ""}
+            onClick={() => setDay(today.getDate() + 6)}
+          >
+            <small>{WeekDays[(today.getDay() + 6) % 7]}</small>
+            <strong>{today.getDate() + 6}</strong>
+          </button>
         </div>
         <div className="filterrow">
           <div className="filter-menus">
