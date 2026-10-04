@@ -616,6 +616,25 @@ mark {
   justify-content: center;
   text-align: center;
 }
+
+.reload {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  background: white;
+}
+
+.reload:hover {
+  background: var(--cream);
+  border-color: #9b9f9b;
+}
+
 .empty > b {
   display: grid;
   place-items: center;
