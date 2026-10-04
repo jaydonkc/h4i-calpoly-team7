@@ -6,6 +6,7 @@ import Icon from "@/components/classes/Icon";
 import WeekDays from "@/components/classes/WeekDays";
 import MultiSelectFilter from "@/components/classes/MultiSelectFilter";
 import { classCategories, type ClassCategory, type ClassSchedule } from "@/types/fitness-class";
+import { error } from "console";
 type FilterMenu = "categories" | "durations" | "levels" | "instructors";
 type FilterDimension = "category" | "duration" | "level" | "instructor";
 
@@ -200,31 +201,40 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
             {classes.length} {classes.length === 1 ? "class" : "classes"}
           </span>
         </div>
-        {classes.length ? (
-          <div className="classlist">
-            <div className="class-table-header" aria-hidden="true">
-              <span>Time</span>
-              <span>Class</span>
-              <span>Instructor</span>
-              <span>Location</span>
-              <span>Duration</span>
-              <span>Difficulty</span>
-              <span>Availability</span>
-              <span />
+        {errorMessage === null ? (
+          classes.length ? (
+            <div className="classlist">
+              <div className="class-table-header" aria-hidden="true">
+                <span>Time</span>
+                <span>Class</span>
+                <span>Instructor</span>
+                <span>Location</span>
+                <span>Duration</span>
+                <span>Difficulty</span>
+                <span>Availability</span>
+                <span />
+              </div>
+              {classes.map((fitnessClass) => (
+                <ClassCard key={fitnessClass.id} fitnessClass={fitnessClass} />
+              ))}
             </div>
-            {classes.map((fitnessClass) => (
-              <ClassCard key={fitnessClass.id} fitnessClass={fitnessClass} />
-            ))}
-          </div>
+          ) : (
+            <div className="empty">
+              <b className="sleep-icon" aria-hidden="true">
+                <span>z</span>
+                <span>z</span>
+                <span>z</span>
+              </b>
+              <h3>Rest day, for now.</h3>
+              <p>There aren’t any matching classes on this day. Try another day or reset your filter.</p>
+            </div>
+          )
         ) : (
-          <div className="empty">
-            <b className="sleep-icon" aria-hidden="true">
-              <span>z</span>
-              <span>z</span>
-              <span>z</span>
-            </b>
-            <h3>Rest day, for now.</h3>
-            <p>There aren’t any matching classes on this day. Try another day or reset your filter.</p>
+          <div>
+            <p>{errorMessage}</p>
+            <button type="button" className="reload" onClick={() => window.location.reload()}>
+              Reload
+            </button>
           </div>
         )}
       </section>
