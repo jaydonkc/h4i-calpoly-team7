@@ -229,6 +229,8 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
               <p>There aren’t any matching classes on this day. Try another day or reset your filter.</p>
             </div>
           )
+        ) : errorMessage === "loading" ? (
+          <p>Loading Classes...</p>
         ) : (
           <div>
             <p>{errorMessage}</p>
