@@ -6,7 +6,7 @@ import Icon from "@/components/classes/Icon";
 import WeekDays from "@/components/classes/WeekDays";
 import MultiSelectFilter from "@/components/classes/MultiSelectFilter";
 import { classCategories, type ClassCategory, type ClassSchedule } from "@/types/fitness-class";
-import { error } from "console";
+import { FitnessClass } from "@/types/fitness-class";
 type FilterMenu = "categories" | "durations" | "levels" | "instructors";
 type FilterDimension = "category" | "duration" | "level" | "instructor";
 
@@ -30,7 +30,7 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
     [appliedInstructors, setAppliedInstructors] = useState<string[]>([]),
     [openFilter, setOpenFilter] = useState<FilterMenu | null>(null);
   const classes = useMemo(() => {
-    const list = initialSchedule.classes.filter((item) => Number(item.date.split("-")[2]) === day);
+    const list = classList.filter((item) => Number(item.date.split("-")[2]) === day);
     return list.filter(
       (item) =>
         (appliedCategories.length === 0 || appliedCategories.includes(item.category)) &&
@@ -38,20 +38,11 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
         (appliedLevels.length === 0 || appliedLevels.includes(item.level)) &&
         (appliedInstructors.length === 0 || appliedInstructors.includes(item.coach)),
     );
-  }, [day, appliedCategories, appliedDurations, appliedLevels, appliedInstructors, initialSchedule.classes]);
+  }, [day, appliedCategories, appliedDurations, appliedLevels, appliedInstructors, classList]);
 
-  const durations = useMemo(
-    () => Array.from(new Set(initialSchedule.classes.map((item) => item.duration))),
-    [initialSchedule.classes],
-  );
-  const levels = useMemo(
-    () => Array.from(new Set(initialSchedule.classes.map((item) => item.level))),
-    [initialSchedule.classes],
-  );
-  const instructors = useMemo(
-    () => Array.from(new Set(initialSchedule.classes.map((item) => item.coach))),
-    [initialSchedule.classes],
-  );
+  const durations = useMemo(() => Array.from(new Set(classList.map((item) => item.duration))), [classList]);
+  const levels = useMemo(() => Array.from(new Set(classList.map((item) => item.level))), [classList]);
+  const instructors = useMemo(() => Array.from(new Set(classList.map((item) => item.coach))), [classList]);
 
   function toggleCategory(category: ClassCategory) {
     setDraftCategories((current) =>
@@ -76,7 +67,7 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
   }
 
   function getFacetCount(dimension: FilterDimension, value: string) {
-    return initialSchedule.classes.filter((item) => {
+    return classList.filter((item) => {
       if (Number(item.date.split("-")[2]) !== day) return false;
 
       const matchesCategory =
