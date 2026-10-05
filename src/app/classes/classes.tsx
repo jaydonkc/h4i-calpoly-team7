@@ -1,4 +1,5 @@
 "use client";
+import { Suspense } from "react";
 import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import ClassCard from "@/components/classes/ClassCard";
 import Icon from "@/components/classes/Icon";
@@ -277,6 +278,8 @@ export default function ClassesPage({ initialSchedule, errorMessage }: ClassesPa
               <p>There aren’t any matching classes on this day. Try another day or reset your filter.</p>
             </div>
           )
+        ) : errorMessage === "loading" ? (
+          <p>Loading Classes...</p>
         ) : (
           <div>
             <p>{errorMessage}</p>
