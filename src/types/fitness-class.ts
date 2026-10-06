@@ -2,7 +2,7 @@ export const classCategories = ["Strength", "Cardio", "Mind & Body"] as const;
 export type ClassCategory = (typeof classCategories)[number];
 
 export type FitnessClass = {
-  id: number;
+  id: number | string;
   date: string;
   title: string;
   category: ClassCategory;
