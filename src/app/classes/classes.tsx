@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import ClassCard from "@/components/classes/ClassCard";
 import Icon from "@/components/classes/Icon";
@@ -6,18 +7,13 @@ import MultiSelectFilter from "@/components/classes/MultiSelectFilter";
 import { classCategories, type ClassCategory, type ClassSchedule } from "@/types/fitness-class";
 type FilterMenu = "categories" | "durations" | "levels" | "instructors";
 type FilterDimension = "category" | "duration" | "level" | "instructor";
-function Brand() {
-  return (
-    <a className="brand" href="#top">
-      <b>FM</b>
-      <span>
-        FITNESS
-        <br />
-        MAXXING
-      </span>
-    </a>
-  );
+
+function formatDay(date: string) {
+  const match = date.match(/^\d{4}-(\d{2})-(\d{2})$/);
+  if (!match) return date;
+  return `${Number(match[1])}/${Number(match[2])}`;
 }
+
 export default function ClassesPage({ initialSchedule }: { initialSchedule: ClassSchedule }) {
   const today = initialSchedule.days.find((item) => item.isToday)?.date ?? initialSchedule.days[0]?.date ?? "";
   const [day, setDay] = useState(today),
@@ -100,21 +96,11 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
   }
   return (
     <main id="top">
-      <nav className="nav shell">
-        <Brand />
-        <div className="navlinks">
-          <a className="active" href="#schedule">
-            Schedule
-          </a>
-          <a href="#membership">Membership</a>
-          <a href="#trainers">Trainers</a>
-          <a href="#about">About</a>
-        </div>
-        <button className="account">
-          <i>H</i>
-          <span>My account</span>
-        </button>
-      </nav>
+      <div className="classes-back-row">
+        <Link href="/purchase" className="classes-back-link">
+          <span aria-hidden="true">←</span> Back
+        </Link>
+      </div>
       <header className="classes-header">
         <div className="shell">
           <h1>Classes</h1>
@@ -140,7 +126,7 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
               onClick={() => setDay(x.date)}
             >
               <small>{x.label}</small>
-              <strong>{x.date}</strong>
+              <strong>{formatDay(x.date)}</strong>
               {x.isToday && <i>Today</i>}
             </button>
           ))}
@@ -239,11 +225,6 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
           </div>
         )}
       </section>
-      <footer className="shell">
-        <Brand />
-        <p>Move well. Live loud.</p>
-        <span>© 2026 Fitness Maxxing</span>
-      </footer>
     </main>
   );
 }

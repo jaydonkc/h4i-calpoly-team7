@@ -1,25 +1,9 @@
 import "./info.css";
 import "../globals.css";
-import Link from "next/link";
 
 export default function GymInfoPage() {
   return (
     <main className="fitness-page">
-      <div className="fitness-logo top-logo" aria-hidden="true">
-        <span className="fitness-logo-mark">FM</span>
-        <span className="fitness-logo-name">
-          Fitness
-          <br />
-          Maxxing
-        </span>
-      </div>
-
-      <div className="fitness-actions">
-        <Link className="account-button" href="/profile">
-          Account
-        </Link>
-      </div>
-
       <div className="info about-info">
         <h1>About Our Gym</h1>
         <div className="gym-details" tabIndex={0}>
@@ -69,19 +53,6 @@ export default function GymInfoPage() {
           <p>Absolutely. Our equipment, classes, and staff support members at every fitness level.</p>
         </details>
       </section>
-
-      <footer className="fitness-footer">
-        <div className="fitness-logo" aria-label="Fitness Maxxing">
-          <span className="fitness-logo-mark">FM</span>
-          <span className="fitness-logo-name">
-            Fitness
-            <br />
-            Maxxing
-          </span>
-        </div>
-        <p className="fitness-slogan">Stronger every day.</p>
-        <p className="fitness-copyright">© 2026 Fitness Maxxing</p>
-      </footer>
     </main>
   );
 }

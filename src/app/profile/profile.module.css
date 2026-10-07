@@ -1,0 +1,143 @@
+.profilePage {
+  display: grid;
+  min-height: 520px;
+  place-items: center;
+  padding: clamp(2rem, 6vw, 5rem) 1rem;
+  color: #111914;
+}
+
+.loginCard {
+  width: min(100%, 520px);
+  box-sizing: border-box;
+  padding: clamp(2rem, 5vw, 3.5rem);
+  border: 1px solid #dedfd9;
+  border-radius: 9px;
+  background: #fffefa;
+  text-align: center;
+}
+
+.loginCard h1 {
+  margin: 0;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  letter-spacing: -0.03em;
+}
+
+.loginCard > p:first-of-type {
+  max-width: 390px;
+  margin: 0.7rem auto 1.8rem;
+  color: #4f5651;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.loginCard form {
+  display: grid;
+  text-align: left;
+}
+
+.loginCard label {
+  margin: 0.65rem 0 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.loginCard input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.75rem;
+  border: 1px solid #d4d7d2;
+  border-radius: 5px;
+  color: inherit;
+  background: white;
+  font: inherit;
+}
+
+.loginButton {
+  width: 100%;
+  margin-top: 0.9rem;
+  padding: 0.8rem 1rem;
+  border: 0;
+  border-radius: 5px;
+  color: white;
+  background: #153b2a;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+.loginButton:hover {
+  background: #0c291c;
+  box-shadow: 0 7px 16px rgb(21 59 42 / 22%);
+  transform: translateY(-2px);
+}
+
+.loginButton:active {
+  box-shadow: 0 2px 6px rgb(21 59 42 / 18%);
+  transform: translateY(0) scale(0.96);
+}
+
+.status {
+  margin: 0.9rem 0 0;
+  padding: 0.7rem;
+  border-radius: 5px;
+  background: #f0f3ed;
+  color: #3f4842;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.textButton,
+.signup button {
+  padding: 0;
+  border: 0;
+  color: #153b2a;
+  background: transparent;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.textButton {
+  margin-top: 1rem;
+  font-size: 0.8rem;
+}
+
+.signup {
+  margin: 2rem 0 0;
+  font-size: 0.82rem;
+}
+
+.signup button {
+  font-weight: 600;
+}
+
+.loginCard input:focus-visible,
+.loginButton:focus-visible,
+.textButton:focus-visible,
+.signup button:focus-visible {
+  border-radius: 3px;
+  outline: 2px solid #153b2a;
+  outline-offset: 3px;
+}
+
+@media (max-width: 520px) {
+  .profilePage {
+    min-height: 440px;
+    padding: 2rem 0;
+  }
+
+  .loginCard {
+    padding: 2rem 1.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loginButton {
+    transition: none;
+  }
+}

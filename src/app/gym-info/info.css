@@ -2,7 +2,7 @@
 
 .fitness-page {
   position: relative;
-  padding-top: 6rem;
+  padding-top: 0;
   padding-bottom: 2rem;
 }
 
@@ -78,7 +78,6 @@
   line-height: 0.95;
 }
 
-.fitness-slogan,
 .fitness-copyright {
   margin: 0;
   font-family: "DM Sans", sans-serif;
@@ -86,9 +85,36 @@
   color: #6f746f;
 }
 
-.fitness-slogan {
-  text-align: center;
-  font-style: italic;
+.fitness-socials {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.75rem;
+}
+
+.fitness-socials a,
+.fitness-socials span {
+  color: #19211e;
+}
+
+.fitness-socials a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.fitness-socials svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.fitness-socials a:focus-visible {
+  border-radius: 3px;
+  outline: 2px solid #19211e;
+  outline-offset: 3px;
 }
 
 .fitness-copyright {
@@ -190,7 +216,7 @@
 
 @media (max-width: 760px) {
   .fitness-page {
-    padding-top: 5.25rem;
+    padding-top: 0;
   }
 
   .fitness-actions {
@@ -210,7 +236,7 @@
   }
 
   .fitness-copyright,
-  .fitness-slogan {
+  .fitness-socials {
     text-align: center;
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { isUserSignedIn } from "@/lib/auth-status";
 import type { FitnessClass } from "@/types/fitness-class";
 import Icon from "./Icon";
 
@@ -61,8 +62,14 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
         <strong>{fitnessClass.spots}</strong>
         <span> spots</span>
       </div>
-      <button className={`reserve ${isBooked ? "cancel" : ""}`} aria-pressed={isBooked} onClick={toggleReservation}>
-        {isBooked ? "Cancel" : "Reserve"}
+      <button
+        className={`reserve ${isBooked ? "cancel" : ""}`}
+        aria-pressed={isUserSignedIn ? isBooked : undefined}
+        aria-label={isUserSignedIn ? undefined : `Log in to reserve ${fitnessClass.title}`}
+        disabled={!isUserSignedIn}
+        onClick={toggleReservation}
+      >
+        {isUserSignedIn ? (isBooked ? "Cancel" : "Reserve") : "Log in to reserve"}
       </button>
       {showConfirmation && (
         <div className="booking-popup" role="status" aria-live="polite">

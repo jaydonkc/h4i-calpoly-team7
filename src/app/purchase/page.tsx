@@ -1,181 +1,109 @@
-"use client";
-
-import "../globals.css";
+import Link from "next/link";
+import { classRepository } from "@/lib/classes/class-repository";
+import type { ClassSchedule } from "@/types/fitness-class";
+import MembershipPlans from "./MembershipPlans";
 import "./purchase.css";
-import { useEffect, useRef, useState } from "react";
 
-const tiers = [
-  {
-    name: "Student",
-    price: "$10/mo",
-    description: "Student membership for gym.",
-    perks: ["perk1", "perk2", "perk3"],
-  },
-  {
-    name: "Standard",
-    price: "$15/mo",
-    description: "Standard Membership.",
-    perks: ["perk1", "perk2", "perk3"],
-  },
-  {
-    name: "Premium",
-    price: "$30/mo",
-    description: "Access to a spa or smth.",
-    perks: ["perk1", "perk2", "perk3"],
-  },
-];
+function displayDate(date: string, schedule: ClassSchedule) {
+  const day = schedule.days.find((item) => item.date === date);
+  if (day) return `${day.label}, ${day.date}`;
 
-export default function MembershipsPage() {
-  // adds button functionality
-  const [selectedTier, setSelectedTier] = useState<(typeof tiers)[number] | null>(null);
-  // disables background click
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  // payment error react element
-  const [paymentError, setPaymentError] = useState("");
-  const [purchaseSuccess, setPurchaseSuccess] = useState("");
+  const isoDate = date.match(/^\d{4}-\d{2}-\d{2}/)?.[0];
+  if (!isoDate) return date;
 
-  useEffect(() => {
-    if (selectedTier) dialogRef.current?.showModal();
-  }, [selectedTier]);
+  return new Date(`${isoDate}T00:00:00`).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+}
+
+export default async function MembershipsPage() {
+  let schedule: ClassSchedule | null = null;
+
+  try {
+    schedule = await classRepository.getSchedule();
+  } catch {
+    // Membership options and FAQs remain available when the schedule cannot load.
+  }
+
+  const today = schedule?.days.find((day) => day.isToday)?.date;
+  const classes = schedule?.classes.filter((fitnessClass) => fitnessClass.date === today).slice(0, 4) ?? [];
+
   return (
     <section className="membershipPage" aria-label="Membership plans">
-      <section>
-        <div className="membershipBanner">
-          <p>Start working out</p>
-          <h1>Memberships</h1>
+      <MembershipPlans />
+
+      <section className="classSignup" aria-labelledby="class-signup-title">
+        <div className="purchaseSectionHeading">
+          <h2 id="class-signup-title">Sign Up for Classes</h2>
+          <Link href="/classes">View Full Schedule →</Link>
         </div>
+
+        {schedule ? (
+          classes.length > 0 ? (
+            <div className="purchaseTableWrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Class</th>
+                    <th scope="col">Instructor</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Time</th>
+                    <th scope="col">Room</th>
+                    <th scope="col">Spots</th>
+                    <th scope="col">
+                      <span className="visuallyHidden">Action</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {classes.map((fitnessClass) => (
+                    <tr key={fitnessClass.id}>
+                      <td>{fitnessClass.title}</td>
+                      <td>{fitnessClass.coach}</td>
+                      <td>{displayDate(fitnessClass.date, schedule)}</td>
+                      <td>{fitnessClass.time}</td>
+                      <td>{fitnessClass.room}</td>
+                      <td>{fitnessClass.spots}</td>
+                      <td>
+                        <Link href="/classes">Sign Up</Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="purchaseNotice">No classes are scheduled today.</p>
+          )
+        ) : (
+          <p className="purchaseNotice" role="status">
+            The class schedule is temporarily unavailable.
+          </p>
+        )}
       </section>
 
-      <section>
-        <div className="planChoice">
-          <h2>Choose your plan</h2>
-          <p>Flexible options for all.</p>
-          <p>Demo checkout: use sample details. No payment will be processed.</p>
-          <p role="status">{purchaseSuccess}</p>
-        </div>
-
-        <div className="planTier">
-          {tiers.map((tier) => (
-            <article key={tier.name}>
-              <h3 className="tierName">{tier.name}</h3>
-              <div className="tierPrice">{tier.price}</div>
-              <p className="tierDescription">{tier.description}</p>
-
-              <ul>
-                {tier.perks.map((perk, index) => (
-                  <li key={tier.name + index}>{perk}</li>
-                ))}
-              </ul>
-
-              <button
-                className="tierButton"
-                onClick={() => {
-                  setPaymentError("");
-                  setPurchaseSuccess("");
-                  setSelectedTier(tier);
-                }}
-              >
-                Select {tier.name}
-              </button>
-            </article>
-          ))}
+      <section className="membershipFaq" aria-labelledby="membership-faq-title">
+        <h2 id="membership-faq-title">Membership FAQ</h2>
+        <div>
+          <details>
+            <summary>Can I cancel anytime?</summary>
+            <p>Cancellation terms are pending partner review.</p>
+          </details>
+          <details>
+            <summary>Can I change plans?</summary>
+            <p>Plan-change details are pending partner review.</p>
+          </details>
+          <details>
+            <summary>Can I visit other locations?</summary>
+            <p>Location access details are pending partner review.</p>
+          </details>
+          <details>
+            <summary>Are classes included?</summary>
+            <p>Class access varies by plan and is pending partner review.</p>
+          </details>
         </div>
       </section>
-      {selectedTier && (
-        <dialog
-          ref={dialogRef}
-          className="paymentForm"
-          aria-labelledby="purchase-dialog-title"
-          onClose={() => setSelectedTier(null)}
-        >
-          <h2 id="purchase-dialog-title">Purchase {selectedTier.name}</h2>
-
-          <div>
-            <h3>Billing summary</h3>
-            <p>{selectedTier.name} membership</p>
-            <p>{selectedTier.description}</p>
-            <p>Total: {selectedTier.price}</p>
-          </div>
-
-          <form
-            onChange={() => setPaymentError("")}
-            onSubmit={(e) => {
-              e.preventDefault();
-              const values = new FormData(e.currentTarget);
-              const cardNumber = String(values.get("cardNumber"));
-              const expiry = String(values.get("expiry"));
-              const [month, year] = expiry.split("/").map(Number);
-              const now = new Date();
-              if (
-                !/^(0[1-9]|1[0-2])\/[0-9]{2}$/.test(expiry) ||
-                2000 + year < now.getFullYear() ||
-                (2000 + year === now.getFullYear() && month < now.getMonth() + 1)
-              ) {
-                setPaymentError("Enter a valid expiry date that has not passed.");
-                return;
-              }
-              if (cardNumber.endsWith("67")) {
-                setPaymentError("Your card was declined.");
-                return;
-              }
-              setPaymentError("");
-              setPurchaseSuccess(`Mock ${selectedTier.name} purchase successful. No payment was processed.`);
-              setSelectedTier(null);
-            }}
-          >
-            <h3>Card details</h3>
-            <label>
-              Card number
-              <input
-                name="cardNumber"
-                type="password"
-                inputMode="numeric"
-                maxLength={16}
-                pattern="[0-9]{16}"
-                title="Enter 16 digits" // feedback when pattern is wrong
-                required
-              />
-            </label>
-
-            <label>
-              Expiry
-              <input
-                name="expiry"
-                placeholder="MM/YY"
-                pattern="(0[1-9]|1[0-2])/[0-9]{2}"
-                title="Enter in MM/YY format"
-                maxLength={5}
-                required
-              />
-            </label>
-
-            <label>
-              CVC <input pattern="[0-9]{3}|[0-9]{4}" maxLength={4} required />
-            </label>
-
-            <h3>Billing address</h3>
-            <label>
-              Street <input required />
-            </label>
-            <label>
-              City <input pattern="[^0-9]+" title="No numbers permitted" required />
-            </label>
-            <label>
-              State <input pattern="[^0-9]+" title="No numbers permitted" required />
-            </label>
-            <label>
-              ZIP <input pattern="[0-9]{5}" maxLength={5} required />
-            </label>
-
-            {paymentError && <p role="alert">{paymentError}</p>}
-
-            <button type="submit">Pay {selectedTier.price}</button>
-            <button type="button" onClick={() => setSelectedTier(null)}>
-              Cancel
-            </button>
-          </form>
-        </dialog>
-      )}
     </section>
   );
 }
