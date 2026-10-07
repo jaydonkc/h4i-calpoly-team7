@@ -15,8 +15,9 @@ const fitnessClassSchema = new Schema({
   level: String,
   duration: String,
   spots: Number,
-  color: String,
   description: String,
 });
 
-export default mongoose.models.FitnessClass || mongoose.model("FitnessClass", fitnessClassSchema);
+const FitnessClasses = mongoose.models.FitnessClass || mongoose.model("FitnessClass", fitnessClassSchema);
+
+export default FitnessClasses;
