@@ -80,15 +80,7 @@ describe("class repository", () => {
 
     const schedule = await classRepository.getSchedule();
 
-    expect(schedule.classes.map((record) => record.time)).toEqual([
-      "00:00",
-      "9:00",
-      "12:00",
-      "13:00",
-      "23:59",
-      "09:60",
-      "24:00",
-    ]);
+    expect(schedule.classes.map((record) => record.time)).toEqual(["00:00", "9:00", "12:00", "13:00", "23:59"]);
   });
 
   it("looks up a generated ID using _id and preserves result conversion", async () => {

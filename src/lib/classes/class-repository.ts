@@ -75,7 +75,7 @@ function matchWeekDate(classDate: string, days: ReturnType<typeof getWeekDates>[
 
 function getTimeSortValue(time: string) {
   const match = time.match(/^([01]?[0-9]|2[0-3]):([0-5][0-9])$/);
-  if (!match) return Number.MAX_SAFE_INTEGER;
+  if (!match) return -1;
 
   return Number(match[1]) * 60 + Number(match[2]);
 }
@@ -94,9 +94,11 @@ class MongoClassRepository implements ClassRepository {
         if (query.category && record.category !== query.category) return [];
         return [toFitnessClass(record, day.isoDate)];
       })
+      .filter((d) => getTimeSortValue(d.time) != -1)
       .sort((first, second) => {
         const dateOrder = first.date.localeCompare(second.date);
         if (dateOrder) return dateOrder;
+
         const timeOrder = getTimeSortValue(first.time) - getTimeSortValue(second.time);
         return timeOrder || first.time.localeCompare(second.time);
       });
