@@ -6,26 +6,56 @@
   font-family: Arial, sans-serif;
 }
 
-/* Banner */
+/* Page header */
 .membershipBanner {
-  padding: 3rem 1rem;
-  text-align: center;
-  background: #f5f3ed;
+  padding: 1rem 0 2rem;
+  border-bottom: 1px solid #dedfd9;
+  text-align: left;
+}
+
+.membershipBanner h1 {
+  margin: 0;
+  font-size: clamp(2.4rem, 5vw, 4.25rem);
+  letter-spacing: -0.055em;
+}
+
+.membershipBanner p {
+  margin: 0.75rem 0 0;
+  color: #4e5550;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
 /* Plan heading */
 .planChoice {
-  margin: 2rem 0;
+  margin: 2rem 0 1rem;
   color: #111914;
-  text-align: center;
+  text-align: left;
+}
+
+.planChoice h2 {
+  margin: 0;
+  font-size: 1.4rem;
 }
 
 .planChoice p {
+  margin: 0.45rem 0 0;
   color: #525954;
+  line-height: 1.45;
+}
+
+.planChoice p:nth-of-type(2) {
+  margin-top: 0.35rem;
+  color: #626963;
+  font-size: 0.8rem;
 }
 
 .planChoice p[role="status"] {
   color: #153b2a;
+}
+
+.planChoice p[role="status"]:empty {
+  display: none;
 }
 
 /* Tier cards */

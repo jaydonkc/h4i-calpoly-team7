@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import ClassCard from "@/components/classes/ClassCard";
 import Icon from "@/components/classes/Icon";
@@ -15,6 +15,7 @@ function formatDay(date: string) {
 }
 
 export default function ClassesPage({ initialSchedule }: { initialSchedule: ClassSchedule }) {
+  const router = useRouter();
   const today = initialSchedule.days.find((item) => item.isToday)?.date ?? initialSchedule.days[0]?.date ?? "";
   const [day, setDay] = useState(today),
     [draftCategories, setDraftCategories] = useState<ClassCategory[]>([]),
@@ -97,9 +98,9 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
   return (
     <main id="top">
       <div className="classes-back-row">
-        <Link href="/purchase" className="classes-back-link">
+        <button type="button" className="classes-back-link" onClick={() => router.back()}>
           <span aria-hidden="true">←</span> Back
-        </Link>
+        </button>
       </div>
       <header className="classes-header">
         <div className="shell">

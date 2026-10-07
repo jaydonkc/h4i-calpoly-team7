@@ -40,8 +40,8 @@ export default function MembershipPlans() {
     <>
       <section>
         <div className="membershipBanner">
-          <p>Start working out</p>
           <h1>Memberships</h1>
+          <p>Start working out</p>
         </div>
       </section>
 

@@ -115,9 +115,6 @@ export default async function GymInfoPage() {
                     <h3>{coach.name}</h3>
                     <p>{coach.specialties}</p>
                   </div>
-                  <Link href="/classes" aria-label={`View classes led by ${coach.name}`}>
-                    →
-                  </Link>
                 </div>
                 <p>
                   Specializes in {coach.specialties.toLowerCase()} sessions and helps members train with confidence and

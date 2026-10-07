@@ -40,23 +40,21 @@
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
+  padding: 0;
+  border: 0;
   color: var(--classes-green);
+  background: transparent;
   font-size: 0.82rem;
   font-weight: 700;
   text-decoration: underline;
+  cursor: pointer;
 }
 
 .classes-header {
-  display: flex;
-  align-items: center;
-  min-height: 150px;
   max-width: 1180px;
   margin: 0 auto;
-  padding: 0 2rem;
-  border: 1px solid var(--classes-line);
-  border-radius: 12px;
-  background: radial-gradient(circle at 85% 20%, rgb(218 226 215 / 45%), transparent 34%),
-    linear-gradient(110deg, #faf8f2, #f2f2ec);
+  padding: 1rem 0 2rem;
+  border-bottom: 1px solid var(--classes-line);
 }
 
 .classes-header .shell {
@@ -65,8 +63,7 @@
 
 .classes-header h1 {
   margin: 0;
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
-  line-height: 1;
+  font-size: clamp(2.4rem, 5vw, 4.25rem);
   letter-spacing: -0.055em;
 }
 
@@ -721,8 +718,7 @@
   }
 
   .classes-header {
-    min-height: 120px;
-    padding: 0 1.25rem;
+    width: calc(100% - 28px);
   }
 
   .schedule {
