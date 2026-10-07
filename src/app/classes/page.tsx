@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { classRepository } from "@/lib/classes/class-repository";
 import ClassesPage from "./classes";
 import type { ClassQuery, ClassSchedule, FitnessClass } from "@/types/fitness-class";
-import getSchedule from "@/database/getSchedule.ts";
+import getSchedule from "@/database/getClass";
 
 export const metadata: Metadata = { title: "Class Schedule | Fitness Maxxing" };
 
