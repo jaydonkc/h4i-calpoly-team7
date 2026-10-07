@@ -3,13 +3,12 @@ import { Suspense } from "react";
 import { classRepository } from "@/lib/classes/class-repository";
 import ClassesPage from "./classes";
 import type { ClassQuery, ClassSchedule, FitnessClass } from "@/types/fitness-class";
+import getSchedule from "@/database/getSchedule.ts";
 
 export const metadata: Metadata = { title: "Class Schedule | Fitness Maxxing" };
 export const dynamic = "force-dynamic";
 
 const emptySchedule: ClassSchedule = {
-  weekLabel: "",
-  days: [],
   classes: [],
 };
 
@@ -23,7 +22,7 @@ export default function ClassesRoute() {
 
 async function ClassesContent() {
   try {
-    const schedule = await classRepository.getSchedule();
+    const schedule = await getSchedule();
     return <ClassesPage initialSchedule={schedule} errorMessage={null} />;
   } catch {
     return (
