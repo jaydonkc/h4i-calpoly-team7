@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { gymLocations } from "@/data/site-content";
 import styles from "./home.module.css";
 
 type FeatureIcon = "equipment" | "classes" | "location" | "coach";
@@ -8,12 +9,6 @@ const features: Array<{ icon: FeatureIcon; title: string; description: string }>
   { icon: "classes", title: "Group Classes", description: "A variety of classes every week" },
   { icon: "location", title: "Multiple Locations", description: "Convenient gyms across the city" },
   { icon: "coach", title: "Expert Coaches", description: "Support for all fitness levels" },
-];
-
-const locations = [
-  { name: "San Luis Obispo", region: "California" },
-  { name: "Los Angeles", region: "California" },
-  { name: "San Francisco", region: "California" },
 ];
 
 function FeatureIcon({ name }: { name: FeatureIcon }) {
@@ -93,7 +88,7 @@ export default function Home() {
         </div>
 
         <div className={styles.locationGrid}>
-          {locations.map((location) => (
+          {gymLocations.map((location) => (
             <article key={location.name}>
               <div>
                 <h3>{location.name}</h3>

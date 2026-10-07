@@ -1,242 +1,174 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap");
-
-.fitness-page {
-  position: relative;
-  padding-top: 0;
-  padding-bottom: 2rem;
-}
-
-.fitness-actions {
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-}
-
-.top-logo {
-  position: absolute;
-  top: 1.5rem;
-  left: 1.5rem;
-}
-
-.account-button {
-  display: inline-block;
-  padding: 0.65rem 1.1rem;
-  border: 1px solid #19211e;
-  border-radius: 999px;
-  background-color: #19211e;
-  color: #d8f64b;
-  font-family: "DM Sans", sans-serif;
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
-}
-
-.account-button:hover,
-.account-button:focus-visible {
-  background-color: #d8f64b;
-  color: #19211e;
-}
-
-.fitness-footer {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  align-items: center;
-  gap: 1rem;
-  max-width: 1200px;
-  margin: 2rem auto 0;
-  padding: 1.5rem 0 0;
-  border-top: 1px solid #d8d6cf;
-}
-
-.fitness-logo {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  color: #19211e;
-  font-family: "Manrope", sans-serif;
-}
-
-.fitness-logo-mark {
-  display: grid;
-  width: 2.75rem;
-  height: 2.75rem;
-  place-items: center;
-  border-radius: 50%;
-  background-color: #19211e;
-  color: #d8f64b;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-}
-
-.fitness-logo-name {
-  font-size: 0.85rem;
-  font-weight: 700;
-  line-height: 0.95;
-}
-
-.fitness-copyright {
-  margin: 0;
-  font-family: "DM Sans", sans-serif;
-  font-size: 0.85rem;
-  color: #6f746f;
-}
-
-.fitness-socials {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-  font-family: "DM Sans", sans-serif;
-  font-size: 0.75rem;
-}
-
-.fitness-socials a,
-.fitness-socials span {
-  color: #19211e;
-}
-
-.fitness-socials a {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.fitness-socials svg {
-  width: 1rem;
-  height: 1rem;
-}
-
-.fitness-socials a:focus-visible {
-  border-radius: 3px;
-  outline: 2px solid #19211e;
-  outline-offset: 3px;
-}
-
-.fitness-copyright {
-  text-align: right;
-}
-
-.info {
-  max-width: 1200px;
+.about-page {
+  max-width: 1180px;
   margin: 0 auto;
-  padding: 2rem;
-  color: #19211e;
-  text-align: center;
-  font-family: "DM Sans", sans-serif;
-  background-color: #fbfaf6;
-  border: 1px solid #d8d6cf;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(25, 33, 30, 0.08);
+  padding: 0 0 2rem;
+  color: #111914;
+  font-family: Arial, sans-serif;
 }
 
-.info + .info {
-  margin-top: 1.25rem;
+.about-intro {
+  padding: 1rem 0 2rem;
+  border-bottom: 1px solid #dedfd9;
 }
 
-.info h1 {
-  margin: 0 0 1.25rem;
-  font-family: "Manrope", sans-serif;
-  color: #19211e;
-  line-height: 1.1;
-  opacity: 0.55;
-  transition: opacity 0.3s ease;
-}
-
-.info:hover h1,
-.info:focus-within h1 {
-  opacity: 1;
-}
-
-.about-info h1 {
-  opacity: 1;
-}
-
-.gym-details {
-  position: relative;
-  max-width: 720px;
-  margin: 0 auto;
-
-  padding: 0.5rem;
-  line-height: 1.65;
-}
-
-.offer-info ul {
+.about-intro h1 {
   margin: 0;
-  padding: 0;
-  list-style: none;
+  font-size: clamp(2.4rem, 5vw, 4.25rem);
+  letter-spacing: -0.055em;
 }
 
-.offer-info li + li {
-  margin-top: 0.65rem;
-}
-
-.visit-info p {
-  margin: 0;
-}
-
-.faq-info {
-  max-width: 900px;
-  margin-top: 1.25rem;
-  padding: 1.5rem;
-  text-align: left;
-}
-
-.faq-info h2 {
-  margin: 0 0 1rem;
-  font-family: "Manrope", sans-serif;
-  font-size: 1.5rem;
-  text-align: center;
-}
-
-.faq-info details {
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #d8d6cf;
-}
-
-.faq-info details:last-child {
-  border-bottom: 0;
-}
-
-.faq-info summary {
-  color: #19211e;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.faq-info p {
+.about-intro p {
+  max-width: 640px;
   margin: 0.75rem 0 0;
-  color: #6f746f;
+  color: #4e5550;
   line-height: 1.5;
 }
 
-@media (max-width: 760px) {
-  .fitness-page {
-    padding-top: 0;
+.about-section {
+  padding: 2rem 0;
+  border-bottom: 1px solid #dedfd9;
+}
+
+.about-section:last-child {
+  border-bottom: 0;
+}
+
+.about-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.about-section h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.about-section-heading > a {
+  color: #153b2a;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.coach-grid,
+.about-location-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.coach-grid article,
+.about-location-grid article {
+  padding: 1.25rem;
+  border: 1px solid #e1e1db;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #fbfaf6, #f1efe9);
+}
+
+.card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.coach-grid h3,
+.about-location-grid h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.card-heading > div > p {
+  margin: 0.3rem 0 0;
+  color: #153b2a;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.card-heading > a {
+  color: #111914;
+  font-size: 1.2rem;
+  text-decoration: none;
+}
+
+.coach-grid article > p,
+.about-location-grid article > p {
+  margin: 1rem 0 0;
+  color: #555c57;
+  font-size: 0.83rem;
+  line-height: 1.45;
+}
+
+.about-location-grid address {
+  margin-top: 0.45rem;
+  color: #555c57;
+  font-size: 0.85rem;
+  font-style: normal;
+}
+
+.about-notice {
+  padding: 1rem;
+  border: 1px solid #dedfd9;
+  border-radius: 8px;
+  background: #f5f3ed;
+}
+
+.amenities-section h2 {
+  margin-bottom: 1.25rem;
+}
+
+.amenities-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.25rem 2rem;
+}
+
+.amenities-grid > div {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 0.8rem;
+}
+
+.amenities-grid svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  flex: 0 0 auto;
+  color: #153b2a;
+}
+
+.about-section a:focus-visible {
+  border-radius: 3px;
+  outline: 2px solid #153b2a;
+  outline-offset: 3px;
+}
+
+@media (max-width: 800px) {
+  .coach-grid,
+  .about-location-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .fitness-actions {
-    top: 1rem;
-    right: 1rem;
+  .amenities-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .about-intro {
+    padding-top: 0.5rem;
   }
 
-  .top-logo {
-    top: 1rem;
-    left: 1rem;
-  }
-
-  .fitness-footer {
+  .coach-grid,
+  .about-location-grid,
+  .amenities-grid {
     grid-template-columns: 1fr;
-    justify-items: center;
-    text-align: center;
   }
 
-  .fitness-copyright,
-  .fitness-socials {
-    text-align: center;
+  .about-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
