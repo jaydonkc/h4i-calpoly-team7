@@ -4,7 +4,7 @@ import { ClassCategory, FitnessClass, ClassQuery, ClassSchedule, classCategories
 //! Example user schema. Not guaranteed to work
 
 const fitnessClassSchema = new Schema({
-  id: Number,
+  _id: Number,
   date: String,
   title: String,
   category: classCategories,
