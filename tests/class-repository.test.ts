@@ -17,8 +17,8 @@ describe("fitness class schema", () => {
     date: "2026-10-06",
     title: "Morning Cardio",
     category: "Cardio",
-    time: "9:00 AM",
-    end: "10:00 AM",
+    time: "09:00",
+    end: "10:00",
     coach: "Alex",
     room: "Studio 1",
     level: "Beginner",
@@ -60,11 +60,16 @@ describe("class repository", () => {
     vi.setSystemTime(new Date(2026, 9, 6, 12));
     const base = { _id: new Types.ObjectId(), date: "2026-10-06", category: "Cardio" };
     const records = [
-      { ...base, time: "1:00 PM" },
+      { ...base, time: "13:00" },
+      { ...base, time: "23:59" },
+      { ...base, time: "12:00" },
+      { ...base, time: "00:00" },
+      { ...base, time: "24:00" },
+      { ...base, time: "09:60" },
       { ...base, time: undefined },
       { ...base, time: null },
       { ...base, time: 900 },
-      { ...base, time: "9:00 AM" },
+      { ...base, time: "9:00" },
     ];
     const query = {
       sort: vi.fn().mockReturnThis(),
@@ -75,12 +80,20 @@ describe("class repository", () => {
 
     const schedule = await classRepository.getSchedule();
 
-    expect(schedule.classes.map((record) => record.time)).toEqual(["9:00 AM", "1:00 PM"]);
+    expect(schedule.classes.map((record) => record.time)).toEqual([
+      "00:00",
+      "9:00",
+      "12:00",
+      "13:00",
+      "23:59",
+      "09:60",
+      "24:00",
+    ]);
   });
 
   it("looks up a generated ID using _id and preserves result conversion", async () => {
     const id = new Types.ObjectId().toString();
-    const record = { _id: new Types.ObjectId(id), date: "2026-10-06", category: "Cardio", time: "9:00 AM" };
+    const record = { _id: new Types.ObjectId(id), date: "2026-10-06", category: "Cardio", time: "09:00" };
     const query = { lean: vi.fn().mockReturnThis(), exec: vi.fn().mockResolvedValue(record) };
     const findOne = vi
       .spyOn(FitnessClassModel, "findOne")

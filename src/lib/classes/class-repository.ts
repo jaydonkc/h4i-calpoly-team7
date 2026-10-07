@@ -74,12 +74,10 @@ function matchWeekDate(classDate: string, days: ReturnType<typeof getWeekDates>[
 }
 
 function getTimeSortValue(time: string) {
-  const match = time.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  const match = time.match(/^([01]?[0-9]|2[0-3]):([0-5][0-9])$/);
   if (!match) return Number.MAX_SAFE_INTEGER;
 
-  let hours = Number(match[1]) % 12;
-  if (match[3].toUpperCase() === "PM") hours += 12;
-  return hours * 60 + Number(match[2]);
+  return Number(match[1]) * 60 + Number(match[2]);
 }
 
 class MongoClassRepository implements ClassRepository {
