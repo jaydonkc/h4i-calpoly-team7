@@ -3,10 +3,10 @@ import { Suspense } from "react";
 import { classRepository } from "@/lib/classes/class-repository";
 import ClassesPage from "./classes";
 import type { ClassQuery, ClassSchedule, FitnessClass } from "@/types/fitness-class";
-import getSchedule from "@/database/getClass";
-
 export const metadata: Metadata = { title: "Class Schedule | Fitness Maxxing" };
 export const dynamic = "force-dynamic";
+
+const URL = "http://localhost:3000";
 
 const emptySchedule: ClassSchedule = {
   classes: [],
@@ -22,7 +22,9 @@ export default function ClassesRoute() {
 
 async function ClassesContent() {
   try {
-    const schedule = await getSchedule();
+    const response = await fetch(`{URL}/api/classes`, { cache: "no-store" });
+    const responseJson = await response.json();
+    const schedule = responseJson.data;
     return <ClassesPage initialSchedule={schedule} errorMessage={null} />;
   } catch {
     return (
