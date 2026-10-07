@@ -1,0 +1,167 @@
+.navbar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0.65rem 0 0.9rem;
+  border-bottom: 1px solid #e1e3df;
+  font-size: 0.8rem;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: #101813;
+  text-decoration: none;
+}
+
+.brandMark {
+  display: grid;
+  width: 2.45rem;
+  height: 2.45rem;
+  place-items: center;
+  border-radius: 50%;
+  color: #d5e76c;
+  background: #13241c;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.brandName {
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+}
+
+.links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1rem, 3vw, 2.25rem);
+}
+
+.navLink {
+  position: relative;
+  padding: 0.85rem 0;
+  color: #101813;
+  text-decoration: none;
+}
+
+.navLink::after {
+  position: absolute;
+  right: 0;
+  bottom: 0.25rem;
+  left: 0;
+  height: 2px;
+  background: #153f2b;
+  content: "";
+  opacity: 0;
+  transform: scaleX(0.4);
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
+}
+
+.navLink:hover::after,
+.navLink[aria-current="page"]::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.navLink[aria-current="page"] {
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.account {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.35rem 0.75rem 0.35rem 0.35rem;
+  border: 1px solid #d3d7d1;
+  border-radius: 999px;
+  color: #101813;
+  text-decoration: none;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease;
+}
+
+.account:hover {
+  border-color: #aab7ac;
+  background: #eef3e9;
+}
+
+.account > span {
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  border-radius: 50%;
+  background: #eeeee9;
+  font-size: 0.72rem;
+  transition: background-color 150ms ease;
+}
+
+.account:hover > span {
+  background: #dce8d8;
+}
+
+.account svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.account strong {
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.brand:focus-visible,
+.navLink:focus-visible,
+.account:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid #153f2b;
+  outline-offset: 3px;
+}
+
+@media (max-width: 760px) {
+  .navbar {
+    grid-template-columns: 1fr auto;
+    gap: 0.75rem 1rem;
+  }
+
+  .links {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-content: flex-start;
+    gap: 1.25rem;
+    overflow-x: auto;
+  }
+
+  .navLink {
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 420px) {
+  .account strong {
+    display: none;
+  }
+
+  .account {
+    padding-right: 0.35rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .account,
+  .account > span {
+    transition: none;
+  }
+}

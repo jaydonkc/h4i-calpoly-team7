@@ -1,6 +1,13 @@
 body {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
   margin: 0;
   font-family: Arial, sans-serif;
+}
+
+body > main {
+  flex: 1;
 }
 
 header,

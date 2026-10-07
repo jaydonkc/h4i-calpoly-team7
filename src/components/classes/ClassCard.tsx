@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useDemoAuth } from "@/components/DemoAuthProvider";
 import type { FitnessClass } from "@/types/fitness-class";
 import Icon from "./Icon";
 
@@ -9,8 +10,9 @@ type ClassCardProps = {
 };
 
 export default function ClassCard({ fitnessClass }: ClassCardProps) {
+  const { isUserSignedIn, reservedClasses, reserveClass, cancelReservation } = useDemoAuth();
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [isBooked, setIsBooked] = useState(false);
+  const isBooked = reservedClasses.some((reservedClass) => reservedClass.id === fitnessClass.id);
 
   useEffect(() => {
     if (!showConfirmation) return;
@@ -21,12 +23,12 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
 
   function toggleReservation() {
     if (isBooked) {
-      setIsBooked(false);
+      cancelReservation(fitnessClass.id);
       setShowConfirmation(false);
       return;
     }
 
-    setIsBooked(true);
+    reserveClass(fitnessClass);
     setShowConfirmation(true);
   }
 
@@ -61,8 +63,14 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
         <strong>{fitnessClass.spots}</strong>
         <span> spots</span>
       </div>
-      <button className={`reserve ${isBooked ? "cancel" : ""}`} aria-pressed={isBooked} onClick={toggleReservation}>
-        {isBooked ? "Cancel" : "Reserve"}
+      <button
+        className={`reserve ${isBooked ? "cancel" : ""}`}
+        aria-pressed={isUserSignedIn ? isBooked : undefined}
+        aria-label={isUserSignedIn ? undefined : `Log in to reserve ${fitnessClass.title}`}
+        disabled={!isUserSignedIn}
+        onClick={toggleReservation}
+      >
+        {isUserSignedIn ? (isBooked ? "Cancel" : "Reserve") : "Log in to reserve"}
       </button>
       {showConfirmation && (
         <div className="booking-popup" role="status" aria-live="polite">
