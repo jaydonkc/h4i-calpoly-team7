@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { useDemoAuth } from "@/components/DemoAuthProvider";
 
 const tiers = [
   {
@@ -24,17 +26,27 @@ const tiers = [
 ];
 
 export default function MembershipPlans() {
+  const { isUserSignedIn, purchaseMembership } = useDemoAuth();
   // adds button functionality
   const [selectedTier, setSelectedTier] = useState<(typeof tiers)[number] | null>(null);
   // disables background click
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const loginPromptRef = useRef<HTMLDialogElement>(null);
+  const confirmationRef = useRef<HTMLDialogElement>(null);
   // payment error react element
   const [paymentError, setPaymentError] = useState("");
   const [purchaseSuccess, setPurchaseSuccess] = useState("");
+  const [confirmedPlan, setConfirmedPlan] = useState("");
 
   useEffect(() => {
     if (selectedTier) dialogRef.current?.showModal();
   }, [selectedTier]);
+
+  useEffect(() => {
+    if (confirmedPlan && !confirmationRef.current?.open) {
+      confirmationRef.current?.showModal();
+    }
+  }, [confirmedPlan]);
 
   return (
     <>
@@ -69,6 +81,11 @@ export default function MembershipPlans() {
               <button
                 className="tierButton"
                 onClick={() => {
+                  if (!isUserSignedIn) {
+                    loginPromptRef.current?.showModal();
+                    return;
+                  }
+
                   setPaymentError("");
                   setPurchaseSuccess("");
                   setSelectedTier(tier);
@@ -80,6 +97,17 @@ export default function MembershipPlans() {
           ))}
         </div>
       </section>
+
+      <dialog ref={loginPromptRef} className="loginPrompt" aria-labelledby="membership-login-title">
+        <h2 id="membership-login-title">Log in to select a membership</h2>
+        <p>You need to log in or create an account before purchasing a membership.</p>
+        <div>
+          <button type="button" onClick={() => loginPromptRef.current?.close()}>
+            Not Now
+          </button>
+          <Link href="/profile">Continue to Log In</Link>
+        </div>
+      </dialog>
 
       {selectedTier && (
         <dialog
@@ -119,7 +147,9 @@ export default function MembershipPlans() {
                 return;
               }
               setPaymentError("");
+              purchaseMembership(selectedTier.name, selectedTier.price);
               setPurchaseSuccess(`Mock ${selectedTier.name} purchase successful. No payment was processed.`);
+              setConfirmedPlan(selectedTier.name);
               setSelectedTier(null);
             }}
           >
@@ -176,6 +206,22 @@ export default function MembershipPlans() {
           </form>
         </dialog>
       )}
+
+      <dialog
+        ref={confirmationRef}
+        className="purchaseConfirmation"
+        aria-labelledby="purchase-confirmation-title"
+        onClose={() => setConfirmedPlan("")}
+      >
+        <h2 id="purchase-confirmation-title">Membership confirmed</h2>
+        <p>Your {confirmedPlan} membership is now active. You can view your membership details from your account.</p>
+        <div>
+          <button type="button" onClick={() => confirmationRef.current?.close()}>
+            Close
+          </button>
+          <Link href="/profile">View My Account</Link>
+        </div>
+      </dialog>
     </>
   );
 }

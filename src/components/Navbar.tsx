@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { isUserSignedIn } from "@/lib/auth-status";
+import { useDemoAuth } from "@/components/DemoAuthProvider";
 import styles from "./Navbar.module.css";
 
 const links = [
@@ -14,6 +14,8 @@ const links = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { user } = useDemoAuth();
+  const accountLabel = user ? `${user.firstName} ${user.lastName.charAt(0).toUpperCase()}.` : "Log in";
 
   return (
     <nav className={styles.navbar} aria-label="Main navigation">
@@ -48,7 +50,7 @@ export default function Navbar() {
             <path d="M5.5 20a6.5 6.5 0 0 1 13 0" />
           </svg>
         </span>
-        <strong>{isUserSignedIn ? "My account" : "Log in"}</strong>
+        <strong>{accountLabel}</strong>
       </Link>
     </nav>
   );

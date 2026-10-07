@@ -6,6 +6,379 @@
   color: #111914;
 }
 
+.accountPage {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1rem 0 3rem;
+  color: #111914;
+}
+
+.accountHeading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #dedfd9;
+}
+
+.accountHeading h1 {
+  margin: 0;
+  font-size: clamp(2.4rem, 5vw, 4.25rem);
+  letter-spacing: -0.055em;
+}
+
+.accountHeading button {
+  padding: 0.65rem 1rem;
+  border: 1px solid #153b2a;
+  border-radius: 5px;
+  color: #153b2a;
+  background: transparent;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.editButton {
+  padding: 0;
+  border: 0;
+  color: #153b2a;
+  background: transparent;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.editForm {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.editForm label {
+  display: grid;
+  gap: 0.35rem;
+  color: #626963;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.editForm input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.65rem 0.7rem;
+  border: 1px solid #d4d7d2;
+  border-radius: 5px;
+  color: #111914;
+  background: white;
+  font: inherit;
+}
+
+.editNameRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.editForm > p,
+.profileStatus {
+  margin: 0;
+  color: #32543f;
+  font-size: 0.78rem;
+}
+
+.editActions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.editActions button {
+  padding: 0.6rem 0.85rem;
+  border: 1px solid #153b2a;
+  border-radius: 5px;
+  color: white;
+  background: #153b2a;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.editActions button[type="button"] {
+  color: #153b2a;
+  background: transparent;
+}
+
+.accountGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  padding: 2rem 0;
+}
+
+.accountCard {
+  padding: 1.5rem;
+  border: 1px solid #dedfd9;
+  border-radius: 8px;
+  background: #fffefa;
+}
+
+.accountCard h2,
+.enrolledSection h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.cardTitleRow,
+.enrolledHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cardTitleRow > span {
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  color: #566057;
+  background: #edf0ea;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.cardTitleRow > .activeStatus {
+  color: #153b2a;
+  background: #dcefd5;
+}
+
+.accountCard dl {
+  display: grid;
+  gap: 0.7rem;
+  margin: 1.25rem 0;
+}
+
+.accountCard dl > div {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 1rem;
+}
+
+.accountCard dt {
+  color: #626963;
+  font-size: 0.85rem;
+}
+
+.accountCard dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.accountAction {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.65rem 1rem;
+  border: 0;
+  border-radius: 5px;
+  color: white;
+  background: #153b2a;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+}
+
+.accountAction:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.enrolledSection {
+  padding-top: 0.25rem;
+}
+
+.enrolledHeading a {
+  color: #153b2a;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.emptyClasses {
+  margin-top: 1rem;
+  padding: 2rem;
+  border: 1px solid #dedfd9;
+  border-radius: 8px;
+  background: #fffefa;
+  text-align: center;
+}
+
+.emptyClasses h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.emptyClasses p {
+  margin: 0.4rem 0 0;
+  color: #626963;
+  font-size: 0.85rem;
+}
+
+.enrolledTableWrapper {
+  margin-top: 1rem;
+  border: 1px solid #dedfd9;
+  border-radius: 8px;
+  overflow-x: auto;
+  background: #fffefa;
+}
+
+.enrolledTableWrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.enrolledTableWrapper th,
+.enrolledTableWrapper td {
+  padding: 0.8rem;
+  border-bottom: 1px solid #e5e5df;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.enrolledTableWrapper th {
+  color: #626963;
+  background: #f5f3ed;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+.enrolledTableWrapper tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.enrolledTableWrapper td > span {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  color: #153b2a;
+  background: #e2efdc;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.unenrollButton {
+  padding: 0.4rem 0.65rem;
+  border: 1px solid #a7aea8;
+  border-radius: 5px;
+  color: #39443d;
+  background: transparent;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease;
+}
+
+.unenrollButton:hover {
+  border-color: #153b2a;
+  background: #eef3e9;
+}
+
+.unenrollButton:focus-visible {
+  outline: 2px solid #153b2a;
+  outline-offset: 2px;
+}
+
+.unenrollDialog {
+  width: min(420px, calc(100% - 2rem));
+  box-sizing: border-box;
+  padding: 1.5rem;
+  border: 1px solid #d8dcd6;
+  border-radius: 8px;
+  color: #111914;
+  background: #fffefa;
+  box-shadow: 0 18px 50px rgb(17 25 20 / 22%);
+}
+
+.unenrollDialog::backdrop {
+  background: rgb(16 25 20 / 45%);
+}
+
+.unenrollDialog h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.unenrollDialog p {
+  margin: 0.75rem 0 1.5rem;
+  color: #565d58;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.unenrollDialog > div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+.unenrollDialog button {
+  padding: 0.65rem 0.9rem;
+  border: 1px solid #153b2a;
+  border-radius: 5px;
+  color: #153b2a;
+  background: transparent;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.unenrollDialog button:last-child {
+  color: white;
+  background: #153b2a;
+}
+
+.unenrollDialog button:hover {
+  background: #eef3e9;
+}
+
+.unenrollDialog button:last-child:hover {
+  background: #0c291c;
+}
+
+.unenrollDialog button:focus-visible {
+  outline: 2px solid #153b2a;
+  outline-offset: 2px;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.demoNotice {
+  margin: 1rem 0 0;
+  color: #6b726d;
+  font-size: 0.75rem;
+  text-align: center;
+}
+
 .loginCard {
   width: min(100%, 520px);
   box-sizing: border-box;
@@ -41,7 +414,7 @@
   font-weight: 600;
 }
 
-.loginCard input {
+.loginCard input:not([type="checkbox"]) {
   width: 100%;
   box-sizing: border-box;
   padding: 0.75rem;
@@ -50,6 +423,37 @@
   color: inherit;
   background: white;
   font: inherit;
+}
+
+.nameRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.field {
+  display: grid;
+}
+
+.optional {
+  color: #6b726d;
+  font-weight: 400;
+}
+
+.terms {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.terms input {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+  margin: 0.1rem 0 0;
+  accent-color: #153b2a;
 }
 
 .loginButton {
@@ -133,6 +537,31 @@
 
   .loginCard {
     padding: 2rem 1.25rem;
+  }
+
+  .nameRow {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .accountPage {
+    width: calc(100% - 28px);
+  }
+
+  .accountHeading,
+  .enrolledHeading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .accountGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .editNameRow {
+    grid-template-columns: 1fr;
   }
 }
 

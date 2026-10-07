@@ -151,8 +151,88 @@
   font-family: Arial, sans-serif;
 }
 
-.paymentForm::backdrop {
+.paymentForm::backdrop,
+.loginPrompt::backdrop,
+.purchaseConfirmation::backdrop {
   background: rgb(16 25 20 / 45%);
+}
+
+.loginPrompt,
+.purchaseConfirmation {
+  width: min(420px, calc(100% - 2rem));
+  box-sizing: border-box;
+  padding: 1.5rem;
+  border: 1px solid #d8dcd6;
+  border-radius: 8px;
+  color: #111914;
+  background: #fffefa;
+  box-shadow: 0 18px 50px rgb(17 25 20 / 22%);
+  font-family: Arial, sans-serif;
+}
+
+.loginPrompt h2,
+.purchaseConfirmation h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.loginPrompt p,
+.purchaseConfirmation p {
+  margin: 0.75rem 0 1.5rem;
+  color: #565d58;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.loginPrompt > div,
+.purchaseConfirmation > div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+.loginPrompt button,
+.loginPrompt a,
+.purchaseConfirmation button,
+.purchaseConfirmation a {
+  padding: 0.65rem 0.9rem;
+  border: 1px solid #153b2a;
+  border-radius: 5px;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.loginPrompt button,
+.purchaseConfirmation button {
+  color: #153b2a;
+  background: transparent;
+}
+
+.loginPrompt a,
+.purchaseConfirmation a {
+  color: white;
+  background: #153b2a;
+  text-decoration: none;
+}
+
+.loginPrompt button:hover,
+.purchaseConfirmation button:hover {
+  background: #eef3e9;
+}
+
+.loginPrompt a:hover,
+.purchaseConfirmation a:hover {
+  background: #0c291c;
+}
+
+.loginPrompt button:focus-visible,
+.loginPrompt a:focus-visible,
+.purchaseConfirmation button:focus-visible,
+.purchaseConfirmation a:focus-visible {
+  outline: 2px solid #153b2a;
+  outline-offset: 2px;
 }
 
 /* Billing summary (the div directly inside the section) */

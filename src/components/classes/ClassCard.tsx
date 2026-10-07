@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { isUserSignedIn } from "@/lib/auth-status";
+import { useDemoAuth } from "@/components/DemoAuthProvider";
 import type { FitnessClass } from "@/types/fitness-class";
 import Icon from "./Icon";
 
@@ -10,8 +10,9 @@ type ClassCardProps = {
 };
 
 export default function ClassCard({ fitnessClass }: ClassCardProps) {
+  const { isUserSignedIn, reservedClasses, reserveClass, cancelReservation } = useDemoAuth();
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [isBooked, setIsBooked] = useState(false);
+  const isBooked = reservedClasses.some((reservedClass) => reservedClass.id === fitnessClass.id);
 
   useEffect(() => {
     if (!showConfirmation) return;
@@ -22,12 +23,12 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
 
   function toggleReservation() {
     if (isBooked) {
-      setIsBooked(false);
+      cancelReservation(fitnessClass.id);
       setShowConfirmation(false);
       return;
     }
 
-    setIsBooked(true);
+    reserveClass(fitnessClass);
     setShowConfirmation(true);
   }
 
