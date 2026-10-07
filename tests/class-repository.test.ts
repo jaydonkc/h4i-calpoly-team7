@@ -13,21 +13,44 @@ afterEach(() => {
 });
 
 describe("fitness class schema", () => {
+  const validClass = {
+    date: "2026-10-06",
+    title: "Morning Cardio",
+    category: "Cardio",
+    time: "9:00 AM",
+    end: "10:00 AM",
+    coach: "Alex",
+    room: "Studio 1",
+    level: "Beginner",
+    duration: "60 minutes",
+    spots: 10,
+    description: "A cardio class for beginners.",
+  };
+
   it.each(classCategories)("generates an ObjectId and accepts scalar category %s", (category) => {
-    const record = new FitnessClassModel({ category, time: "9:00 AM" });
+    const record = new FitnessClassModel({ ...validClass, category });
     expect(record._id).toBeInstanceOf(Types.ObjectId);
     expect(record.category).toBe(category);
     expect(record.validateSync()).toBeUndefined();
   });
 
   it.each([undefined, "Unknown", ["Cardio"]])("rejects invalid category %j", (category) => {
-    const error = new FitnessClassModel({ category, time: "9:00 AM" }).validateSync();
+    const error = new FitnessClassModel({ ...validClass, category }).validateSync();
     expect(error?.errors.category).toBeDefined();
   });
 
-  it("requires a time", () => {
-    const error = new FitnessClassModel({ category: "Cardio" }).validateSync();
-    expect(error?.errors.time).toBeDefined();
+  it.each(Object.keys(validClass))("requires %s", (field) => {
+    const error = new FitnessClassModel({ ...validClass, [field]: undefined }).validateSync();
+    expect(error?.errors[field]).toBeDefined();
+  });
+
+  it.each([-1, 1.5, NaN, Infinity])("rejects invalid spots %s", (spots) => {
+    const error = new FitnessClassModel({ ...validClass, spots }).validateSync();
+    expect(error?.errors.spots).toBeDefined();
+  });
+
+  it.each([0, 1, 10])("accepts nonnegative integer spots %s", (spots) => {
+    expect(new FitnessClassModel({ ...validClass, spots }).validateSync()).toBeUndefined();
   });
 });
 
