@@ -13,7 +13,6 @@ export type FitnessClass = {
   level: string;
   duration: string;
   spots: number;
-  color: string;
   description: string;
 };
 

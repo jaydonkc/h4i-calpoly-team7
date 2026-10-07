@@ -1,10 +1,11 @@
+import { isObjectIdOrHexString } from "mongoose";
 import connectDB from "@/database/db";
 import FitnessClassModel from "@/database/userSchema";
 import type { ClassQuery, ClassSchedule, FitnessClass } from "@/types/fitness-class";
 
 export interface ClassRepository {
   getSchedule(query?: ClassQuery): Promise<ClassSchedule>;
-  getById(id: number): Promise<FitnessClass | null>;
+  getById(id: FitnessClass["id"]): Promise<FitnessClass | null>;
 }
 
 type ClassRecord = Omit<FitnessClass, "id" | "date"> & {
@@ -26,7 +27,6 @@ function toFitnessClass(record: ClassRecord, date = record.date): FitnessClass {
     level: record.level,
     duration: record.duration,
     spots: record.spots,
-    color: record.color,
     description: record.description,
   };
 }
@@ -90,6 +90,7 @@ class MongoClassRepository implements ClassRepository {
     const records = await FitnessClassModel.find().sort({ date: 1, time: 1 }).lean<ClassRecord[]>().exec();
     const classes = records
       .flatMap((record) => {
+        if (typeof record.time !== "string") return [];
         const day = matchWeekDate(record.date, week);
         if (!day || (query.date && query.date !== day.isoDate && query.date !== day.dayOfMonth)) return [];
         if (query.category && record.category !== query.category) return [];
@@ -115,9 +116,10 @@ class MongoClassRepository implements ClassRepository {
     };
   }
 
-  async getById(id: number): Promise<FitnessClass | null> {
+  async getById(id: FitnessClass["id"]): Promise<FitnessClass | null> {
+    if (!isObjectIdOrHexString(id)) return null;
     await connectDB();
-    const record = await FitnessClassModel.findOne({ id }).lean<ClassRecord>().exec();
+    const record = await FitnessClassModel.findOne({ _id: id }).lean<ClassRecord>().exec();
     return record ? toFitnessClass(record) : null;
   }
 }
