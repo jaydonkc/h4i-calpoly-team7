@@ -1,23 +1,61 @@
-/* This is just vibecoded placeholder css */
-
 .membershipPage {
   max-width: 960px;
   margin: 0 auto;
   padding: 0 1rem 3rem;
-  font-family: system-ui, sans-serif;
+  color: #111914;
+  font-family: Arial, sans-serif;
 }
 
-/* Banner */
+/* Page header */
 .membershipBanner {
-  padding: 3rem 1rem;
-  text-align: center;
-  background: #f3f3f3;
+  padding: 1rem 0 2rem;
+  border-bottom: 1px solid #dedfd9;
+  text-align: left;
+}
+
+.membershipBanner h1 {
+  margin: 0;
+  font-size: clamp(2.4rem, 5vw, 4.25rem);
+  letter-spacing: -0.055em;
+}
+
+.membershipBanner p {
+  margin: 0.75rem 0 0;
+  color: #4e5550;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
 /* Plan heading */
 .planChoice {
-  margin: 2rem 0;
-  text-align: center;
+  margin: 2rem 0 1rem;
+  color: #111914;
+  text-align: left;
+}
+
+.planChoice h2 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.planChoice p {
+  margin: 0.45rem 0 0;
+  color: #525954;
+  line-height: 1.45;
+}
+
+.planChoice p:nth-of-type(2) {
+  margin-top: 0.35rem;
+  color: #626963;
+  font-size: 0.8rem;
+}
+
+.planChoice p[role="status"] {
+  color: #153b2a;
+}
+
+.planChoice p[role="status"]:empty {
+  display: none;
 }
 
 /* Tier cards */
@@ -31,13 +69,18 @@
   display: flex;
   flex-direction: column;
   padding: 1.5rem;
-  border: 1px solid #ddd;
+  border: 1px solid #d8dcd6;
   border-radius: 8px;
+  background: #fffefa;
 }
 
 .planTier ul {
   flex-grow: 1; /* pushes the button to the bottom of every card */
   padding-left: 1.25rem;
+}
+
+.planTier li::marker {
+  color: #245b3b;
 }
 
 .tierName {
@@ -51,34 +94,46 @@
 }
 
 .tierDescription {
-  color: #555;
+  color: #565d58;
 }
 
 /* Buttons */
 .tierButton,
 .paymentForm button {
   padding: 0.6rem 1rem;
-  border: 1px solid #111;
+  border: 1px solid #153b2a;
   border-radius: 6px;
-  background: #111;
-  color: #fff;
+  background: #153b2a;
+  color: #fffefa;
   font: inherit;
   cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
 }
 
 .tierButton:hover,
-.paymentForm button:hover {
-  background: #333;
+.paymentForm button[type="submit"]:hover {
+  background: #0c291c;
+  box-shadow: 0 7px 16px rgb(21 59 42 / 22%);
+  transform: translateY(-2px);
+}
+
+.tierButton:active,
+.paymentForm button[type="submit"]:active {
+  box-shadow: 0 2px 6px rgb(21 59 42 / 18%);
+  transform: translateY(0) scale(0.96);
 }
 
 /* Cancel button (type="button" inside the form) */
 .paymentForm button[type="button"] {
   background: transparent;
-  color: #111;
+  color: #153b2a;
 }
 
 .paymentForm button[type="button"]:hover {
-  background: #f3f3f3;
+  background: #eef2ea;
 }
 
 /* Payment section */
@@ -89,8 +144,95 @@
   max-height: 90vh;
   overflow-y: auto;
   padding: 1.5rem;
+  border: 1px solid #d8dcd6;
   border-radius: 8px;
-  background: #fff;
+  color: #111914;
+  background: #fffefa;
+  font-family: Arial, sans-serif;
+}
+
+.paymentForm::backdrop,
+.loginPrompt::backdrop,
+.purchaseConfirmation::backdrop {
+  background: rgb(16 25 20 / 45%);
+}
+
+.loginPrompt,
+.purchaseConfirmation {
+  width: min(420px, calc(100% - 2rem));
+  box-sizing: border-box;
+  padding: 1.5rem;
+  border: 1px solid #d8dcd6;
+  border-radius: 8px;
+  color: #111914;
+  background: #fffefa;
+  box-shadow: 0 18px 50px rgb(17 25 20 / 22%);
+  font-family: Arial, sans-serif;
+}
+
+.loginPrompt h2,
+.purchaseConfirmation h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.loginPrompt p,
+.purchaseConfirmation p {
+  margin: 0.75rem 0 1.5rem;
+  color: #565d58;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.loginPrompt > div,
+.purchaseConfirmation > div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+.loginPrompt button,
+.loginPrompt a,
+.purchaseConfirmation button,
+.purchaseConfirmation a {
+  padding: 0.65rem 0.9rem;
+  border: 1px solid #153b2a;
+  border-radius: 5px;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.loginPrompt button,
+.purchaseConfirmation button {
+  color: #153b2a;
+  background: transparent;
+}
+
+.loginPrompt a,
+.purchaseConfirmation a {
+  color: white;
+  background: #153b2a;
+  text-decoration: none;
+}
+
+.loginPrompt button:hover,
+.purchaseConfirmation button:hover {
+  background: #eef3e9;
+}
+
+.loginPrompt a:hover,
+.purchaseConfirmation a:hover {
+  background: #0c291c;
+}
+
+.loginPrompt button:focus-visible,
+.loginPrompt a:focus-visible,
+.purchaseConfirmation button:focus-visible,
+.purchaseConfirmation a:focus-visible {
+  outline: 2px solid #153b2a;
+  outline-offset: 2px;
 }
 
 /* Billing summary (the div directly inside the section) */
@@ -98,7 +240,7 @@
   margin-bottom: 1.5rem;
   padding: 1rem;
   border-radius: 6px;
-  background: #f3f3f3;
+  background: #eef2ea;
 }
 
 .paymentForm > div p {
@@ -121,17 +263,171 @@
   width: 100%;
   margin-top: 0.25rem;
   padding: 0.5rem;
-  border: 1px solid #bbb;
+  border: 1px solid #c9cec7;
   border-radius: 4px;
+  color: #111914;
+  background: white;
   font: inherit;
+}
+
+.paymentForm input:focus-visible,
+.tierButton:focus-visible,
+.paymentForm button:focus-visible {
+  outline: 2px solid #153b2a;
+  outline-offset: 2px;
 }
 
 /* Only shows after the person has interacted with the field */
 .paymentForm input:user-invalid {
-  border-color: #c00;
+  border-color: #9f2f2f;
+}
+
+.paymentForm p[role="alert"] {
+  color: #8d2525;
 }
 
 .paymentForm form button {
   margin-top: 1rem;
   margin-right: 0.5rem;
+}
+
+.classSignup,
+.membershipFaq {
+  margin-top: 3rem;
+}
+
+.purchaseSectionHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.purchaseSectionHeading h2,
+.membershipFaq h2 {
+  margin: 0;
+  color: #111914;
+  font-size: 1.4rem;
+}
+
+.purchaseSectionHeading a {
+  color: #153b2a;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.purchaseTableWrapper {
+  overflow-x: auto;
+  border: 1px solid #d8dcd6;
+  border-radius: 7px;
+}
+
+.purchaseTableWrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fffefa;
+  font-size: 0.8rem;
+}
+
+.purchaseTableWrapper th,
+.purchaseTableWrapper td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #d8dcd6;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.purchaseTableWrapper th {
+  background: #f1f3ed;
+  font-size: 0.74rem;
+}
+
+.purchaseTableWrapper tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.purchaseTableWrapper td:last-child {
+  text-align: right;
+}
+
+.purchaseTableWrapper td a {
+  display: inline-block;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid #72916f;
+  border-radius: 5px;
+  color: #153b2a;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.purchaseTableWrapper td a:hover {
+  background: #eef3e9;
+}
+
+.purchaseNotice {
+  padding: 1rem;
+  border: 1px solid #d8dcd6;
+  border-radius: 7px;
+  color: #565d58;
+  background: #f5f3ed;
+}
+
+.membershipFaq > div {
+  margin-top: 1rem;
+  border: 1px solid #d8dcd6;
+  border-radius: 7px;
+  overflow: hidden;
+  background: #fffefa;
+}
+
+.membershipFaq details + details {
+  border-top: 1px solid #d8dcd6;
+}
+
+.membershipFaq summary {
+  padding: 0.85rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.membershipFaq details p {
+  margin: 0;
+  padding: 0 1rem 1rem;
+  color: #565d58;
+  font-size: 0.82rem;
+}
+
+.purchaseSectionHeading a:focus-visible,
+.purchaseTableWrapper td a:focus-visible,
+.membershipFaq summary:focus-visible {
+  outline: 2px solid #153b2a;
+  outline-offset: 2px;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .purchaseSectionHeading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tierButton,
+  .paymentForm button[type="submit"] {
+    transition: none;
+  }
 }

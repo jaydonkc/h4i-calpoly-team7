@@ -4,10 +4,10 @@ Here are all of the steps you should follow whenever contributing to this repo!
 
 ## Making Changes
 
-1. Before you start making changes, always make sure you're on the main branch, then `git pull` and `npm i` to make sure your code is up to date
+1. Start from an up-to-date `dev` branch: run `git switch dev`, `git pull --ff-only`, and `npm ci`. Preserve existing local changes.
 2. Create a branch `git checkout -b <name-of-branch>`
 3. Make changes to the code
-4. `npm run lint` to ensure code standards. (running `npm run lint:fix` will fix most of the styling errors)
+4. Run `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build` before requesting review. Open feature pull requests against `dev`. Release reviewed changes to `main`; Vercel deploys `main` to Production and other branches to Preview.
 
 ## Commiting Changes
 

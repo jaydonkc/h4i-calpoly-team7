@@ -1,0 +1,194 @@
+.contactPage {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+  gap: clamp(2rem, 6vw, 5rem);
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 1rem 0 2rem;
+  color: #111914;
+}
+
+.contactPage h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+  letter-spacing: -0.04em;
+}
+
+.formColumn > p {
+  max-width: 540px;
+  margin: 0.65rem 0 1.4rem;
+  color: #4f5651;
+  line-height: 1.5;
+}
+
+.form {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.form label {
+  margin-top: 0.45rem;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.form input,
+.form select,
+.form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.75rem;
+  border: 1px solid #d5d8d3;
+  border-radius: 5px;
+  color: #111914;
+  background: white;
+  font: inherit;
+}
+
+.form textarea {
+  resize: vertical;
+}
+
+.form button {
+  margin-top: 0.65rem;
+  padding: 0.8rem 1rem;
+  border: 0;
+  border-radius: 5px;
+  color: white;
+  background: #153b2a;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+.form button:hover {
+  background: #0c291c;
+  box-shadow: 0 7px 16px rgb(21 59 42 / 22%);
+  transform: translateY(-2px);
+}
+
+.form button:active {
+  box-shadow: 0 2px 6px rgb(21 59 42 / 18%);
+  transform: translateY(0) scale(0.96);
+}
+
+.form input:focus-visible,
+.form select:focus-visible,
+.form textarea:focus-visible,
+.form button:focus-visible,
+.details a:focus-visible,
+.faqs summary:focus-visible {
+  outline: 2px solid #153b2a;
+  outline-offset: 2px;
+}
+
+.formStatus {
+  margin: 0.5rem 0 0;
+  padding: 0.75rem;
+  border-radius: 5px;
+  background: #f1f4ed;
+  font-size: 0.85rem;
+}
+
+.details {
+  padding-left: clamp(1.5rem, 4vw, 3rem);
+  border-left: 1px solid #dedfd9;
+}
+
+.details section {
+  padding-bottom: 1.4rem;
+  border-bottom: 1px solid #dedfd9;
+}
+
+.details section + section {
+  padding-top: 1.4rem;
+}
+
+.details section:last-child {
+  border-bottom: 0;
+}
+
+.details h2 {
+  margin: 0 0 0.9rem;
+  font-size: 1rem;
+}
+
+.details address {
+  display: grid;
+  gap: 0.85rem;
+  font-size: 0.88rem;
+  font-style: normal;
+}
+
+.details address a,
+.details address > span,
+.instagram {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.details address span[aria-hidden="true"] {
+  width: 1rem;
+  color: #153b2a;
+  text-align: center;
+}
+
+.instagram {
+  width: fit-content;
+  font-size: 0.88rem;
+}
+
+.instagram svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.faqs {
+  border: 1px solid #dedfd9;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.faqs details + details {
+  border-top: 1px solid #dedfd9;
+}
+
+.faqs summary {
+  padding: 0.65rem 0.75rem;
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+
+.faqs p {
+  margin: 0;
+  padding: 0 0.75rem 0.75rem;
+  color: #565d58;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 760px) {
+  .contactPage {
+    grid-template-columns: 1fr;
+  }
+
+  .details {
+    padding-top: 1.5rem;
+    padding-left: 0;
+    border-top: 1px solid #dedfd9;
+    border-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .form button {
+    transition: none;
+  }
+}
