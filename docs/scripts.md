@@ -15,6 +15,7 @@ This script copies the examples in `src/data/classes.json` into MongoDB with tod
 run the seed command.
 
 If any object in classes.json fails validation, the entire seed is rejected.
+Use 24-hour times for both `time` and `end`, such as `8:00` or `18:00`, without AM/PM.
 
 ## Check the classes database
 
