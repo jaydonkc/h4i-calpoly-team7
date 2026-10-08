@@ -25,7 +25,7 @@ type DemoAuthContextValue = {
   createAccount: (user: DemoUser) => void;
   updateProfile: (user: DemoUser) => void;
   reserveClass: (fitnessClass: FitnessClass) => void;
-  cancelReservation: (classId: number) => void;
+  cancelReservation: (classId: FitnessClass["id"]) => void;
   purchaseMembership: (plan: string, price: string) => void;
   signOut: () => void;
 };
