@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useDemoAuth } from "@/components/DemoAuthProvider";
+import type { FitnessClass } from "@/types/fitness-class";
 import styles from "./profile.module.css";
 
 function displayClassDate(date: string) {
@@ -27,7 +28,9 @@ export default function Profile() {
   const [message, setMessage] = useState("");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileMessage, setProfileMessage] = useState("");
-  const [pendingUnenrollment, setPendingUnenrollment] = useState<{ id: number; title: string } | null>(null);
+  const [pendingUnenrollment, setPendingUnenrollment] = useState<{ id: FitnessClass["id"]; title: string } | null>(
+    null,
+  );
   const unenrollDialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {

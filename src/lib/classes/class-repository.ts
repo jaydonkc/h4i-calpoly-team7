@@ -1,28 +1,55 @@
-import mockSchedule from "@/data/classes.json";
+import { isObjectIdOrHexString } from "mongoose";
+import { getGymCalendarDate, toIsoDate } from "@/lib/classes/class-dates";
+import connectDB from "@/database/db";
+import FitnessClassModel from "@/database/userSchema";
 import type { ClassQuery, ClassSchedule, FitnessClass } from "@/types/fitness-class";
 
-const GYM_TIME_ZONE = "America/Los_Angeles";
-
-function getDateParts(date: Date) {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: GYM_TIME_ZONE,
-    year: "numeric",
-    month: "numeric",
-    day: "numeric",
-  }).formatToParts(date);
-
-  return Object.fromEntries(parts.map((part) => [part.type, Number(part.value)])) as Record<
-    "year" | "month" | "day",
-    number
-  >;
+export interface ClassRepository {
+  getSchedule(query?: ClassQuery): Promise<ClassSchedule>;
+  getById(id: FitnessClass["id"]): Promise<FitnessClass | null>;
 }
 
-function toIsoDate(date: Date) {
-  return [
-    date.getUTCFullYear(),
-    String(date.getUTCMonth() + 1).padStart(2, "0"),
-    String(date.getUTCDate()).padStart(2, "0"),
-  ].join("-");
+type ClassRecord = Omit<FitnessClass, "id" | "date"> & {
+  _id: { toString(): string };
+  id?: number;
+  date: string;
+};
+
+function toFitnessClass(record: ClassRecord, date = record.date): FitnessClass {
+  return {
+    id: record._id.toString(),
+    date,
+    title: record.title,
+    category: record.category,
+    time: record.time,
+    end: record.end,
+    coach: record.coach,
+    room: record.room,
+    level: record.level,
+    duration: record.duration,
+    spots: record.spots,
+    description: record.description,
+  };
+}
+
+function getWeekDates(now: Date) {
+  const today = getGymCalendarDate(now);
+  const monday = new Date(today);
+  monday.setUTCDate(monday.getUTCDate() - ((monday.getUTCDay() + 6) % 7));
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(monday);
+    date.setUTCDate(monday.getUTCDate() + index);
+    const isoDate = toIsoDate(date);
+
+    return {
+      date,
+      isoDate,
+      dayOfMonth: String(date.getUTCDate()),
+      label: date.toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" }).toUpperCase(),
+      isToday: isoDate === toIsoDate(today),
+    };
+  });
 }
 
 function formatWeekLabel(firstDay: Date, lastDay: Date) {
@@ -38,60 +65,68 @@ function formatWeekLabel(firstDay: Date, lastDay: Date) {
   return `${firstMonth} ${firstDate}—${lastDate}, ${lastYear}`;
 }
 
-export function getCurrentWeek(now = new Date()) {
-  const { year, month, day } = getDateParts(now);
-  const today = new Date(Date.UTC(year, month - 1, day, 12));
-  const monday = new Date(today);
-  monday.setUTCDate(today.getUTCDate() - ((today.getUTCDay() + 6) % 7));
-  const todayIsoDate = toIsoDate(today);
+function matchWeekDate(classDate: string, days: ReturnType<typeof getWeekDates>[number][]) {
+  const legacyDayOfMonth = /^\d{1,2}$/.test(classDate) ? classDate.padStart(2, "0") : null;
+  const isoDate = /^\d{4}-\d{2}-\d{2}/.test(classDate) ? classDate.slice(0, 10) : null;
+  const parsedDate = !legacyDayOfMonth && !isoDate ? new Date(classDate) : null;
+  const parsedIsoDate =
+    parsedDate && !Number.isNaN(parsedDate.getTime()) ? toIsoDate(getGymCalendarDate(parsedDate)) : null;
 
-  const days = Array.from({ length: 7 }, (_, index) => {
-    const date = new Date(monday);
-    date.setUTCDate(monday.getUTCDate() + index);
-    const isoDate = toIsoDate(date);
+  return days.find(
+    (day) =>
+      day.isoDate === isoDate || day.isoDate === parsedIsoDate || day.dayOfMonth.padStart(2, "0") === legacyDayOfMonth,
+  );
+}
+
+function getTimeSortValue(time: string) {
+  const match = time.match(/^([01]?[0-9]|2[0-3]):([0-5][0-9])$/);
+  if (!match) return -1;
+
+  return Number(match[1]) * 60 + Number(match[2]);
+}
+
+class MongoClassRepository implements ClassRepository {
+  async getSchedule(query: ClassQuery = {}): Promise<ClassSchedule> {
+    await connectDB();
+
+    const week = getWeekDates(new Date());
+    const records = await FitnessClassModel.find().sort({ date: 1, time: 1 }).lean<ClassRecord[]>().exec();
+    const classes = records
+      .flatMap((record) => {
+        if (typeof record.time !== "string") return [];
+        const day = matchWeekDate(record.date, week);
+        if (!day || (query.date && query.date !== day.isoDate && query.date !== day.dayOfMonth)) return [];
+        if (query.category && record.category !== query.category) return [];
+        return [toFitnessClass(record, day.isoDate)];
+      })
+      .filter((d) => getTimeSortValue(d.time) != -1)
+      .sort((first, second) => {
+        const dateOrder = first.date.localeCompare(second.date);
+        if (dateOrder) return dateOrder;
+
+        const timeOrder = getTimeSortValue(first.time) - getTimeSortValue(second.time);
+        return timeOrder || first.time.localeCompare(second.time);
+      });
+    const firstDay = week[0].date;
+    const lastDay = week[6].date;
 
     return {
-      label: date.toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" }).toUpperCase(),
-      date: isoDate,
-      ...(isoDate === todayIsoDate ? { isToday: true } : {}),
+      weekLabel: formatWeekLabel(firstDay, lastDay),
+      days: week.map(({ isoDate, label, isToday }) => ({
+        label,
+        date: isoDate,
+        ...(isToday ? { isToday: true } : {}),
+      })),
+      classes,
     };
-  });
-
-  const lastDay = new Date(monday);
-  lastDay.setUTCDate(monday.getUTCDate() + 6);
-
-  return { weekLabel: formatWeekLabel(monday, lastDay), days };
-}
-
-export interface ClassRepository {
-  getSchedule(query?: ClassQuery): Promise<ClassSchedule>;
-  getById(id: number): Promise<FitnessClass | null>;
-}
-
-class JsonClassRepository implements ClassRepository {
-  async getSchedule(query: ClassQuery = {}): Promise<ClassSchedule> {
-    const sourceSchedule = mockSchedule as ClassSchedule;
-    const currentWeek = getCurrentWeek();
-    const currentDatesBySourceDate = new Map(
-      sourceSchedule.days.map((sourceDay, index) => [sourceDay.date, currentWeek.days[index].date]),
-    );
-    const classes = sourceSchedule.classes
-      .map((fitnessClass) => ({
-        ...fitnessClass,
-        date: currentDatesBySourceDate.get(fitnessClass.date) ?? fitnessClass.date,
-      }))
-      .filter(
-        (item) => (!query.date || item.date === query.date) && (!query.category || item.category === query.category),
-      );
-
-    return { ...currentWeek, classes };
   }
 
-  async getById(id: number): Promise<FitnessClass | null> {
-    return (mockSchedule as ClassSchedule).classes.find((item) => item.id === id) ?? null;
+  async getById(id: FitnessClass["id"]): Promise<FitnessClass | null> {
+    if (!isObjectIdOrHexString(id)) return null;
+    await connectDB();
+    const record = await FitnessClassModel.findOne({ _id: id }).lean<ClassRecord>().exec();
+    return record ? toFitnessClass(record) : null;
   }
 }
 
-// UI code depends on this contract, not the JSON source. Replace this instance
-// with a database-backed repository without changing page or component code.
-export const classRepository: ClassRepository = new JsonClassRepository();
+export const classRepository: ClassRepository = new MongoClassRepository();
