@@ -1,10 +1,11 @@
 import mongoose, { Schema } from "mongoose";
+import { isValidClassDate } from "@/lib/classes/class-dates";
 import { classCategories } from "@/types/fitness-class";
 
 //! Example user schema. Not guaranteed to work
 
 const fitnessClassSchema = new Schema({
-  date: { type: String, required: true, match: /^202[0-9]-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/ },
+  date: { type: String, required: true, validate: isValidClassDate },
   title: { type: String, required: true },
   category: { type: String, required: true, enum: classCategories },
   time: { type: String, required: true, match: /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/ },

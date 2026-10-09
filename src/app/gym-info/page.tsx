@@ -4,6 +4,8 @@ import { classRepository } from "@/lib/classes/class-repository";
 import type { ClassCategory } from "@/types/fitness-class";
 import "./info.css";
 
+export const dynamic = "force-dynamic";
+
 type AmenityIconName = "weights" | "cardio" | "group" | "locker" | "shower" | "parking" | "storage" | "wifi";
 
 const amenities: Array<{ name: string; icon: AmenityIconName }> = [

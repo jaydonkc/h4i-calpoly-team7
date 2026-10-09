@@ -4,6 +4,8 @@ import type { ClassSchedule } from "@/types/fitness-class";
 import MembershipPlans from "./MembershipPlans";
 import "./purchase.css";
 
+export const dynamic = "force-dynamic";
+
 function displayDate(date: string, schedule: ClassSchedule) {
   const day = schedule.days.find((item) => item.date === date);
   if (day) return `${day.label}, ${day.date}`;

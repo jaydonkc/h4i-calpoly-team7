@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { getGymCalendarDate, toIsoDate } from "@/lib/classes/class-dates";
 import { Types } from "mongoose";
 import sampleSchedule from "@/data/classes.json";
 import FitnessClassModel from "@/database/userSchema";
@@ -8,11 +9,7 @@ export async function seedClasses(today = new Date()) {
     throw new Error("Seeding is only allowed in development.");
   }
 
-  const date = [
-    today.getFullYear(),
-    String(today.getMonth() + 1).padStart(2, "0"),
-    String(today.getDate()).padStart(2, "0"),
-  ].join("-");
+  const date = toIsoDate(getGymCalendarDate(today));
 
   const records = sampleSchedule.classes.map((sample) => {
     const { id, color, ...fields } = sample;

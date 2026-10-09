@@ -23,9 +23,9 @@ it("reuses seed IDs on reruns and writes valid examples with today's date", asyn
     return Promise.resolve({ acknowledged: true }) as unknown as ReturnType<typeof FitnessClassModel.updateOne>;
   });
 
-  expect(await seedClasses(new Date(2026, 9, 7))).toBe(sampleSchedule.classes.length);
+  expect(await seedClasses(new Date("2026-10-07T12:00:00-07:00"))).toBe(sampleSchedule.classes.length);
   const firstIds = Array.from(stored.keys());
-  await seedClasses(new Date(2026, 9, 8));
+  await seedClasses(new Date("2026-10-09T01:00:00Z"));
 
   expect(stored.size).toBe(sampleSchedule.classes.length);
   expect(Array.from(stored.keys())).toEqual(firstIds);

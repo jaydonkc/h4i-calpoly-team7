@@ -11,7 +11,7 @@ The entry point is `scripts/seed-classes.ts`. Running `npm run dev` in another
 terminal does not set `NODE_ENV` for this command. If `NODE_ENV` != "development", seeding
 cannot occur.
 
-This script copies the examples in `src/data/classes.json` into MongoDB with today's local date. Rerunning updates the same examples, including their dates and available spots, without creating duplicates. The JSON stays unchanged. Page loads never
+This script copies the examples in `src/data/classes.json` into MongoDB with today's date in `America/Los_Angeles`. Rerunning updates the same examples, including their dates and available spots, without creating duplicates. The JSON stays unchanged. Page loads never
 run the seed command.
 
 If any object in classes.json fails validation, the entire seed is rejected.
@@ -41,3 +41,13 @@ To display each test’s name and result.
 ```powershell
 npm test -- --reporter=verbose
 ```
+
+## Shared class data contract
+
+MongoDB generates `_id` as an ObjectId. The repository always exposes its hex
+string as the frontend `id`, even for older records with a numeric `id` field.
+Use that string with `getById`.
+
+Dates use real calendar dates in `YYYY-MM-DD` format. Both start and end times
+use 24-hour `H:mm` or `HH:mm` strings. The schedule and seed command use
+`America/Los_Angeles` for the gym's current day, regardless of server timezone.

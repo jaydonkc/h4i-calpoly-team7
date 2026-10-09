@@ -1,4 +1,5 @@
 import { isObjectIdOrHexString } from "mongoose";
+import { getGymCalendarDate, toIsoDate } from "@/lib/classes/class-dates";
 import connectDB from "@/database/db";
 import FitnessClassModel from "@/database/userSchema";
 import type { ClassQuery, ClassSchedule, FitnessClass } from "@/types/fitness-class";
@@ -16,7 +17,7 @@ type ClassRecord = Omit<FitnessClass, "id" | "date"> & {
 
 function toFitnessClass(record: ClassRecord, date = record.date): FitnessClass {
   return {
-    id: record.id ?? record._id.toString(),
+    id: record._id.toString(),
     date,
     title: record.title,
     category: record.category,
@@ -31,27 +32,37 @@ function toFitnessClass(record: ClassRecord, date = record.date): FitnessClass {
   };
 }
 
-function getWeekDates(today: Date) {
-  const monday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+function getWeekDates(now: Date) {
+  const today = getGymCalendarDate(now);
+  const monday = new Date(today);
+  monday.setUTCDate(monday.getUTCDate() - ((monday.getUTCDay() + 6) % 7));
 
   return Array.from({ length: 7 }, (_, index) => {
     const date = new Date(monday);
-    date.setDate(monday.getDate() + index);
-    const isoDate = [
-      date.getFullYear(),
-      String(date.getMonth() + 1).padStart(2, "0"),
-      String(date.getDate()).padStart(2, "0"),
-    ].join("-");
+    date.setUTCDate(monday.getUTCDate() + index);
+    const isoDate = toIsoDate(date);
 
     return {
       date,
       isoDate,
-      dayOfMonth: String(date.getDate()),
-      label: date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase(),
-      isToday: date.toDateString() === today.toDateString(),
+      dayOfMonth: String(date.getUTCDate()),
+      label: date.toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" }).toUpperCase(),
+      isToday: isoDate === toIsoDate(today),
     };
   });
+}
+
+function formatWeekLabel(firstDay: Date, lastDay: Date) {
+  const firstMonth = firstDay.toLocaleDateString("en-US", { month: "long", timeZone: "UTC" });
+  const lastMonth = lastDay.toLocaleDateString("en-US", { month: "long", timeZone: "UTC" });
+  const firstDate = firstDay.getUTCDate();
+  const lastDate = lastDay.getUTCDate();
+  const firstYear = firstDay.getUTCFullYear();
+  const lastYear = lastDay.getUTCFullYear();
+
+  if (firstYear !== lastYear) return `${firstMonth} ${firstDate}, ${firstYear}—${lastMonth} ${lastDate}, ${lastYear}`;
+  if (firstMonth !== lastMonth) return `${firstMonth} ${firstDate}—${lastMonth} ${lastDate}, ${lastYear}`;
+  return `${firstMonth} ${firstDate}—${lastDate}, ${lastYear}`;
 }
 
 function matchWeekDate(classDate: string, days: ReturnType<typeof getWeekDates>[number][]) {
@@ -59,13 +70,7 @@ function matchWeekDate(classDate: string, days: ReturnType<typeof getWeekDates>[
   const isoDate = /^\d{4}-\d{2}-\d{2}/.test(classDate) ? classDate.slice(0, 10) : null;
   const parsedDate = !legacyDayOfMonth && !isoDate ? new Date(classDate) : null;
   const parsedIsoDate =
-    parsedDate && !Number.isNaN(parsedDate.getTime())
-      ? [
-          parsedDate.getFullYear(),
-          String(parsedDate.getMonth() + 1).padStart(2, "0"),
-          String(parsedDate.getDate()).padStart(2, "0"),
-        ].join("-")
-      : null;
+    parsedDate && !Number.isNaN(parsedDate.getTime()) ? toIsoDate(getGymCalendarDate(parsedDate)) : null;
 
   return days.find(
     (day) =>
@@ -106,8 +111,8 @@ class MongoClassRepository implements ClassRepository {
     const lastDay = week[6].date;
 
     return {
-      weekLabel: `${firstDay.toLocaleDateString("en-US", { month: "long", day: "numeric" })}—${lastDay.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`,
-      days: week.map(({ date, isoDate, label, isToday }) => ({
+      weekLabel: formatWeekLabel(firstDay, lastDay),
+      days: week.map(({ isoDate, label, isToday }) => ({
         label,
         date: isoDate,
         ...(isToday ? { isToday: true } : {}),
