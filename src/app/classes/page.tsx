@@ -20,8 +20,12 @@ export default function ClassesRoute() {
 
 async function ClassesContent() {
   try {
-    const response = await fetch(`{URL}/api/classes`, { cache: "no-store" });
-    const schedule: ClassSchedule = await response.json(); // Assuming that the data is fetched as ClassSchedule and not the classes prop
+    const requestHeaders = headers();
+    const host = requestHeaders.get("host");
+    const protocol = requestHeaders.get("x-forwarded-proto") ?? "http";
+    const baseUrl = `${protocol}://${host}`;
+    const response = await fetch(`${baseUrl}/api/classes`);
+    const schedule: ClassSchedule = await response.json();
     return <ClassesPage initialSchedule={schedule} errorMessage={null} />;
   } catch {
     return (
