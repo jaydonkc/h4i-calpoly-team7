@@ -1,6 +1,4 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
-import { classRepository } from "@/lib/classes/class-repository";
 import ClassesPage from "./classes";
 import type { ClassQuery, ClassSchedule, FitnessClass } from "@/types/fitness-class";
 export const metadata: Metadata = { title: "Class Schedule | Fitness Maxxing" };
@@ -23,8 +21,7 @@ export default function ClassesRoute() {
 async function ClassesContent() {
   try {
     const response = await fetch(`{URL}/api/classes`, { cache: "no-store" });
-    const responseJson = await response.json();
-    const schedule = responseJson.data;
+    const schedule: ClassSchedule = await response.json(); // Assuming that the data is fetched as ClassSchedule and not the classes prop
     return <ClassesPage initialSchedule={schedule} errorMessage={null} />;
   } catch {
     return (
