@@ -197,6 +197,10 @@
 }
 
 @media (max-width: 480px) {
+  .hero h1 {
+    font-size: clamp(1.75rem, 8vw, 2.4rem);
+  }
+
   .hero {
     padding: 3rem 1.25rem;
   }
