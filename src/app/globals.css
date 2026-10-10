@@ -10,20 +10,16 @@ body > main {
   flex: 1;
 }
 
-header,
 main {
   padding: 1rem;
 }
 
-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-nav a[aria-current="page"] {
-  font-weight: bold;
-  text-decoration: underline;
+.site-header {
+  position: sticky;
+  z-index: 30;
+  top: 0;
+  border-bottom: 1px solid #e7ebe8;
+  background: #fff;
 }
 
 a:focus-visible {

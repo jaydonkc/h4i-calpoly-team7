@@ -14,7 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <DemoAuthProvider>
-          <header>
+          <header className="site-header">
             <Navbar />
           </header>
           <main>{children}</main>
