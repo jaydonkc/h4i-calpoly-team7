@@ -9,6 +9,14 @@ type ClassCardProps = {
   fitnessClass: FitnessClass;
 };
 
+function formatTime(time: string) {
+  const [hourString, minute] = time.split(":");
+  const hour = Number(hourString);
+  const period = hour >= 12 ? "pm" : "am";
+  const formattedHour = hour % 12 || 12;
+  return `${formattedHour}:${minute}${period}`;
+}
+
 export default function ClassCard({ fitnessClass }: ClassCardProps) {
   const { isUserSignedIn, reservedClasses, reserveClass, cancelReservation } = useDemoAuth();
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -35,8 +43,8 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
   return (
     <article className="classcard">
       <div className="table-cell class-time" data-label="Time">
-        <strong>{fitnessClass.time}</strong>
-        <span>to {fitnessClass.end}</span>
+        <strong>{formatTime(fitnessClass.time)}</strong>
+        <span>to {formatTime(fitnessClass.end)}</span>
       </div>
       <div className="table-cell classmain" data-label="Class">
         <div>
