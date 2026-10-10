@@ -39,15 +39,18 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
   }, [day, appliedCategories, appliedDurations, appliedLevels, appliedInstructors, initialSchedule.classes]);
 
   const durations = useMemo(
-    () => Array.from(new Set(initialSchedule.classes.map((item) => item.duration))),
+    () =>
+      Array.from(new Set(initialSchedule.classes.map((item) => item.duration))).sort(
+        (a, b) => parseInt(a) - parseInt(b),
+      ),
     [initialSchedule.classes],
   );
   const levels = useMemo(
-    () => Array.from(new Set(initialSchedule.classes.map((item) => item.level))),
+    () => Array.from(new Set(initialSchedule.classes.map((item) => item.level))).sort(),
     [initialSchedule.classes],
   );
   const instructors = useMemo(
-    () => Array.from(new Set(initialSchedule.classes.map((item) => item.coach))),
+    () => Array.from(new Set(initialSchedule.classes.map((item) => item.coach))).sort(),
     [initialSchedule.classes],
   );
 
