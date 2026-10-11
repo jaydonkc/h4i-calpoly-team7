@@ -11,6 +11,7 @@ const connectDB = async () => {
   if (connection.readyState === 1) return mongoose;
   connection.pendingConnect ??= mongoose
     .connect(uri, {
+      bufferCommands: false,
       maxPoolSize: 10,
       maxIdleTimeMS: 60000,
       serverSelectionTimeoutMS: 10000,

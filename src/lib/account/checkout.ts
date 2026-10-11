@@ -1,3 +1,4 @@
+import { ensureIndexes } from "@/database/indexes";
 import mongoose from "mongoose";
 import { randomUUID } from "node:crypto";
 import connectDB from "@/database/db";
@@ -26,7 +27,7 @@ export async function listOrders(userId: string): Promise<DemoOrder[]> {
 }
 export async function demoCheckout(userId: string, email: string, plan: MembershipPlan, idempotencyKey: string) {
   await connectDB();
-  await Promise.all([OrderModel.init(), MembershipModel.init()]);
+  await Promise.all([ensureIndexes(OrderModel), ensureIndexes(MembershipModel)]);
   const session = await mongoose.startSession();
   try {
     await session.withTransaction(async () => {

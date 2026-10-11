@@ -11,7 +11,7 @@ const membershipSchema = new Schema(
     startsAt: { type: Date, required: true },
     expiresAt: { type: Date, required: true },
   },
-  { timestamps: true },
+  { timestamps: true, bufferCommands: false, autoCreate: false, autoIndex: false },
 );
 
 export default mongoose.models.Membership || mongoose.model("Membership", membershipSchema);

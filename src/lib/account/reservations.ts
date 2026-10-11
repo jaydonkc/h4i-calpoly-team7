@@ -1,3 +1,4 @@
+import { ensureIndexes } from "@/database/indexes";
 import mongoose from "mongoose";
 import connectDB from "@/database/db";
 import ReservationModel from "@/database/reservationSchema";
@@ -35,7 +36,7 @@ export async function reserve(userId: string, classId: string, date: string) {
   const fitnessClass = schedule.classes.find((item) => String(item.id) === classId && item.date === date);
   if (!fitnessClass) throw new AccountError("This class is no longer on the schedule.", 404);
   if (hasClassStarted(date, fitnessClass.time)) throw new AccountError("This class has already started.", 409);
-  await Promise.all([ReservationModel.init(), OccurrenceModel.init()]);
+  await Promise.all([ensureIndexes(ReservationModel), ensureIndexes(OccurrenceModel)]);
   // Each dated occurrence has its own capacity, including legacy recurring classes.
   try {
     await OccurrenceModel.updateOne(

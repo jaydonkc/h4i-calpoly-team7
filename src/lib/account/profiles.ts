@@ -1,3 +1,4 @@
+import { ensureIndexes } from "@/database/indexes";
 import type { User } from "@supabase/supabase-js";
 import connectDB from "@/database/db";
 import ProfileModel from "@/database/accountSchema";
@@ -5,7 +6,7 @@ import { defaultPreferences, type Profile, type Preferences } from "@/types/acco
 
 export async function loadProfile(user: User): Promise<Profile> {
   await connectDB();
-  await ProfileModel.init();
+  await ensureIndexes(ProfileModel);
   const metadata = user.user_metadata;
   const text = (key: string, fallback: string, max: number) =>
     typeof metadata?.[key] === "string" ? metadata[key].trim().slice(0, max) || fallback : fallback;

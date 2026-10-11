@@ -6,7 +6,7 @@ const schema = new Schema(
     capacity: { type: Number, required: true, min: 0 },
     reservedCount: { type: Number, required: true, default: 0, min: 0 },
   },
-  { timestamps: true },
+  { timestamps: true, bufferCommands: false, autoCreate: false, autoIndex: false },
 );
 schema.index({ classId: 1, date: 1 }, { unique: true });
 export default mongoose.models.ClassOccurrence || mongoose.model("ClassOccurrence", schema);

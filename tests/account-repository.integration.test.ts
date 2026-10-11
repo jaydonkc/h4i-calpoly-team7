@@ -62,7 +62,14 @@ integration("MongoDB account persistence and transactions in isolated test colle
     // The Atlas credential is scoped to the app database. All models above use
     // unique disposable collections; normal app records are never queried.
     await mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 10000 });
-    await Promise.all(Object.values(mongoose.models).map((model) => model.init()));
+    await Promise.all(
+      Object.values(mongoose.models)
+        .filter((model) => model.modelName.startsWith(scope.prefix))
+        .map(async (model) => {
+          await model.createCollection();
+          await model.createIndexes();
+        }),
+    );
     classId = String(
       (
         await ClassModel.create({
@@ -108,6 +115,21 @@ integration("MongoDB account persistence and transactions in isolated test colle
     expect(profile.firstName).toBe("Updated");
     expect(profile.preferences.timeFormat).toBe("24h");
   }, 30000);
+  it("reads a model first loaded during a stale serverless heartbeat without buffering", async () => {
+    const state = vi.spyOn(mongoose.connection, "readyState", "get").mockReturnValue(0);
+    let lateModel;
+    try {
+      lateModel = mongoose.model(
+        `${scope.prefix}_late_profiles`,
+        mongoose.models[`${scope.prefix}_profiles`].schema,
+        `${scope.prefix}_profiles`,
+      );
+    } finally {
+      state.mockRestore();
+    }
+    const profile = await lateModel.findOne({ userId: user.id }).lean();
+    expect(profile?.firstName).toBe("Updated");
+  });
   it("reserves the last seat once under concurrency, prevents duplicates and isolates cancellations", async () => {
     const results = await Promise.allSettled([reserve(user.id, classId, date), reserve("other-owner", classId, date)]);
     expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1);

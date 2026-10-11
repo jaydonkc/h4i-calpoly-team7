@@ -7,7 +7,7 @@ const schema = new Schema(
     amountCents: { type: Number, required: true },
     status: { type: String, enum: ["simulated"], default: "simulated", required: true },
   },
-  { timestamps: true },
+  { timestamps: true, bufferCommands: false, autoCreate: false, autoIndex: false },
 );
 schema.index({ userId: 1, idempotencyKey: 1 }, { unique: true });
 export default mongoose.models.DemoOrder || mongoose.model("DemoOrder", schema);

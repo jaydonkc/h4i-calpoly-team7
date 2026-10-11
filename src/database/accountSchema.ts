@@ -12,6 +12,6 @@ const schema = new Schema(
       defaultClassCategory: { type: String, enum: ["All", ...classCategories], default: "All" },
     },
   },
-  { timestamps: true },
+  { timestamps: true, bufferCommands: false, autoCreate: false, autoIndex: false },
 );
 export default mongoose.models.AccountProfile || mongoose.model("AccountProfile", schema, "profiles");
