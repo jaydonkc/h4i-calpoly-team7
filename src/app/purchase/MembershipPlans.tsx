@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 
-const tiers = [
+import type { MembershipPlan } from "@/types/account";
+
+const tiers: Array<{ name: MembershipPlan; price: string; description: string; perks: string[] }> = [
   {
     name: "Student",
     price: "$10/mo",
@@ -37,6 +39,9 @@ export default function MembershipPlans() {
   const [paymentError, setPaymentError] = useState("");
   const [purchaseSuccess, setPurchaseSuccess] = useState("");
   const [confirmedPlan, setConfirmedPlan] = useState("");
+  const [pending, setPending] = useState(false);
+  const busy = useRef(false);
+  const checkoutKey = useRef("");
 
   useEffect(() => {
     if (selectedTier) dialogRef.current?.showModal();
@@ -61,7 +66,7 @@ export default function MembershipPlans() {
         <div className="planChoice">
           <h2>Choose your plan</h2>
           <p>Flexible options for all.</p>
-          <p>Demo checkout: use sample details. No payment will be processed.</p>
+          <p>Demo checkout saves your selection. No payment or automatic renewal will be processed.</p>
           <p role="status">{purchaseSuccess}</p>
         </div>
 
@@ -88,6 +93,7 @@ export default function MembershipPlans() {
 
                   setPaymentError("");
                   setPurchaseSuccess("");
+                  checkoutKey.current = crypto.randomUUID();
                   setSelectedTier(tier);
                 }}
               >
@@ -116,7 +122,7 @@ export default function MembershipPlans() {
           aria-labelledby="purchase-dialog-title"
           onClose={() => setSelectedTier(null)}
         >
-          <h2 id="purchase-dialog-title">Purchase {selectedTier.name}</h2>
+          <h2 id="purchase-dialog-title">Demo checkout: {selectedTier.name}</h2>
 
           <div>
             <h3>Billing summary</h3>
@@ -127,80 +133,33 @@ export default function MembershipPlans() {
 
           <form
             onChange={() => setPaymentError("")}
-            onSubmit={(event) => {
+            onSubmit={async (event) => {
               event.preventDefault();
-              const values = new FormData(event.currentTarget);
-              const cardNumber = String(values.get("cardNumber"));
-              const expiry = String(values.get("expiry"));
-              const [month, year] = expiry.split("/").map(Number);
-              const now = new Date();
-              if (
-                !/^(0[1-9]|1[0-2])\/[0-9]{2}$/.test(expiry) ||
-                2000 + year < now.getFullYear() ||
-                (2000 + year === now.getFullYear() && month < now.getMonth() + 1)
-              ) {
-                setPaymentError("Enter a valid expiry date that has not passed.");
-                return;
-              }
-              if (cardNumber.endsWith("67")) {
-                setPaymentError("Your card was declined.");
-                return;
-              }
+              if (busy.current) return;
+              busy.current = true;
+              setPending(true);
               setPaymentError("");
-              purchaseMembership(selectedTier.name, selectedTier.price);
-              setPurchaseSuccess(`Mock ${selectedTier.name} purchase successful. No payment was processed.`);
-              setConfirmedPlan(selectedTier.name);
-              setSelectedTier(null);
+              try {
+                await purchaseMembership(selectedTier.name, checkoutKey.current);
+                setPurchaseSuccess(`Demo ${selectedTier.name} checkout saved. No payment was processed.`);
+                setConfirmedPlan(selectedTier.name);
+                setSelectedTier(null);
+              } catch (error) {
+                setPaymentError(error instanceof Error ? error.message : "Unable to save checkout. Please try again.");
+              } finally {
+                busy.current = false;
+                setPending(false);
+              }
             }}
           >
-            <h3>Card details</h3>
-            <label>
-              Card number
-              <input
-                name="cardNumber"
-                type="password"
-                inputMode="numeric"
-                maxLength={16}
-                pattern="[0-9]{16}"
-                title="Enter 16 digits"
-                required
-              />
-            </label>
-
-            <label>
-              Expiry
-              <input
-                name="expiry"
-                placeholder="MM/YY"
-                pattern="(0[1-9]|1[0-2])/[0-9]{2}"
-                title="Enter in MM/YY format"
-                maxLength={5}
-                required
-              />
-            </label>
-
-            <label>
-              CVC <input pattern="[0-9]{3}|[0-9]{4}" maxLength={4} required />
-            </label>
-
-            <h3>Billing address</h3>
-            <label>
-              Street <input required />
-            </label>
-            <label>
-              City <input pattern="[^0-9]+" title="No numbers permitted" required />
-            </label>
-            <label>
-              State <input pattern="[^0-9]+" title="No numbers permitted" required />
-            </label>
-            <label>
-              ZIP <input pattern="[0-9]{5}" maxLength={5} required />
-            </label>
+            <p>This is a simulated checkout. No card or billing details are needed.</p>
 
             {paymentError && <p role="alert">{paymentError}</p>}
 
-            <button type="submit">Pay {selectedTier.price}</button>
-            <button type="button" onClick={() => setSelectedTier(null)}>
+            <button type="submit" disabled={pending}>
+              {pending ? "Saving…" : "Confirm Demo Checkout"}
+            </button>
+            <button type="button" disabled={pending} onClick={() => setSelectedTier(null)}>
               Cancel
             </button>
           </form>
@@ -213,8 +172,11 @@ export default function MembershipPlans() {
         aria-labelledby="purchase-confirmation-title"
         onClose={() => setConfirmedPlan("")}
       >
-        <h2 id="purchase-confirmation-title">Membership confirmed</h2>
-        <p>Your {confirmedPlan} membership is now active. You can view your membership details from your account.</p>
+        <h2 id="purchase-confirmation-title">Demo checkout saved</h2>
+        <p>
+          Your {confirmedPlan} demo selection is saved in your checkout history. View your account for your current
+          membership status. No payment was processed.
+        </p>
         <div>
           <button type="button" onClick={() => confirmationRef.current?.close()}>
             Close

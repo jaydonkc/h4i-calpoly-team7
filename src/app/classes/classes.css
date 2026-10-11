@@ -1,4 +1,5 @@
-#top {
+#top,
+.booking-popup {
   --classes-ink: #111914;
   --classes-green: #153b2a;
   --classes-green-dark: #0c291c;
@@ -551,9 +552,10 @@
 
 .booking-popup {
   position: fixed;
-  z-index: 20;
-  top: 1.5rem;
+  z-index: 1000;
+  top: 6.5rem;
   right: 1.5rem;
+  box-sizing: border-box;
   display: grid;
   width: min(330px, calc(100% - 32px));
   grid-template-columns: 40px 1fr 24px;
@@ -815,4 +817,9 @@
   #top .reserve {
     transition: none;
   }
+}
+.reservation-error {
+  grid-column: 1 / -1;
+  color: #9b2828;
+  padding: 0.5rem;
 }

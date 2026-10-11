@@ -4,6 +4,13 @@ import { renderToStaticMarkup } from "react-dom/server";
 import ClassesPage from "@/app/classes/classes";
 import type { ClassSchedule, FitnessClass } from "@/types/fitness-class";
 
+vi.mock("@/components/AuthProvider", () => ({
+  useAuth: () => ({
+    preferences: { timeFormat: "12h", defaultClassCategory: "All" },
+    profileLoading: false,
+    isLoading: false,
+  }),
+}));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ back: vi.fn() }) }));
 vi.mock("@/components/classes/ClassCard", () => ({
   default: ({ fitnessClass }: { fitnessClass: FitnessClass }) => createElement("div", null, fitnessClass.title),

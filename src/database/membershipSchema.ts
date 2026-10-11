@@ -7,7 +7,7 @@ const membershipSchema = new Schema(
     plan: { type: String, required: true, enum: ["Student", "Standard", "Premium"] },
     memberId: { type: String, required: true, unique: true },
     status: { type: String, required: true, enum: ["active", "expired"], default: "active" },
-    source: { type: String, required: true, enum: ["manual_demo"] },
+    source: { type: String, required: true, enum: ["manual_demo", "demo_checkout"] },
     startsAt: { type: Date, required: true },
     expiresAt: { type: Date, required: true },
   },

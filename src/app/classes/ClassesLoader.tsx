@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { ClassSchedule } from "@/types/fitness-class";
+import { useAuth } from "@/components/AuthProvider";
 import ClassesPage from "./classes";
 
 const emptySchedule: ClassSchedule = { weekLabel: "", days: [], classes: [] };
@@ -9,11 +10,12 @@ const emptySchedule: ClassSchedule = { weekLabel: "", days: [], classes: [] };
 export default function ClassesLoader() {
   const [schedule, setSchedule] = useState<ClassSchedule>(emptySchedule);
   const [errorMessage, setErrorMessage] = useState<string | null>("loading");
+  const { reservationsRevision } = useAuth();
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
-    setErrorMessage("loading");
+    // Keep the current schedule and booking confirmation visible during refresh.
 
     async function loadSchedule() {
       try {
@@ -40,7 +42,7 @@ export default function ClassesLoader() {
 
     void loadSchedule();
     return () => controller.abort();
-  }, [attempt]);
+  }, [attempt, reservationsRevision]);
 
   return (
     <ClassesPage
