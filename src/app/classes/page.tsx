@@ -32,8 +32,8 @@ async function ClassesContent() {
       throw new Error("An error has occurred");
     }
 
-    const schedule: ClassSchedule = await response.json();
-    return <ClassesPage initialSchedule={schedule} errorMessage={null} />;
+    const schedule = await response.json();
+    return <ClassesPage initialSchedule={schedule.data} errorMessage={null} />;
   } catch {
     return (
       <ClassesPage
