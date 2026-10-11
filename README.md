@@ -99,4 +99,4 @@ Follow [getting-started.md](docs/getting-started.md) for setup details and [cont
 
 Account profiles, preferences, reservations, and demo checkout history persist in MongoDB and are linked to verified Supabase identities. See [Account data](docs/account-data.md) for API contracts and persistence checks. Demo checkout does not process payments.
 
-See [Classes API](docs/classes-api.md) for writable class fields, creation responses, form error handling, and the pending development Atlas persistence check.
+See [Classes API](docs/classes-api.md) for writable class fields, creation responses, form error handling, and verified development Atlas persistence checks.

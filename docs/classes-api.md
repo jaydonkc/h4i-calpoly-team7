@@ -43,9 +43,22 @@ Reuse the existing Atlas connection, Mongoose model, repository, and public seri
 
 Run `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build`. `tests/api-create-class.test.ts` covers trimmed input, awaiting save confirmation, string IDs, create/read conversion, malformed JSON, missing/invalid/unknown fields without a database call, connection/write failures, and schema guards. Database operations in these tests are mocked; they do not prove Atlas persistence.
 
-## Development Atlas check — pending
+## Development Atlas verification
 
-No development Atlas credentials were provided for this change. Do not close #27 until real create/read and persistence evidence is added to its PR.
+Verified on October 11, 2026, at approximately 3:16 p.m. America/Los_Angeles using the local production build of commit `909c4ec`, configured from the developer's existing `.env.local`. The URI was confirmed to point to MongoDB Atlas; credentials were not printed or copied into Git.
+
+| Real check                              | Result                                                                                  |
+| --------------------------------------- | --------------------------------------------------------------------------------------- |
+| POST with padded title and zero spots   | 201; trimmed saved record, string ID `6acc0aa0ad4224a5700b05fa`; collection count 8 → 9 |
+| GET after creation                      | 200; exact saved fields and ID found in current-week schedule                           |
+| App stopped and started again           | GET 200; same saved record and ID                                                       |
+| Browser `/classes` reload after restart | Demo class remained visible on October 11                                               |
+| Nine invalid requests                   | Each returned 400 with the expected field error; count remained 9 after each            |
+| Separate app with unreachable database  | Valid POST returned the documented safe 503; Atlas count remained 9                     |
+
+Invalid cases: malformed JSON, blank title, impossible date, unknown category, invalid time, end before start, negative spots, fractional spots, and injected `id`. The saved title is `Atlas verification #27 2026-10-11T22:15:59.668Z`; its description identifies it as a development check, and zero spots prevent reservations. It remains in Atlas as persistence evidence.
+
+### Repeat the check
 
 1. Configure the development `MONGO_URI` securely in `.env.local`, then run `npm run dev`.
 2. Submit the example JSON with a current-week date and a unique title to `POST /api/classes` using an HTTP client. Record status 201 and the returned string ID.
