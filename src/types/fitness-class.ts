@@ -17,8 +17,6 @@ export type FitnessClass = {
 };
 
 export type ClassSchedule = {
-  weekLabel: string;
-  days: Array<{ label: string; date: string; isToday?: boolean }>;
   classes: FitnessClass[];
 };
 
