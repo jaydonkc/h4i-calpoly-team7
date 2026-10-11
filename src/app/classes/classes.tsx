@@ -8,15 +8,17 @@ import { classCategories, type ClassCategory, type ClassSchedule } from "@/types
 type FilterMenu = "categories" | "durations" | "levels" | "instructors";
 type FilterDimension = "category" | "duration" | "level" | "instructor";
 
-function formatDay(date: string) {
-  const match = date.match(/^\d{4}-(\d{2})-(\d{2})$/);
-  if (!match) return date;
-  return `${Number(match[1])}/${Number(match[2])}`;
-}
+type ClassesPageProps = {
+  initialSchedule: ClassSchedule;
+  errorMessage?: string | null;
+  onRetry?: () => void;
+};
 
-export default function ClassesPage({ initialSchedule }: { initialSchedule: ClassSchedule }) {
+export default function ClassesPage({ initialSchedule, errorMessage = null, onRetry }: ClassesPageProps) {
   const router = useRouter();
   const today = initialSchedule.days.find((item) => item.isToday)?.date ?? initialSchedule.days[0]?.date ?? "";
+  const classList = initialSchedule.classes;
+
   const [day, setDay] = useState(today),
     [draftCategories, setDraftCategories] = useState<ClassCategory[]>([]),
     [draftDurations, setDraftDurations] = useState<string[]>([]),
@@ -38,9 +40,21 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
     );
   }, [day, appliedCategories, appliedDurations, appliedLevels, appliedInstructors, classList]);
 
-  const durations = useMemo(() => Array.from(new Set(classList.map((item) => item.duration))), [classList]);
-  const levels = useMemo(() => Array.from(new Set(classList.map((item) => item.level))), [classList]);
-  const instructors = useMemo(() => Array.from(new Set(classList.map((item) => item.coach))), [classList]);
+  const durations = useMemo(
+    () =>
+      Array.from(new Set(initialSchedule.classes.map((item) => item.duration))).sort(
+        (a, b) => parseInt(a) - parseInt(b),
+      ),
+    [initialSchedule.classes],
+  );
+  const levels = useMemo(
+    () => Array.from(new Set(initialSchedule.classes.map((item) => item.level))).sort(),
+    [initialSchedule.classes],
+  );
+  const instructors = useMemo(
+    () => Array.from(new Set(initialSchedule.classes.map((item) => item.coach))).sort(),
+    [initialSchedule.classes],
+  );
 
   function toggleCategory(category: ClassCategory) {
     setDraftCategories((current) =>
@@ -108,18 +122,18 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
             <Icon name="calendar" /> Jump to today
           </button>
         </div>
-        <div className="days" role="tablist">
-          {initialSchedule.days.map((x) => (
+        <div className="days" role="tablist" aria-label="Schedule dates">
+          {initialSchedule.days.map((item) => (
             <button
               role="tab"
-              aria-selected={day === x.date}
-              className={day === x.date ? "selected" : ""}
-              key={x.date}
-              onClick={() => setDay(x.date)}
+              aria-selected={day === item.date}
+              className={day === item.date ? "selected" : ""}
+              key={item.date}
+              onClick={() => setDay(item.date)}
             >
-              <small>{x.label}</small>
-              <strong>{formatDay(x.date)}</strong>
-              {x.isToday && <i>Today</i>}
+              <small>{item.label}</small>
+              <strong>{Number(item.date.slice(-2))}</strong>
+              {item.isToday && <i>Today</i>}
             </button>
           ))}
         </div>
