@@ -4,7 +4,7 @@ import { ClassSchedule } from "@/types/fitness-class";
 
 export const dynamic = "force-dynamic";
 
-export default async function GET(request: Request) {
+export default async function getSchedule(): Promise<ClassSchedule> {
   await connectDB();
   try {
     const fitnessclasses = await FitnessClasses.find().sort({ time: 1 }).orFail();
