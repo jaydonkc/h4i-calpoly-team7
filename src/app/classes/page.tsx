@@ -13,33 +13,5 @@ const emptySchedule: ClassSchedule = {
 };
 
 export default function ClassesRoute() {
-  return (
-    <Suspense fallback={<ClassesPage initialSchedule={emptySchedule} errorMessage={"loading"} />}>
-      <ClassesContent />
-    </Suspense>
-  );
-}
-
-async function ClassesContent() {
-  try {
-    const requestHeaders = headers();
-    const host = requestHeaders.get("host");
-    const protocol = requestHeaders.get("x-forwarded-proto") ?? "http";
-    const baseUrl = `${protocol}://${host}`;
-    const response = await fetch(`${baseUrl}/api/classes`);
-
-    if (!response.ok) {
-      throw new Error("An error has occurred");
-    }
-
-    const schedule = await response.json();
-    return <ClassesPage initialSchedule={schedule.data} errorMessage={null} />;
-  } catch {
-    return (
-      <ClassesPage
-        initialSchedule={emptySchedule}
-        errorMessage={"An issue has occurred. Please reload the page, or try again at a later time."}
-      />
-    );
-  }
+  return <ClassesLoader />;
 }

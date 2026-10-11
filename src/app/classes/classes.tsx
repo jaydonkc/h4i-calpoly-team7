@@ -3,10 +3,8 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import ClassCard from "@/components/classes/ClassCard";
 import Icon from "@/components/classes/Icon";
-import WeekDays from "@/components/classes/WeekDays";
 import MultiSelectFilter from "@/components/classes/MultiSelectFilter";
 import { classCategories, type ClassCategory, type ClassSchedule } from "@/types/fitness-class";
-import { FitnessClass } from "@/types/fitness-class";
 type FilterMenu = "categories" | "durations" | "levels" | "instructors";
 type FilterDimension = "category" | "duration" | "level" | "instructor";
 
@@ -30,7 +28,7 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
     [appliedInstructors, setAppliedInstructors] = useState<string[]>([]),
     [openFilter, setOpenFilter] = useState<FilterMenu | null>(null);
   const classes = useMemo(() => {
-    const list = classList.filter((item) => Number(item.date.split("-")[2]) === day);
+    const list = classList.filter((item) => item.date === day);
     return list.filter(
       (item) =>
         (appliedCategories.length === 0 || appliedCategories.includes(item.category)) &&
@@ -68,7 +66,7 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
 
   function getFacetCount(dimension: FilterDimension, value: string) {
     return classList.filter((item) => {
-      if (Number(item.date.split("-")[2]) !== day) return false;
+      if (item.date !== day) return false;
 
       const matchesCategory =
         dimension === "category"
@@ -103,11 +101,10 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
       <section className="schedule shell" id="schedule">
         <div className="heading">
           <div>
-            <h2>
-              {formattedDate} - {today.getDate() + 6}
-            </h2>
+            <small>THIS WEEK</small>
+            <h2>{initialSchedule.weekLabel}</h2>
           </div>
-          <button className="today" onClick={() => setDay(today.getDate())}>
+          <button className="today" disabled={!today} onClick={() => setDay(today)}>
             <Icon name="calendar" /> Jump to today
           </button>
         </div>
@@ -221,11 +218,11 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
             </div>
           )
         ) : errorMessage === "loading" ? (
-          <p>Loading Classes...</p>
+          <p role="status">Loading Classes...</p>
         ) : (
           <div>
-            <p>{errorMessage}</p>
-            <button type="button" className="reload" onClick={() => window.location.reload()}>
+            <p role="alert">{errorMessage}</p>
+            <button type="button" className="reload" onClick={onRetry ?? (() => window.location.reload())}>
               Reload
             </button>
           </div>

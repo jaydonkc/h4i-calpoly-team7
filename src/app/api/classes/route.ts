@@ -1,17 +1,16 @@
-import connectDB from "@/database/db";
-import FitnessClasses from "@/database/userSchema";
 import { classRepository } from "@/lib/classes/class-repository";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  await connectDB();
   try {
-    const fitnessclasses = await FitnessClasses.find().sort({ time: 1 }).orFail();
-    const classschedule = await classRepository.getSchedule();
-    return NextResponse.json({ success: true, data: classschedule }, { status: 200 });
-  } catch (err) {
-    return NextResponse.json({ success: false, message: "404 not found" }, { status: 503 });
+    const schedule = await classRepository.getSchedule();
+    return NextResponse.json({ success: true, data: schedule }, { status: 200 });
+  } catch {
+    return NextResponse.json(
+      { success: false, message: "The class schedule is temporarily unavailable. Please try again." },
+      { status: 503 },
+    );
   }
 }
