@@ -1,3 +1,4 @@
+import { AuthRetryableFetchError } from "@supabase/supabase-js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GET } from "@/app/api/membership/route";
 
@@ -31,5 +32,15 @@ describe("membership privacy", () => {
     const response = await GET();
     expect(response.status).toBe(503);
     expect(await response.text()).not.toContain("secret internal error");
+  });
+  it("reports resolved authentication outages as unavailable", async () => {
+    mocks.getUser.mockResolvedValue({
+      data: { user: null },
+      error: new AuthRetryableFetchError("private detail", 503),
+    });
+    const response = await GET();
+    expect(response.status).toBe(503);
+    expect(await response.text()).not.toContain("private detail");
+    expect(mocks.getMembership).not.toHaveBeenCalled();
   });
 });

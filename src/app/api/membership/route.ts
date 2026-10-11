@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isAuthProviderUnavailable } from "@/lib/auth/errors";
 import { createClient } from "@/lib/supabase/server";
 import { getMembership } from "@/lib/memberships/repository";
 
@@ -10,6 +11,11 @@ export async function GET() {
       data: { user },
       error,
     } = await createClient().auth.getUser();
+    if (isAuthProviderUnavailable(error))
+      return NextResponse.json(
+        { error: "Unable to load your membership. Please try again." },
+        { status: 503, headers: { "Cache-Control": "no-store" } },
+      );
     if (error || !user)
       return NextResponse.json({ error: "Please log in." }, { status: 401, headers: { "Cache-Control": "no-store" } });
     const membership = await getMembership(user.id);

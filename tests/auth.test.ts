@@ -1,3 +1,4 @@
+import { AuthRetryableFetchError } from "@supabase/supabase-js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { safeNextPath } from "@/lib/auth/redirect";
@@ -90,5 +91,11 @@ describe("protected user API", () => {
     const response = await currentUser();
     expect(response.status).toBe(503);
     expect(await response.text()).not.toContain("internal detail");
+  });
+  it("reports resolved authentication outages as unavailable", async () => {
+    auth.getUser.mockResolvedValue({ data: { user: null }, error: new AuthRetryableFetchError("private detail", 503) });
+    const response = await currentUser();
+    expect(response.status).toBe(503);
+    expect(await response.text()).not.toContain("private detail");
   });
 });

@@ -78,8 +78,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const client = createClient();
       const {
         data: { subscription },
-      } = client.auth.onAuthStateChange((_event, session) => {
-        if (!active) return;
+      } = client.auth.onAuthStateChange((event, session) => {
+        // INITIAL_SESSION comes from storage; getUser must verify it first.
+        if (!active || event === "INITIAL_SESSION") return;
         authRevision.current += 1;
         applyUser(session?.user ?? null);
         setIsLoading(false);
