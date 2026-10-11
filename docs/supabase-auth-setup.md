@@ -27,16 +27,27 @@ The publishable key is intended for application clients and is safe to include i
 
 Restart `npm run dev` after changing environment variables. Teammates can use the application configuration without sharing the owner's Supabase account. Dashboard access is a separate invitation/permission decision.
 
-## Implementation handoff
+## Implemented flows
+
+The application uses `@supabase/ssr` and `@supabase/supabase-js` for cookie-based authentication in Next.js 14. `src/middleware.ts` verifies and refreshes sessions; server handlers independently use `getUser()` before returning protected identity data.
+
+- `/profile`: email/password login, registration, confirmation resend, password recovery, logout, and editing basic account metadata.
+- `/auth/callback`: exchanges the PKCE code, applies a validated local return destination, and shows a recoverable error for invalid/expired links.
+- `/auth/reset-password`: requires a verified authenticated session before rendering the new-password form.
+- `/api/auth/user`: returns the verified user's ID/email or 401; provider unavailability returns 503. Responses are not cached.
+
+Email links must be opened in the same browser where the request started, because PKCE uses a browser-specific verifier. A short-lived navigation cookie remembers the destination so email requests use the exact configured callback URL. Registration requires email confirmation unless the provider is configured otherwise. Email address changes use Supabase's confirmation flow.
+
+Account names and contact phone numbers currently persist in Supabase user metadata. These fields are user editable and must never determine staff privileges. MongoDB profile synchronization is a separate task. Complimentary memberships persist in MongoDB, keyed by the Supabase user ID, and load through the authenticated `/api/membership` endpoint. Checkout and reservations remain temporary demos. All local membership/reservation state resets when identity changes or the user signs out.
+
+No service-role key is needed. Keep email confirmation enabled. If the built-in email sender rejects a recipient or is rate limited, configure a suitable SMTP provider through a separate provider setup; do not bypass confirmation to make a test pass.
+
+## Verification
+
+Run `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build`. Tests cover callback failure, redirect sanitization, and signed-out/invalid-token rejection at the protected identity endpoint.
+
+For the live test, run on `http://localhost:3000`, which is already allowed by the project. Register using a development test email, confirm in the same browser, and check successful login, invalid credentials, refresh persistence, profile updates, logout, and signed-out rejection by `/api/auth/user`. Request a password reset and complete the reset page using a new password. Actual email delivery and signed-in flows require a confirmed test account; automated mock tests alone do not verify them.
 
 Issue: https://github.com/jaydonkc/h4i-calpoly-team7/issues/32
 
-Project creation and local callback configuration are complete. Authentication code and end-to-end sign-in verification remain for the issue owner.
-
-Use the official [Next.js Auth guide](https://supabase.com/docs/guides/auth/quickstarts/nextjs) and [server-side client guide](https://supabase.com/docs/guides/auth/server-side/creating-a-client?framework=nextjs). This repository uses Next.js 14 App Router: adapt the middleware examples to this installed version rather than copying newer Next.js conventions blindly.
-
-The implementation should add `@supabase/supabase-js` and `@supabase/ssr`, browser/server client helpers, session refresh handling, email/password sign-in, an authenticated profile identity, logout, and server validation for protected content. Implement `/auth/callback` if using email-confirmation or code-exchange redirects. Do not treat a browser-local flag as proof of authentication.
-
-For verification, use a development test account with a confirmed email. Account creation and confirmation are still needed before the real sign-in demo. Registration UI remains a separate issue. The developer must demonstrate invalid credentials, successful sign-in, refresh persistence, logout, and signed-out protection before closing #32.
-
-Supabase is not connected to GitHub automatic schema deployment. Adding URL/key configuration is sufficient for the initial authentication integration; no database migration or GitHub installation is required for this handoff.
+References: [Supabase SSR client guide](https://supabase.com/docs/guides/auth/server-side/creating-a-client?framework=nextjs), [password recovery API](https://supabase.com/docs/reference/javascript/auth-resetpasswordforemail).

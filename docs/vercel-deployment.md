@@ -20,7 +20,7 @@ A live request to the main `/api/example` endpoint returned HTTP 200 with the ex
 
 ## Environment configuration
 
-`NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are configured for Production and Preview. See `supabase-auth-setup.md` for values and the exact saved callback URLs. The application still needs the auth implementation in issue #32.
+`NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are configured for Production and Preview. See `supabase-auth-setup.md` for values and the exact saved callback URLs. The authentication implementation is tracked in issue #32; verify live email and session flows after deploying it.
 
 Both Vercel environments currently use the same development Supabase project, so authentication users/data are shared. Separate deployments do not imply separate databases.
 

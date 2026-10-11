@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { safeNextPath } from "@/lib/auth/redirect";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { useDemoAuth } from "@/components/DemoAuthProvider";
+import { useAuth } from "@/components/AuthProvider";
 import type { FitnessClass } from "@/types/fitness-class";
 import styles from "./profile.module.css";
 
@@ -23,8 +25,26 @@ function displayMembershipDate(date: string) {
 }
 
 export default function Profile() {
-  const { user, membership, reservedClasses, createAccount, updateProfile, cancelReservation, signOut } = useDemoAuth();
-  const [view, setView] = useState<"login" | "signup">("login");
+  const {
+    user,
+    membership,
+    membershipLoading,
+    membershipError,
+    reservedClasses,
+    signIn,
+    signUp,
+    requestPasswordReset,
+    resendConfirmation,
+    updateProfile,
+    cancelReservation,
+    signOut,
+    isLoading,
+    authError,
+  } = useAuth();
+  const [view, setView] = useState<"login" | "signup" | "recovery" | "confirmation">("login");
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
+  const submitting = useRef(false);
   const [message, setMessage] = useState("");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileMessage, setProfileMessage] = useState("");
@@ -44,30 +64,99 @@ export default function Profile() {
     }
   }, [pendingUnenrollment]);
 
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).has("authError")) {
+      setMessage("This email link is invalid or expired. Request a new link and open it in the same browser.");
+    }
+  }, []);
+
+  function getNext() {
+    return safeNextPath(new URLSearchParams(window.location.search).get("next"));
+  }
+
+  async function submit(action: () => Promise<void>, report = setMessage) {
+    if (submitting.current) return;
+    submitting.current = true;
+    setPending(true);
+    report("");
+    try {
+      await action();
+    } catch (error) {
+      report(error instanceof Error ? error.message : "Unable to connect. Please try again.");
+    } finally {
+      submitting.current = false;
+      setPending(false);
+    }
+  }
+
   function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setMessage("Login is not connected yet. Your information was not submitted.");
+    const form = new FormData(event.currentTarget);
+    void submit(async () => {
+      await signIn(String(form.get("email") ?? "").trim(), String(form.get("password") ?? ""));
+      router.replace(getNext());
+      router.refresh();
+    });
   }
 
   function handleCreateAccount(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+    const form = new FormData(event.currentTarget);
     const account = {
-      firstName: String(formData.get("firstName") ?? "").trim(),
-      lastName: String(formData.get("lastName") ?? "").trim(),
-      email: String(formData.get("email") ?? "").trim(),
-      phone: String(formData.get("phone") ?? "").trim(),
+      firstName: String(form.get("firstName") ?? "").trim(),
+      lastName: String(form.get("lastName") ?? "").trim(),
+      email: String(form.get("email") ?? "").trim(),
+      phone: String(form.get("phone") ?? "").trim(),
     };
-
     if (!account.firstName || !account.lastName || !account.email) {
       setMessage("Enter your first name, last name, and email address.");
       return;
     }
-
-    createAccount(account);
+    const password = String(form.get("password") ?? "");
+    if (password.length < 8 || !form.get("terms")) {
+      setMessage("Use at least 8 characters and accept the terms to continue.");
+      return;
+    }
+    void submit(async () => {
+      const signedIn = await signUp(account, password, getNext());
+      if (signedIn) {
+        router.replace(getNext());
+        router.refresh();
+      } else
+        setMessage(
+          "Check your email for a confirmation link. Open it in this browser, then log in. If you already have an account, use Log In or reset your password.",
+        );
+    });
   }
 
-  function changeView(nextView: "login" | "signup") {
+  function handleRecovery(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const email = String(new FormData(event.currentTarget).get("email") ?? "").trim();
+    void submit(async () => {
+      await requestPasswordReset(email);
+      setMessage("If an account exists for that email, you will receive a reset link. Open it in this browser.");
+    });
+  }
+
+  function handleResend(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const email = String(new FormData(event.currentTarget).get("email") ?? "").trim();
+    void submit(async () => {
+      await resendConfirmation(email, getNext());
+      setMessage("If your account still needs confirmation, a new link will be sent. Open it in this browser.");
+    });
+  }
+
+  function handleSignOut() {
+    void submit(async () => {
+      await signOut();
+      setIsEditingProfile(false);
+      setPendingUnenrollment(null);
+      router.refresh();
+    }, setProfileMessage);
+  }
+
+  function changeView(nextView: "login" | "signup" | "recovery" | "confirmation") {
     setView(nextView);
     setMessage("");
   }
@@ -87,36 +176,60 @@ export default function Profile() {
       return;
     }
 
-    updateProfile(updatedUser);
-    setIsEditingProfile(false);
-    setProfileMessage("Profile details updated.");
+    void submit(async () => {
+      const emailChanged = await updateProfile(updatedUser);
+      setIsEditingProfile(false);
+      setProfileMessage(
+        emailChanged
+          ? "Profile updated. Check your email to confirm the email address change."
+          : "Profile details updated.",
+      );
+      router.refresh();
+    }, setProfileMessage);
   }
+
+  if (isLoading)
+    return (
+      <p className={styles.demoNotice} role="status">
+        Checking your session…
+      </p>
+    );
 
   if (user) {
     return (
       <div className={styles.accountPage}>
         <div className={styles.accountHeading}>
           <h1>Account Overview</h1>
-          <button type="button" onClick={signOut}>
+          <button type="button" onClick={handleSignOut} disabled={pending}>
             Log Out
           </button>
         </div>
 
+        {profileMessage && <p role="status">{profileMessage}</p>}
         <div className={styles.accountGrid}>
           <section className={styles.accountCard} aria-labelledby="membership-status-title">
             <div className={styles.cardTitleRow}>
               <h2 id="membership-status-title">Membership Status</h2>
-              <span className={membership ? styles.activeStatus : undefined}>
-                {membership ? "Active" : "Not active"}
+              <span className={membership?.status === "active" ? styles.activeStatus : undefined}>
+                {membershipLoading
+                  ? "Loading…"
+                  : membershipError
+                    ? "Unavailable"
+                    : membership
+                      ? membership.status === "active"
+                        ? "Active"
+                        : "Expired"
+                      : "Not active"}
               </span>
             </div>
+            {membershipError && <p role="alert">{membershipError}</p>}
             <dl>
               <div>
                 <dt>Plan</dt>
                 <dd>{membership ? `${membership.plan} (${membership.price})` : "Not selected"}</dd>
               </div>
               <div>
-                <dt>Renewal date</dt>
+                <dt>{membership?.source === "manual_demo" ? "Valid until" : "Renewal date"}</dt>
                 <dd>{membership ? displayMembershipDate(membership.renewalDate) : "Not scheduled"}</dd>
               </div>
               {membership && (
@@ -176,7 +289,9 @@ export default function Profile() {
                 </label>
                 {profileMessage && <p role="alert">{profileMessage}</p>}
                 <div className={styles.editActions}>
-                  <button type="submit">Save Changes</button>
+                  <button type="submit" disabled={pending}>
+                    {pending ? "Saving…" : "Save Changes"}
+                  </button>
                   <button
                     type="button"
                     onClick={() => {
@@ -299,7 +414,10 @@ export default function Profile() {
           </div>
         </dialog>
 
-        <p className={styles.demoNotice}>This is a temporary demo session. Account details are not saved.</p>
+        <p className={styles.demoNotice}>
+          Your account uses Supabase authentication. Complimentary memberships are saved in MongoDB. Checkout and class
+          reservations are still demos.
+        </p>
       </div>
     );
   }
@@ -307,14 +425,45 @@ export default function Profile() {
   return (
     <div className={styles.profilePage}>
       <section className={styles.loginCard} aria-labelledby="profile-form-title">
-        <h1 id="profile-form-title">{view === "login" ? "Log In to Your Account" : "Create Your Account"}</h1>
+        <h1 id="profile-form-title">
+          {view === "login"
+            ? "Log In to Your Account"
+            : view === "recovery"
+              ? "Reset Your Password"
+              : view === "confirmation"
+                ? "Confirm Your Email"
+                : "Create Your Account"}
+        </h1>
         <p>
           {view === "login"
             ? "Log in to view your membership, enrolled classes, and manage your profile."
-            : "Create an account to manage your membership and reserve fitness classes."}
+            : view === "recovery"
+              ? "Enter your email to receive a password reset link."
+              : view === "confirmation"
+                ? "Enter your email to request a new confirmation link."
+                : "Create an account to manage your membership and reserve fitness classes."}
         </p>
 
-        {view === "login" ? (
+        {authError && <p role="alert">{authError}</p>}
+        {view === "recovery" || view === "confirmation" ? (
+          <>
+            <form onSubmit={view === "recovery" ? handleRecovery : handleResend}>
+              <label htmlFor="recovery-email">Email</label>
+              <input id="recovery-email" name="email" type="email" autoComplete="email" required />
+              {message && (
+                <p className={styles.status} role="status">
+                  {message}
+                </p>
+              )}
+              <button className={styles.loginButton} type="submit" disabled={pending}>
+                {pending ? "Sending…" : view === "recovery" ? "Send reset link" : "Resend confirmation"}
+              </button>
+            </form>
+            <button className={styles.textButton} type="button" disabled={pending} onClick={() => changeView("login")}>
+              Back to login
+            </button>
+          </>
+        ) : view === "login" ? (
           <>
             <form onSubmit={handleLogin} onChange={() => setMessage("")}>
               <label htmlFor="profile-email">Email</label>
@@ -343,22 +492,31 @@ export default function Profile() {
                 </p>
               )}
 
-              <button className={styles.loginButton} type="submit">
-                Log In
+              <button className={styles.loginButton} type="submit" disabled={pending}>
+                {pending ? "Logging in…" : "Log In"}
               </button>
             </form>
 
             <button
               className={styles.textButton}
               type="button"
-              onClick={() => setMessage("Password recovery is not available yet.")}
+              disabled={pending}
+              onClick={() => changeView("recovery")}
             >
               Forgot password?
+            </button>
+            <button
+              className={styles.textButton}
+              type="button"
+              disabled={pending}
+              onClick={() => changeView("confirmation")}
+            >
+              Resend confirmation email
             </button>
 
             <p className={styles.signup}>
               New here?{" "}
-              <button type="button" onClick={() => changeView("signup")}>
+              <button type="button" disabled={pending} onClick={() => changeView("signup")}>
                 Create an account
               </button>
             </p>
@@ -414,14 +572,14 @@ export default function Profile() {
                 </p>
               )}
 
-              <button className={styles.loginButton} type="submit">
-                Create Account
+              <button className={styles.loginButton} type="submit" disabled={pending}>
+                {pending ? "Creating account…" : "Create Account"}
               </button>
             </form>
 
             <p className={styles.signup}>
               Already have an account?{" "}
-              <button type="button" onClick={() => changeView("login")}>
+              <button type="button" disabled={pending} onClick={() => changeView("login")}>
                 Log in
               </button>
             </p>

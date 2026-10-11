@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import localFont from "next/font/local";
 import { usePathname } from "next/navigation";
-import { useDemoAuth } from "@/components/DemoAuthProvider";
+import { useAuth } from "@/components/AuthProvider";
 import styles from "./Navbar.module.css";
 
 const links = [
@@ -34,11 +34,15 @@ function isActive(pathname: string, href: string) {
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { user } = useDemoAuth();
+  const { user, isLoading } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
-  const accountLabel = user ? user.firstName + " " + user.lastName.charAt(0).toUpperCase() + "." : "Log in";
+  const accountLabel = isLoading
+    ? "Account"
+    : user
+      ? user.firstName + " " + user.lastName.charAt(0).toUpperCase() + "."
+      : "Log in";
 
   useEffect(() => {
     setMenuOpen(false);

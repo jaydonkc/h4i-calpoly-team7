@@ -39,7 +39,7 @@ See the [issue tracker](https://github.com/jaydonkc/h4i-calpoly-team7/issues) fo
 
 - **Application:** Next.js 14 App Router, React 18, TypeScript, and CSS.
 - **Database:** MongoDB Atlas and Mongoose; fitness-class persistence integration is in progress.
-- **Authentication:** Supabase Auth project configured; application integration is tracked in [#32](https://github.com/jaydonkc/h4i-calpoly-team7/issues/32).
+- **Authentication:** Supabase email/password authentication implemented; live verification is tracked in [#32](https://github.com/jaydonkc/h4i-calpoly-team7/issues/32).
 - **Hosting:** Vercel with GitHub deployment integration.
 - **Quality checks:** ESLint, Prettier, TypeScript, Vitest, and GitHub Actions.
 

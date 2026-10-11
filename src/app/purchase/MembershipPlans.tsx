@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { useDemoAuth } from "@/components/DemoAuthProvider";
+import { useAuth } from "@/components/AuthProvider";
 
 const tiers = [
   {
@@ -26,7 +26,7 @@ const tiers = [
 ];
 
 export default function MembershipPlans() {
-  const { isUserSignedIn, purchaseMembership } = useDemoAuth();
+  const { isUserSignedIn, purchaseMembership } = useAuth();
   // adds button functionality
   const [selectedTier, setSelectedTier] = useState<(typeof tiers)[number] | null>(null);
   // disables background click
