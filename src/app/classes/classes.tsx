@@ -8,15 +8,17 @@ import { classCategories, type ClassCategory, type ClassSchedule } from "@/types
 type FilterMenu = "categories" | "durations" | "levels" | "instructors";
 type FilterDimension = "category" | "duration" | "level" | "instructor";
 
-function formatDay(date: string) {
-  const match = date.match(/^\d{4}-(\d{2})-(\d{2})$/);
-  if (!match) return date;
-  return `${Number(match[1])}/${Number(match[2])}`;
-}
+type ClassesPageProps = {
+  initialSchedule: ClassSchedule;
+  errorMessage?: string | null;
+  onRetry?: () => void;
+};
 
-export default function ClassesPage({ initialSchedule }: { initialSchedule: ClassSchedule }) {
+export default function ClassesPage({ initialSchedule, errorMessage = null, onRetry }: ClassesPageProps) {
   const router = useRouter();
   const today = initialSchedule.days.find((item) => item.isToday)?.date ?? initialSchedule.days[0]?.date ?? "";
+  const classList = initialSchedule.classes;
+
   const [day, setDay] = useState(today),
     [draftCategories, setDraftCategories] = useState<ClassCategory[]>([]),
     [draftDurations, setDraftDurations] = useState<string[]>([]),
@@ -28,7 +30,7 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
     [appliedInstructors, setAppliedInstructors] = useState<string[]>([]),
     [openFilter, setOpenFilter] = useState<FilterMenu | null>(null);
   const classes = useMemo(() => {
-    const list = initialSchedule.classes.filter((item) => item.date === day);
+    const list = classList.filter((item) => item.date === day);
     return list.filter(
       (item) =>
         (appliedCategories.length === 0 || appliedCategories.includes(item.category)) &&
@@ -36,18 +38,21 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
         (appliedLevels.length === 0 || appliedLevels.includes(item.level)) &&
         (appliedInstructors.length === 0 || appliedInstructors.includes(item.coach)),
     );
-  }, [day, appliedCategories, appliedDurations, appliedLevels, appliedInstructors, initialSchedule.classes]);
+  }, [day, appliedCategories, appliedDurations, appliedLevels, appliedInstructors, classList]);
 
   const durations = useMemo(
-    () => Array.from(new Set(initialSchedule.classes.map((item) => item.duration))),
+    () =>
+      Array.from(new Set(initialSchedule.classes.map((item) => item.duration))).sort(
+        (a, b) => parseInt(a) - parseInt(b),
+      ),
     [initialSchedule.classes],
   );
   const levels = useMemo(
-    () => Array.from(new Set(initialSchedule.classes.map((item) => item.level))),
+    () => Array.from(new Set(initialSchedule.classes.map((item) => item.level))).sort(),
     [initialSchedule.classes],
   );
   const instructors = useMemo(
-    () => Array.from(new Set(initialSchedule.classes.map((item) => item.coach))),
+    () => Array.from(new Set(initialSchedule.classes.map((item) => item.coach))).sort(),
     [initialSchedule.classes],
   );
 
@@ -74,7 +79,7 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
   }
 
   function getFacetCount(dimension: FilterDimension, value: string) {
-    return initialSchedule.classes.filter((item) => {
+    return classList.filter((item) => {
       if (item.date !== day) return false;
 
       const matchesCategory =
@@ -113,22 +118,22 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
             <small>THIS WEEK</small>
             <h2>{initialSchedule.weekLabel}</h2>
           </div>
-          <button className="today" onClick={() => setDay(today)}>
+          <button className="today" disabled={!today} onClick={() => setDay(today)}>
             <Icon name="calendar" /> Jump to today
           </button>
         </div>
-        <div className="days" role="tablist">
-          {initialSchedule.days.map((x) => (
+        <div className="days" role="tablist" aria-label="Schedule dates">
+          {initialSchedule.days.map((item) => (
             <button
               role="tab"
-              aria-selected={day === x.date}
-              className={day === x.date ? "selected" : ""}
-              key={x.date}
-              onClick={() => setDay(x.date)}
+              aria-selected={day === item.date}
+              className={day === item.date ? "selected" : ""}
+              key={item.date}
+              onClick={() => setDay(item.date)}
             >
-              <small>{x.label}</small>
-              <strong>{formatDay(x.date)}</strong>
-              {x.isToday && <i>Today</i>}
+              <small>{item.label}</small>
+              <strong>{Number(item.date.slice(-2))}</strong>
+              {item.isToday && <i>Today</i>}
             </button>
           ))}
         </div>
@@ -198,31 +203,42 @@ export default function ClassesPage({ initialSchedule }: { initialSchedule: Clas
             {classes.length} {classes.length === 1 ? "class" : "classes"}
           </span>
         </div>
-        {classes.length ? (
-          <div className="classlist">
-            <div className="class-table-header" aria-hidden="true">
-              <span>Time</span>
-              <span>Class</span>
-              <span>Instructor</span>
-              <span>Location</span>
-              <span>Duration</span>
-              <span>Difficulty</span>
-              <span>Availability</span>
-              <span />
+        {errorMessage === null ? (
+          classes.length ? (
+            <div className="classlist">
+              <div className="class-table-header" aria-hidden="true">
+                <span>Time</span>
+                <span>Class</span>
+                <span>Instructor</span>
+                <span>Location</span>
+                <span>Duration</span>
+                <span>Difficulty</span>
+                <span>Availability</span>
+                <span />
+              </div>
+              {classes.map((fitnessClass) => (
+                <ClassCard key={fitnessClass.id} fitnessClass={fitnessClass} />
+              ))}
             </div>
-            {classes.map((fitnessClass) => (
-              <ClassCard key={fitnessClass.id} fitnessClass={fitnessClass} />
-            ))}
-          </div>
+          ) : (
+            <div className="empty">
+              <b className="sleep-icon" aria-hidden="true">
+                <span>z</span>
+                <span>z</span>
+                <span>z</span>
+              </b>
+              <h3>Rest day, for now.</h3>
+              <p>There aren’t any matching classes on this day. Try another day or reset your filter.</p>
+            </div>
+          )
+        ) : errorMessage === "loading" ? (
+          <p role="status">Loading Classes...</p>
         ) : (
-          <div className="empty">
-            <b className="sleep-icon" aria-hidden="true">
-              <span>z</span>
-              <span>z</span>
-              <span>z</span>
-            </b>
-            <h3>Rest day, for now.</h3>
-            <p>There aren’t any matching classes on this day. Try another day or reset your filter.</p>
+          <div>
+            <p role="alert">{errorMessage}</p>
+            <button type="button" className="reload" onClick={onRetry ?? (() => window.location.reload())}>
+              Reload
+            </button>
           </div>
         )}
       </section>
