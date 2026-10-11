@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { classRepository } from "@/lib/classes/class-repository";
+import { availableSchedule } from "@/lib/account/reservations";
 import type { ClassSchedule } from "@/types/fitness-class";
 import MembershipPlans from "./MembershipPlans";
 import "./purchase.css";
@@ -23,7 +24,7 @@ export default async function MembershipsPage() {
   let schedule: ClassSchedule | null = null;
 
   try {
-    schedule = await classRepository.getSchedule();
+    schedule = await availableSchedule(await classRepository.getSchedule());
   } catch {
     // Membership options and FAQs remain available when the schedule cannot load.
   }

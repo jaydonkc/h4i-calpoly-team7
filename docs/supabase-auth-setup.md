@@ -31,14 +31,14 @@ Restart `npm run dev` after changing environment variables. Teammates can use th
 
 The application uses `@supabase/ssr` and `@supabase/supabase-js` for cookie-based authentication in Next.js 14. `src/middleware.ts` verifies and refreshes sessions; server handlers independently use `getUser()` before returning protected identity data.
 
-- `/profile`: email/password login, registration, confirmation resend, password recovery, logout, and editing basic account metadata.
+- `/profile`: email/password login, registration, confirmation resend, password recovery, logout, and editing MongoDB-backed profile details.
 - `/auth/callback`: exchanges the PKCE code, applies a validated local return destination, and shows a recoverable error for invalid/expired links.
 - `/auth/reset-password`: requires a verified authenticated session before rendering the new-password form.
 - `/api/auth/user`: returns the verified user's ID/email or 401; provider unavailability returns 503. Responses are not cached.
 
 Email links must be opened in the same browser where the request started, because PKCE uses a browser-specific verifier. A short-lived navigation cookie remembers the destination so email requests use the exact configured callback URL. Registration requires email confirmation unless the provider is configured otherwise. Email address changes use Supabase's confirmation flow.
 
-Account names and contact phone numbers currently persist in Supabase user metadata. These fields are user editable and must never determine staff privileges. MongoDB profile synchronization is a separate task. Complimentary memberships persist in MongoDB, keyed by the Supabase user ID, and load through the authenticated `/api/membership` endpoint. Checkout and reservations remain temporary demos. All local membership/reservation state resets when identity changes or the user signs out.
+Supabase owns authentication, email confirmation, and password recovery. MongoDB owns profiles, preferences, reservations, demo orders, and memberships, linked by the verified Supabase user ID. The first authenticated profile read imports registration metadata if a MongoDB profile does not exist; later edits save only to MongoDB. Confirmed email changes are reflected on the next profile read. These systems do not synchronize automatically. Names and phone numbers never determine staff privileges. See [Account data](account-data.md) for API contracts and verification.
 
 No service-role key is needed. Keep email confirmation enabled. If the built-in email sender rejects a recipient or is rate limited, configure a suitable SMTP provider through a separate provider setup; do not bypass confirmation to make a test pass.
 

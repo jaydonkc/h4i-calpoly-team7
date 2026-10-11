@@ -4,6 +4,13 @@ import { createContext, useContext, useState, useEffect, useRef, type ReactNode 
 import type { Membership } from "@/types/membership";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import {
+  defaultPreferences,
+  type Preferences,
+  type Profile,
+  type DemoOrder,
+  type MembershipPlan,
+} from "@/types/account";
 import type { FitnessClass } from "@/types/fitness-class";
 
 export type AccountUser = {
@@ -28,9 +35,20 @@ type AuthContextValue = {
   requestPasswordReset: (email: string) => Promise<void>;
   resendConfirmation: (email: string, next: string) => Promise<void>;
   updateProfile: (user: AccountUser) => Promise<boolean>;
-  reserveClass: (fitnessClass: FitnessClass) => void;
-  cancelReservation: (classId: FitnessClass["id"]) => void;
-  purchaseMembership: (plan: string, price: string) => void;
+  profileLoading: boolean;
+  profileError: string;
+  preferences: Preferences;
+  updatePreferences: (preferences: Preferences) => Promise<void>;
+  reservationsLoading: boolean;
+  reservationsError: string;
+  reservationsRevision: number;
+  orders: DemoOrder[];
+  ordersLoading: boolean;
+  ordersError: string;
+  retryAccount: () => void;
+  reserveClass: (fitnessClass: FitnessClass) => Promise<void>;
+  cancelReservation: (fitnessClass: FitnessClass) => Promise<void>;
+  purchaseMembership: (plan: MembershipPlan, idempotencyKey: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -42,6 +60,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [membershipLoading, setMembershipLoading] = useState(false);
   const [membershipError, setMembershipError] = useState("");
   const [reservedClasses, setReservedClasses] = useState<FitnessClass[]>([]);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState("");
+  const [preferences, setPreferences] = useState<Preferences>(defaultPreferences);
+  const [reservationsLoading, setReservationsLoading] = useState(false);
+  const [reservationsError, setReservationsError] = useState("");
+  const [reservationsRevision, setReservationsRevision] = useState(0);
+  const [orders, setOrders] = useState<DemoOrder[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersError, setOrdersError] = useState("");
+  const [accountAttempt, setAccountAttempt] = useState(0);
 
   const [isLoading, setIsLoading] = useState(true);
   const [authError, setAuthError] = useState("");
@@ -55,17 +83,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setMembershipLoading(Boolean(authUser));
       setMembershipError("");
       setReservedClasses([]);
+      setProfileLoading(Boolean(authUser));
+      setProfileError("");
+      setPreferences(defaultPreferences);
+      setReservationsLoading(Boolean(authUser));
+      setReservationsError("");
+      setOrders([]);
+      setOrdersLoading(Boolean(authUser));
+      setOrdersError("");
       userId.current = authUser?.id ?? null;
     }
     const metadata = authUser?.user_metadata;
-    setUser(
+    setUser((current) =>
       authUser
         ? {
             id: authUser.id,
-            firstName: typeof metadata?.first_name === "string" ? metadata.first_name : "Member",
-            lastName: typeof metadata?.last_name === "string" ? metadata.last_name : "",
+            firstName:
+              current?.id === authUser.id
+                ? current.firstName
+                : typeof metadata?.first_name === "string"
+                  ? metadata.first_name
+                  : "Member",
+            lastName:
+              current?.id === authUser.id
+                ? current.lastName
+                : typeof metadata?.last_name === "string"
+                  ? metadata.last_name
+                  : "",
             email: authUser.email ?? "",
-            phone: typeof metadata?.phone === "string" ? metadata.phone : "",
+            phone:
+              current?.id === authUser.id ? current.phone : typeof metadata?.phone === "string" ? metadata.phone : "",
           }
         : null,
     );
@@ -134,7 +181,73 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!controller.signal.aborted) setMembershipLoading(false);
       });
     return () => controller.abort();
-  }, [accountId]);
+  }, [accountId, accountAttempt]);
+
+  async function accountRequest<T>(path: string, method = "GET", body?: unknown, signal?: AbortSignal): Promise<T> {
+    const response = await fetch(path, {
+      method,
+      cache: "no-store",
+      signal,
+      ...(body ? { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {}),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error ?? "Unable to save or load your account. Please try again.");
+    return result;
+  }
+
+  function applyProfile(profile: Profile) {
+    if (profile.userId !== userId.current) return;
+    setUser({
+      id: profile.userId,
+      email: profile.email,
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      phone: profile.phone,
+    });
+    setPreferences(profile.preferences);
+  }
+
+  useEffect(() => {
+    if (!accountId) return;
+    const controller = new AbortController();
+    setProfileLoading(true);
+    setProfileError("");
+    setReservationsLoading(true);
+    setReservationsError("");
+    setOrdersLoading(true);
+    setOrdersError("");
+    void accountRequest<{ profile: Profile }>("/api/profile", "GET", undefined, controller.signal)
+      .then((result) => {
+        if (!controller.signal.aborted) applyProfile(result.profile);
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted) setProfileError(error.message);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setProfileLoading(false);
+      });
+    void accountRequest<{ reservations: FitnessClass[] }>("/api/reservations", "GET", undefined, controller.signal)
+      .then((result) => {
+        if (!controller.signal.aborted) setReservedClasses(result.reservations);
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted) setReservationsError(error.message);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setReservationsLoading(false);
+      });
+    void accountRequest<{ orders: DemoOrder[] }>("/api/checkout", "GET", undefined, controller.signal)
+      .then((result) => {
+        if (!controller.signal.aborted) setOrders(result.orders);
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted) setOrdersError(error.message);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setOrdersLoading(false);
+      });
+    return () => controller.abort();
+  }, [accountId, accountAttempt]);
 
   async function signIn(email: string, password: string) {
     const { data, error } = await createClient().auth.signInWithPassword({ email, password });
@@ -187,44 +300,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       error: identityError,
     } = await client.auth.getUser();
     if (identityError || !current) throw new Error("Please log in again.");
+    // Save profile fields first; email changes are confirmed separately by Supabase.
+    const result = await accountRequest<{ profile: Profile }>("/api/profile", "PUT", {
+      firstName: account.firstName,
+      lastName: account.lastName,
+      phone: account.phone,
+    });
+    applyProfile(result.profile);
     const emailChanged = account.email !== current.email;
-    const { data, error } = await client.auth.updateUser(
-      {
-        ...(emailChanged ? { email: account.email } : {}),
-        data: { first_name: account.firstName, last_name: account.lastName, phone: account.phone },
-      },
-      { emailRedirectTo: emailCallback("/profile") },
-    );
-    if (error) throw new Error(error.message);
-    applyUser(data.user);
+    if (emailChanged) {
+      const { error } = await client.auth.updateUser(
+        { email: account.email },
+        { emailRedirectTo: emailCallback("/profile") },
+      );
+      if (error) throw new Error(`Profile details saved, but the email change failed: ${error.message}`);
+    }
     return emailChanged;
   }
 
-  function purchaseMembership(plan: string, price: string) {
-    const paidOn = new Date();
-    const renewalMonth = paidOn.getMonth() + 1;
-    const lastDayOfRenewalMonth = new Date(paidOn.getFullYear(), renewalMonth + 1, 0).getDate();
-    const renewalDate = new Date(paidOn.getFullYear(), renewalMonth, Math.min(paidOn.getDate(), lastDayOfRenewalMonth));
-    const localRenewalDate = [
-      renewalDate.getFullYear(),
-      String(renewalDate.getMonth() + 1).padStart(2, "0"),
-      String(renewalDate.getDate()).padStart(2, "0"),
-    ].join("-");
-
-    setMembership((current) => ({
-      plan,
-      price,
-      status: "active",
-      source: "demo_checkout",
-      renewalDate: localRenewalDate,
-      memberId: current?.memberId ?? `FM-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
-    }));
+  async function updatePreferences(values: Preferences) {
+    const result = await accountRequest<{ profile: Profile }>("/api/preferences", "PUT", values);
+    applyProfile(result.profile);
   }
 
-  function reserveClass(fitnessClass: FitnessClass) {
-    setReservedClasses((current) =>
-      current.some((reservedClass) => reservedClass.id === fitnessClass.id) ? current : [...current, fitnessClass],
+  async function purchaseMembership(plan: MembershipPlan, idempotencyKey: string) {
+    const identity = userId.current;
+    const result = await accountRequest<{ membership: Membership | null; orders: DemoOrder[] }>(
+      "/api/checkout",
+      "POST",
+      { plan, idempotencyKey },
     );
+    if (identity !== userId.current) return;
+    setMembership(result.membership);
+    setOrders(result.orders);
+    setOrdersError("");
+  }
+
+  async function changeReservation(fitnessClass: FitnessClass, method: "POST" | "DELETE") {
+    const identity = userId.current;
+    const result = await accountRequest<{ reservations: FitnessClass[] }>("/api/reservations", method, {
+      classId: String(fitnessClass.id),
+      date: fitnessClass.date,
+    });
+    if (identity !== userId.current) return;
+    setReservedClasses(result.reservations);
+    setReservationsError("");
+    setReservationsRevision((current) => current + 1);
   }
 
   async function signOut() {
@@ -251,9 +372,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         requestPasswordReset,
         resendConfirmation,
         updateProfile,
-        reserveClass,
-        cancelReservation: (classId) =>
-          setReservedClasses((current) => current.filter((fitnessClass) => fitnessClass.id !== classId)),
+        profileLoading,
+        profileError,
+        preferences,
+        updatePreferences,
+        reservationsLoading,
+        reservationsError,
+        reservationsRevision,
+        orders,
+        ordersLoading,
+        ordersError,
+        retryAccount: () => setAccountAttempt((current) => current + 1),
+        reserveClass: (fitnessClass) => changeReservation(fitnessClass, "POST"),
+        cancelReservation: (fitnessClass) => changeReservation(fitnessClass, "DELETE"),
         purchaseMembership,
         signOut,
       }}

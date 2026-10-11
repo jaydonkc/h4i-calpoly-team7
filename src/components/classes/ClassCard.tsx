@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { formatClassTime } from "@/types/account";
+import { useRef, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import type { FitnessClass } from "@/types/fitness-class";
 import Icon from "./Icon";
@@ -9,42 +11,46 @@ type ClassCardProps = {
   fitnessClass: FitnessClass;
 };
 
-function formatTime(time: string) {
-  const [hourString, minute] = time.split(":");
-  const hour = Number(hourString);
-  const period = hour >= 12 ? "pm" : "am";
-  const formattedHour = hour % 12 || 12;
-  return `${formattedHour}:${minute}${period}`;
-}
-
 export default function ClassCard({ fitnessClass }: ClassCardProps) {
-  const { isUserSignedIn, reservedClasses, reserveClass, cancelReservation } = useAuth();
+  const {
+    isUserSignedIn,
+    reservedClasses,
+    reserveClass,
+    cancelReservation,
+    preferences,
+    reservationsLoading,
+    reservationsError,
+  } = useAuth();
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const isBooked = reservedClasses.some((reservedClass) => reservedClass.id === fitnessClass.id);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+  const busy = useRef(false);
+  const isBooked = reservedClasses.some(
+    (reservedClass) => reservedClass.id === fitnessClass.id && reservedClass.date === fitnessClass.date,
+  );
 
-  useEffect(() => {
-    if (!showConfirmation) return;
-
-    const timeout = window.setTimeout(() => setShowConfirmation(false), 2500);
-    return () => window.clearTimeout(timeout);
-  }, [showConfirmation]);
-
-  function toggleReservation() {
-    if (isBooked) {
-      cancelReservation(fitnessClass.id);
-      setShowConfirmation(false);
-      return;
+  async function toggleReservation() {
+    if (busy.current) return;
+    busy.current = true;
+    setPending(true);
+    setError("");
+    try {
+      if (isBooked) await cancelReservation(fitnessClass);
+      else await reserveClass(fitnessClass);
+      setShowConfirmation(!isBooked);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Unable to update your reservation.");
+    } finally {
+      busy.current = false;
+      setPending(false);
     }
-
-    reserveClass(fitnessClass);
-    setShowConfirmation(true);
   }
 
   return (
     <article className="classcard">
       <div className="table-cell class-time" data-label="Time">
-        <strong>{formatTime(fitnessClass.time)}</strong>
-        <span>to {formatTime(fitnessClass.end)}</span>
+        <strong>{formatClassTime(fitnessClass.time, preferences.timeFormat)}</strong>
+        <span>to {formatClassTime(fitnessClass.end, preferences.timeFormat)}</span>
       </div>
       <div className="table-cell classmain" data-label="Class">
         <div>
@@ -75,25 +81,46 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
         className={`reserve ${isBooked ? "cancel" : ""}`}
         aria-pressed={isUserSignedIn ? isBooked : undefined}
         aria-label={isUserSignedIn ? undefined : `Log in to reserve ${fitnessClass.title}`}
-        disabled={!isUserSignedIn}
+        disabled={
+          !isUserSignedIn ||
+          pending ||
+          reservationsLoading ||
+          Boolean(reservationsError) ||
+          (!isBooked && fitnessClass.spots === 0)
+        }
         onClick={toggleReservation}
       >
-        {isUserSignedIn ? (isBooked ? "Cancel" : "Reserve") : "Log in to reserve"}
+        {pending
+          ? "Saving…"
+          : isUserSignedIn
+            ? isBooked
+              ? "Cancel"
+              : fitnessClass.spots === 0
+                ? "Full"
+                : "Reserve"
+            : "Log in to reserve"}
       </button>
-      {showConfirmation && (
-        <div className="booking-popup" role="status" aria-live="polite">
-          <span>
-            <Icon name="check" />
-          </span>
-          <div>
-            <strong>Class Booked!</strong>
-            <small>{fitnessClass.title}</small>
-          </div>
-          <button aria-label="Dismiss confirmation" onClick={() => setShowConfirmation(false)}>
-            ×
-          </button>
-        </div>
+      {error && (
+        <p role="alert" className="reservation-error">
+          {error}
+        </p>
       )}
+      {showConfirmation &&
+        createPortal(
+          <div className="booking-popup" role="status" aria-live="polite">
+            <span>
+              <Icon name="check" />
+            </span>
+            <div>
+              <strong>Class Booked!</strong>
+              <small>{fitnessClass.title}</small>
+            </div>
+            <button aria-label="Dismiss confirmation" onClick={() => setShowConfirmation(false)}>
+              ×
+            </button>
+          </div>,
+          document.body,
+        )}
     </article>
   );
 }

@@ -65,7 +65,8 @@
   font-weight: 600;
 }
 
-.editForm input {
+.editForm input,
+.editForm select {
   width: 100%;
   box-sizing: border-box;
   padding: 0.65rem 0.7rem;

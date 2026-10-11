@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useRef, useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import { useAuth } from "@/components/AuthProvider";
 import ClassCard from "@/components/classes/ClassCard";
 import Icon from "@/components/classes/Icon";
 import MultiSelectFilter from "@/components/classes/MultiSelectFilter";
@@ -16,6 +17,8 @@ type ClassesPageProps = {
 
 export default function ClassesPage({ initialSchedule, errorMessage = null, onRetry }: ClassesPageProps) {
   const router = useRouter();
+  const { preferences, profileLoading, profileError, user, isLoading, reservationsError, retryAccount } = useAuth();
+  const preferenceApplied = useRef<string | null | undefined>(undefined);
   const today = initialSchedule.days.find((item) => item.isToday)?.date ?? initialSchedule.days[0]?.date ?? "";
   const classList = initialSchedule.classes;
 
@@ -29,6 +32,13 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
     [appliedLevels, setAppliedLevels] = useState<string[]>([]),
     [appliedInstructors, setAppliedInstructors] = useState<string[]>([]),
     [openFilter, setOpenFilter] = useState<FilterMenu | null>(null);
+  useEffect(() => {
+    if (isLoading || profileLoading || profileError || preferenceApplied.current === (user?.id ?? null)) return;
+    const categories = preferences.defaultClassCategory === "All" ? [] : [preferences.defaultClassCategory];
+    setDraftCategories(categories);
+    setAppliedCategories(categories);
+    preferenceApplied.current = user?.id ?? null;
+  }, [isLoading, profileLoading, profileError, user?.id, preferences.defaultClassCategory]);
   const classes = useMemo(() => {
     const list = classList.filter((item) => item.date === day);
     return list.filter(
@@ -137,6 +147,14 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
             </button>
           ))}
         </div>
+        {reservationsError && (
+          <p role="alert">
+            {reservationsError}{" "}
+            <button type="button" onClick={retryAccount}>
+              Retry account data
+            </button>
+          </p>
+        )}
         <div className="filterrow">
           <div className="filter-menus">
             <MultiSelectFilter

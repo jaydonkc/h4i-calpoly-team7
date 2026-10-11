@@ -6,6 +6,8 @@ import { safeNextPath } from "@/lib/auth/redirect";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import type { FitnessClass } from "@/types/fitness-class";
+import AccountPreferences from "./AccountPreferences";
+import { formatClassTime } from "@/types/account";
 import styles from "./profile.module.css";
 
 function displayClassDate(date: string) {
@@ -40,6 +42,15 @@ export default function Profile() {
     signOut,
     isLoading,
     authError,
+    profileLoading,
+    profileError,
+    preferences,
+    reservationsLoading,
+    reservationsError,
+    orders,
+    ordersLoading,
+    ordersError,
+    retryAccount,
   } = useAuth();
   const [view, setView] = useState<"login" | "signup" | "recovery" | "confirmation">("login");
   const router = useRouter();
@@ -48,9 +59,7 @@ export default function Profile() {
   const [message, setMessage] = useState("");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileMessage, setProfileMessage] = useState("");
-  const [pendingUnenrollment, setPendingUnenrollment] = useState<{ id: FitnessClass["id"]; title: string } | null>(
-    null,
-  );
+  const [pendingUnenrollment, setPendingUnenrollment] = useState<FitnessClass | null>(null);
   const unenrollDialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -205,7 +214,7 @@ export default function Profile() {
           </button>
         </div>
 
-        {profileMessage && <p role="status">{profileMessage}</p>}
+        {profileMessage && !isEditingProfile && <p role="status">{profileMessage}</p>}
         <div className={styles.accountGrid}>
           <section className={styles.accountCard} aria-labelledby="membership-status-title">
             <div className={styles.cardTitleRow}>
@@ -222,14 +231,21 @@ export default function Profile() {
                       : "Not active"}
               </span>
             </div>
-            {membershipError && <p role="alert">{membershipError}</p>}
+            {membershipError && (
+              <p role="alert">
+                {membershipError}{" "}
+                <button type="button" onClick={retryAccount}>
+                  Retry membership
+                </button>
+              </p>
+            )}
             <dl>
               <div>
                 <dt>Plan</dt>
                 <dd>{membership ? `${membership.plan} (${membership.price})` : "Not selected"}</dd>
               </div>
               <div>
-                <dt>{membership?.source === "manual_demo" ? "Valid until" : "Renewal date"}</dt>
+                <dt>Valid until</dt>
                 <dd>{membership ? displayMembershipDate(membership.renewalDate) : "Not scheduled"}</dd>
               </div>
               {membership && (
@@ -253,7 +269,7 @@ export default function Profile() {
           <section className={styles.accountCard} aria-labelledby="profile-details-title">
             <div className={styles.cardTitleRow}>
               <h2 id="profile-details-title">Profile Details</h2>
-              {!isEditingProfile && (
+              {!isEditingProfile && !profileLoading && !profileError && (
                 <button
                   className={styles.editButton}
                   type="button"
@@ -267,7 +283,16 @@ export default function Profile() {
               )}
             </div>
 
-            {isEditingProfile ? (
+            {profileLoading ? (
+              <p role="status">Loading profile…</p>
+            ) : profileError ? (
+              <p role="alert">
+                {profileError}{" "}
+                <button type="button" onClick={retryAccount}>
+                  Retry account data
+                </button>
+              </p>
+            ) : isEditingProfile ? (
               <form className={styles.editForm} onSubmit={handleProfileUpdate}>
                 <div className={styles.editNameRow}>
                   <label>
@@ -294,6 +319,7 @@ export default function Profile() {
                   </button>
                   <button
                     type="button"
+                    disabled={pending}
                     onClick={() => {
                       setIsEditingProfile(false);
                       setProfileMessage("");
@@ -321,11 +347,6 @@ export default function Profile() {
                     <dd>{user.phone || "Not provided"}</dd>
                   </div>
                 </dl>
-                {profileMessage && (
-                  <p className={styles.profileStatus} role="status">
-                    {profileMessage}
-                  </p>
-                )}
               </>
             )}
           </section>
@@ -336,7 +357,16 @@ export default function Profile() {
             <h2 id="enrolled-classes-title">Enrolled Classes</h2>
             <Link href="/classes">Browse Classes →</Link>
           </div>
-          {reservedClasses.length > 0 ? (
+          {reservationsLoading ? (
+            <p role="status">Loading reservations…</p>
+          ) : reservationsError ? (
+            <p role="alert">
+              {reservationsError}{" "}
+              <button type="button" onClick={retryAccount}>
+                Retry reservations
+              </button>
+            </p>
+          ) : reservedClasses.length > 0 ? (
             <div className={styles.enrolledTableWrapper}>
               <table>
                 <thead>
@@ -354,11 +384,11 @@ export default function Profile() {
                 </thead>
                 <tbody>
                   {reservedClasses.map((fitnessClass) => (
-                    <tr key={fitnessClass.id}>
+                    <tr key={`${fitnessClass.id}-${fitnessClass.date}`}>
                       <td>{fitnessClass.title}</td>
                       <td>{fitnessClass.coach}</td>
                       <td>{displayClassDate(fitnessClass.date)}</td>
-                      <td>{fitnessClass.time}</td>
+                      <td>{formatClassTime(fitnessClass.time, preferences.timeFormat)}</td>
                       <td>{fitnessClass.room}</td>
                       <td>
                         <span>Enrolled</span>
@@ -368,7 +398,7 @@ export default function Profile() {
                           className={styles.unenrollButton}
                           type="button"
                           aria-label={`Unenroll from ${fitnessClass.title}`}
-                          onClick={() => setPendingUnenrollment({ id: fitnessClass.id, title: fitnessClass.title })}
+                          onClick={() => setPendingUnenrollment(fitnessClass)}
                         >
                           Unenroll
                         </button>
@@ -398,15 +428,20 @@ export default function Profile() {
               ? `Are you sure you want to unenroll from ${pendingUnenrollment.title}?`
               : "Are you sure you want to unenroll?"}
           </p>
+          {profileMessage && <p role="alert">{profileMessage}</p>}
           <div>
-            <button type="button" autoFocus onClick={() => setPendingUnenrollment(null)}>
+            <button type="button" disabled={pending} autoFocus onClick={() => setPendingUnenrollment(null)}>
               Keep Enrollment
             </button>
             <button
               type="button"
+              disabled={pending}
               onClick={() => {
-                if (pendingUnenrollment) cancelReservation(pendingUnenrollment.id);
-                setPendingUnenrollment(null);
+                void submit(async () => {
+                  if (pendingUnenrollment) await cancelReservation(pendingUnenrollment);
+                  setPendingUnenrollment(null);
+                  setProfileMessage("Reservation canceled.");
+                }, setProfileMessage);
               }}
             >
               Unenroll
@@ -414,10 +449,31 @@ export default function Profile() {
           </div>
         </dialog>
 
-        <p className={styles.demoNotice}>
-          Your account uses Supabase authentication. Complimentary memberships are saved in MongoDB. Checkout and class
-          reservations are still demos.
-        </p>
+        <div className={styles.accountGrid}>
+          <AccountPreferences />
+          <section className={styles.accountCard} aria-labelledby="orders-title">
+            <h2 id="orders-title">Demo Checkout History</h2>
+            <p>No payments or automatic renewals are processed.</p>
+            {ordersLoading ? (
+              <p role="status">Loading checkout history…</p>
+            ) : ordersError ? (
+              <p role="alert">
+                {ordersError} <button onClick={retryAccount}>Retry checkout history</button>
+              </p>
+            ) : orders.length ? (
+              <ul>
+                {orders.map((order) => (
+                  <li key={order.id}>
+                    {order.plan} — ${(order.amountCents / 100).toFixed(2)} simulated,{" "}
+                    {new Date(order.createdAt).toLocaleDateString("en-US", { timeZone: "America/Los_Angeles" })}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No demo checkouts yet.</p>
+            )}
+          </section>
+        </div>
       </div>
     );
   }

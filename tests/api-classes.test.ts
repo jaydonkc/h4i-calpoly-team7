@@ -4,6 +4,7 @@ import Model from "@/database/userSchema";
 import { GET } from "@/app/api/classes/route";
 import { Types } from "mongoose";
 
+vi.mock("@/lib/account/reservations", () => ({ availableSchedule: async (schedule: unknown) => schedule }));
 vi.mock("@/database/db", () => ({ default: vi.fn() }));
 afterEach(() => {
   vi.useRealTimers();

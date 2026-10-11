@@ -20,7 +20,8 @@ export async function GET() {
       return NextResponse.json({ error: "Please log in." }, { status: 401, headers: { "Cache-Control": "no-store" } });
     const membership = await getMembership(user.id);
     return NextResponse.json({ membership }, { headers: { "Cache-Control": "private, no-store" } });
-  } catch {
+  } catch (error) {
+    console.error("Membership storage request failed", { name: error instanceof Error ? error.name : "UnknownError" });
     return NextResponse.json(
       { error: "Unable to load your membership. Please try again." },
       { status: 503, headers: { "Cache-Control": "no-store" } },

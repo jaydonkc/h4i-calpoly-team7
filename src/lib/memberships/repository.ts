@@ -9,14 +9,14 @@ export async function getMembership(userId: string): Promise<Membership | null> 
     memberId: string;
     expiresAt: Date;
     status: "active" | "expired";
-    source: "manual_demo";
+    source: "manual_demo" | "demo_checkout";
   } | null;
   if (!record) return null;
   const expiry = new Date(record.expiresAt);
   return {
     plan: record.plan,
     memberId: record.memberId,
-    price: "Complimentary demo",
+    price: record.source === "manual_demo" ? "Complimentary demo" : "Demo — no charge",
     source: record.source,
     renewalDate: new Intl.DateTimeFormat("en-CA", {
       timeZone: "America/Los_Angeles",
