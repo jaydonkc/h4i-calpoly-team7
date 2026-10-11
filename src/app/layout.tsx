@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DemoAuthProvider } from "@/components/DemoAuthProvider";
+import { AuthProvider } from "@/components/AuthProvider";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import "./globals.css";
@@ -13,13 +13,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <DemoAuthProvider>
+        <AuthProvider>
           <header className="site-header">
             <Navbar />
           </header>
           <main>{children}</main>
           <Footer />
-        </DemoAuthProvider>
+        </AuthProvider>
       </body>
     </html>
   );
