@@ -25,6 +25,11 @@ async function ClassesContent() {
     const protocol = requestHeaders.get("x-forwarded-proto") ?? "http";
     const baseUrl = `${protocol}://${host}`;
     const response = await fetch(`${baseUrl}/api/classes`);
+
+    if (!response.ok) {
+      throw new Error("An error has occurred");
+    }
+
     const schedule: ClassSchedule = await response.json();
     return <ClassesPage initialSchedule={schedule} errorMessage={null} />;
   } catch {
