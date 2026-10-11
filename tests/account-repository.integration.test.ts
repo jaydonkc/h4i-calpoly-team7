@@ -62,6 +62,7 @@ integration("MongoDB account persistence and transactions in isolated test colle
     // The Atlas credential is scoped to the app database. All models above use
     // unique disposable collections; normal app records are never queried.
     await mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 10000 });
+    await Promise.all(Object.values(mongoose.models).map((model) => model.init()));
     classId = String(
       (
         await ClassModel.create({
@@ -100,6 +101,13 @@ integration("MongoDB account persistence and transactions in isolated test colle
     expect(persisted.preferences.timeFormat).toBe("24h");
     expect((await loadProfile({ ...user, id: "other-owner" })).firstName).toBe("Original");
   });
+  it("reloads saved profile data after disconnect and reconnect", async () => {
+    await loadProfile(user);
+    await mongoose.disconnect();
+    const profile = await loadProfile(user);
+    expect(profile.firstName).toBe("Updated");
+    expect(profile.preferences.timeFormat).toBe("24h");
+  }, 30000);
   it("reserves the last seat once under concurrency, prevents duplicates and isolates cancellations", async () => {
     const results = await Promise.allSettled([reserve(user.id, classId, date), reserve("other-owner", classId, date)]);
     expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1);

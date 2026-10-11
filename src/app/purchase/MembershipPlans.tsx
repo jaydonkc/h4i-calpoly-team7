@@ -85,6 +85,7 @@ export default function MembershipPlans() {
 
               <button
                 className="tierButton"
+                disabled={pending}
                 onClick={() => {
                   if (!isUserSignedIn) {
                     loginPromptRef.current?.showModal();
@@ -120,6 +121,9 @@ export default function MembershipPlans() {
           ref={dialogRef}
           className="paymentForm"
           aria-labelledby="purchase-dialog-title"
+          onCancel={(event) => {
+            if (pending) event.preventDefault();
+          }}
           onClose={() => setSelectedTier(null)}
         >
           <h2 id="purchase-dialog-title">Demo checkout: {selectedTier.name}</h2>

@@ -17,8 +17,8 @@ type ClassesPageProps = {
 
 export default function ClassesPage({ initialSchedule, errorMessage = null, onRetry }: ClassesPageProps) {
   const router = useRouter();
-  const { preferences, profileLoading, isLoading, reservationsError, retryAccount } = useAuth();
-  const preferenceApplied = useRef(false);
+  const { preferences, profileLoading, profileError, user, isLoading, reservationsError, retryAccount } = useAuth();
+  const preferenceApplied = useRef<string | null | undefined>(undefined);
   const today = initialSchedule.days.find((item) => item.isToday)?.date ?? initialSchedule.days[0]?.date ?? "";
   const classList = initialSchedule.classes;
 
@@ -33,12 +33,12 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
     [appliedInstructors, setAppliedInstructors] = useState<string[]>([]),
     [openFilter, setOpenFilter] = useState<FilterMenu | null>(null);
   useEffect(() => {
-    if (isLoading || profileLoading || preferenceApplied.current) return;
+    if (isLoading || profileLoading || profileError || preferenceApplied.current === (user?.id ?? null)) return;
     const categories = preferences.defaultClassCategory === "All" ? [] : [preferences.defaultClassCategory];
     setDraftCategories(categories);
     setAppliedCategories(categories);
-    preferenceApplied.current = true;
-  }, [isLoading, profileLoading, preferences.defaultClassCategory]);
+    preferenceApplied.current = user?.id ?? null;
+  }, [isLoading, profileLoading, profileError, user?.id, preferences.defaultClassCategory]);
   const classes = useMemo(() => {
     const list = classList.filter((item) => item.date === day);
     return list.filter(

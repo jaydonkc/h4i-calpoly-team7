@@ -3,7 +3,7 @@ import connectDB from "@/database/db";
 import ReservationModel from "@/database/reservationSchema";
 import OccurrenceModel from "@/database/classOccurrenceSchema";
 import { classRepository } from "@/lib/classes/class-repository";
-import { getGymCalendarDate, toIsoDate } from "@/lib/classes/class-dates";
+import { hasClassStarted } from "@/lib/classes/class-start";
 import { AccountError } from "@/lib/account/http";
 import type { FitnessClass, ClassSchedule } from "@/types/fitness-class";
 
@@ -34,15 +34,7 @@ export async function reserve(userId: string, classId: string, date: string) {
   const schedule = await classRepository.getSchedule({ date });
   const fitnessClass = schedule.classes.find((item) => String(item.id) === classId && item.date === date);
   if (!fitnessClass) throw new AccountError("This class is no longer on the schedule.", 404);
-  const today = toIsoDate(getGymCalendarDate(new Date()));
-  const localTime = new Intl.DateTimeFormat("en-GB", {
-    timeZone: "America/Los_Angeles",
-    hour: "2-digit",
-    minute: "2-digit",
-    hourCycle: "h23",
-  }).format(new Date());
-  if (date < today || (date === today && fitnessClass.time <= localTime))
-    throw new AccountError("This class has already started.", 409);
+  if (hasClassStarted(date, fitnessClass.time)) throw new AccountError("This class has already started.", 409);
   await Promise.all([ReservationModel.init(), OccurrenceModel.init()]);
   // Each dated occurrence has its own capacity, including legacy recurring classes.
   try {

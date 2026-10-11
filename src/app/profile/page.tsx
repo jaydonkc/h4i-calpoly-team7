@@ -231,7 +231,14 @@ export default function Profile() {
                       : "Not active"}
               </span>
             </div>
-            {membershipError && <p role="alert">{membershipError}</p>}
+            {membershipError && (
+              <p role="alert">
+                {membershipError}{" "}
+                <button type="button" onClick={retryAccount}>
+                  Retry membership
+                </button>
+              </p>
+            )}
             <dl>
               <div>
                 <dt>Plan</dt>
@@ -312,6 +319,7 @@ export default function Profile() {
                   </button>
                   <button
                     type="button"
+                    disabled={pending}
                     onClick={() => {
                       setIsEditingProfile(false);
                       setProfileMessage("");

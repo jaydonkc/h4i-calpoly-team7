@@ -31,6 +31,12 @@ export function accountRoute(action: (request: NextRequest, user: User) => Promi
       if (error || !user) throw new AccountError("Please log in.", 401);
       return NextResponse.json(await action(request, user), { headers });
     } catch (error) {
+      if (!(error instanceof AccountError))
+        console.error("Account storage request failed", {
+          route: request.nextUrl.pathname,
+          name: error instanceof Error ? error.name : "UnknownError",
+          code: typeof (error as { code?: unknown })?.code === "number" ? (error as { code: number }).code : undefined,
+        });
       return NextResponse.json(
         {
           error:
