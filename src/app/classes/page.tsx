@@ -7,6 +7,8 @@ export const dynamic = "force-dynamic";
 const URL = "http://localhost:3000";
 
 const emptySchedule: ClassSchedule = {
+  weekLabel: "",
+  days: [],
   classes: [],
 };
 
