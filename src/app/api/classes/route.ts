@@ -3,6 +3,8 @@ import FitnessClasses from "@/database/userSchema";
 import { classRepository } from "@/lib/classes/class-repository";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   await connectDB();
   try {
