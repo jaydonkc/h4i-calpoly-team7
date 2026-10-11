@@ -3,8 +3,10 @@ import { getGymCalendarDate, toIsoDate } from "@/lib/classes/class-dates";
 import connectDB from "@/database/db";
 import FitnessClassModel from "@/database/userSchema";
 import type { ClassQuery, ClassSchedule, FitnessClass } from "@/types/fitness-class";
+import type { ClassInput } from "@/lib/classes/class-input";
 
 export interface ClassRepository {
+  create(input: ClassInput): Promise<FitnessClass>;
   getSchedule(query?: ClassQuery): Promise<ClassSchedule>;
   getById(id: FitnessClass["id"]): Promise<FitnessClass | null>;
 }
@@ -86,6 +88,12 @@ function getTimeSortValue(time: string) {
 }
 
 class MongoClassRepository implements ClassRepository {
+  async create(input: ClassInput): Promise<FitnessClass> {
+    await connectDB();
+    const record = await FitnessClassModel.create(input);
+    return toFitnessClass(record.toObject() as ClassRecord);
+  }
+
   async getSchedule(query: ClassQuery = {}): Promise<ClassSchedule> {
     await connectDB();
 

@@ -2,21 +2,27 @@ import mongoose, { Schema } from "mongoose";
 import { isValidClassDate } from "@/lib/classes/class-dates";
 import { classCategories } from "@/types/fitness-class";
 
-//! Example user schema. Not guaranteed to work
-
 const fitnessClassSchema = new Schema(
   {
     date: { type: String, required: true, validate: isValidClassDate },
-    title: { type: String, required: true },
+    title: { type: String, required: true, trim: true },
     category: { type: String, required: true, enum: classCategories },
     time: { type: String, required: true, match: /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/ },
-    end: { type: String, required: true, match: /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/ },
-    coach: { type: String, required: true },
-    room: { type: String, required: true },
+    end: {
+      type: String,
+      required: true,
+      match: /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/,
+      validate: function (this: { time: string }, end: string) {
+        const minutes = (time: string) => Number(time.split(":")[0]) * 60 + Number(time.split(":")[1]);
+        return minutes(end) > minutes(this.time ?? "");
+      },
+    },
+    coach: { type: String, required: true, trim: true },
+    room: { type: String, required: true, trim: true },
     level: { type: String, required: true, enum: ["All levels", "Beginner", "Intermediate", "Advanced"] },
-    duration: { type: String, required: true },
+    duration: { type: String, required: true, trim: true },
     spots: { type: Number, required: true, min: 0, validate: Number.isInteger },
-    description: { type: String, required: true },
+    description: { type: String, required: true, trim: true },
   },
   { bufferCommands: false, autoCreate: false, autoIndex: false },
 );

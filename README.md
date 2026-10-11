@@ -98,3 +98,5 @@ npm run build
 Follow [getting-started.md](docs/getting-started.md) for setup details and [contributing.md](docs/contributing.md) for the branch and pull-request workflow. Changes should be reviewed on `dev` before release to `main`.
 
 Account profiles, preferences, reservations, and demo checkout history persist in MongoDB and are linked to verified Supabase identities. See [Account data](docs/account-data.md) for API contracts and persistence checks. Demo checkout does not process payments.
+
+See [Classes API](docs/classes-api.md) for writable class fields, creation responses, form error handling, and the pending development Atlas persistence check.
