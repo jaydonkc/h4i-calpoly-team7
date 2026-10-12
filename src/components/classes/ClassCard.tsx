@@ -1,8 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { classReturnPath, loginPath } from "@/lib/auth/redirect";
 import { createPortal } from "react-dom";
 import { formatClassTime } from "@/types/account";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import type { FitnessClass } from "@/types/fitness-class";
 import Icon from "./Icon";
@@ -12,8 +14,10 @@ type ClassCardProps = {
 };
 
 export default function ClassCard({ fitnessClass }: ClassCardProps) {
+  const router = useRouter();
   const {
     isUserSignedIn,
+    isLoading,
     reservedClasses,
     reserveClass,
     cancelReservation,
@@ -25,11 +29,28 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const busy = useRef(false);
+  const reserveButton = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    if (
+      isUserSignedIn &&
+      !reservationsLoading &&
+      query.get("class") === String(fitnessClass.id) &&
+      query.get("day") === fitnessClass.date
+    ) {
+      reserveButton.current?.focus();
+      reserveButton.current?.scrollIntoView({ block: "center" });
+    }
+  }, [isUserSignedIn, reservationsLoading, fitnessClass.id, fitnessClass.date]);
   const isBooked = reservedClasses.some(
     (reservedClass) => reservedClass.id === fitnessClass.id && reservedClass.date === fitnessClass.date,
   );
 
   async function toggleReservation() {
+    if (!isUserSignedIn) {
+      router.push(loginPath(classReturnPath(String(fitnessClass.id), fitnessClass.date)));
+      return;
+    }
     if (busy.current) return;
     busy.current = true;
     setPending(true);
@@ -47,7 +68,7 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
   }
 
   return (
-    <article className="classcard">
+    <article className="classcard" id={`class-${fitnessClass.id}-${fitnessClass.date}`}>
       <div className="table-cell class-time" data-label="Time">
         <strong>{formatClassTime(fitnessClass.time, preferences.timeFormat)}</strong>
         <span>to {formatClassTime(fitnessClass.end, preferences.timeFormat)}</span>
@@ -78,27 +99,30 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
         <span> spots</span>
       </div>
       <button
+        ref={reserveButton}
         className={`reserve ${isBooked ? "cancel" : ""}`}
         aria-pressed={isUserSignedIn ? isBooked : undefined}
         aria-label={isUserSignedIn ? undefined : `Log in to reserve ${fitnessClass.title}`}
         disabled={
-          !isUserSignedIn ||
+          isLoading ||
           pending ||
-          reservationsLoading ||
-          Boolean(reservationsError) ||
-          (!isBooked && fitnessClass.spots === 0)
+          (isUserSignedIn && reservationsLoading) ||
+          (isUserSignedIn && Boolean(reservationsError)) ||
+          (isUserSignedIn && !isBooked && fitnessClass.spots === 0)
         }
         onClick={toggleReservation}
       >
-        {pending
-          ? "Saving…"
-          : isUserSignedIn
-            ? isBooked
-              ? "Cancel"
-              : fitnessClass.spots === 0
-                ? "Full"
-                : "Reserve"
-            : "Log in to reserve"}
+        {isLoading
+          ? "Checking session…"
+          : pending
+            ? "Saving…"
+            : isUserSignedIn
+              ? isBooked
+                ? "Cancel"
+                : fitnessClass.spots === 0
+                  ? "Full"
+                  : "Reserve"
+              : "Log in to reserve"}
       </button>
       {error && (
         <p role="alert" className="reservation-error">

@@ -39,6 +39,16 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
     setAppliedCategories(categories);
     preferenceApplied.current = user?.id ?? null;
   }, [isLoading, profileLoading, profileError, user?.id, preferences.defaultClassCategory]);
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    const requestedDay = query.get("day");
+    if (initialSchedule.days.some((item) => item.date === requestedDay)) setDay(requestedDay!);
+    // Return to the selected class even if the saved default filter would hide it.
+    if (query.has("class")) {
+      setAppliedCategories([]);
+      setDraftCategories([]);
+    }
+  }, [initialSchedule.days, profileLoading]);
   const classes = useMemo(() => {
     const list = classList.filter((item) => item.date === day);
     return list.filter(

@@ -1,5 +1,6 @@
 "use client";
 
+import { loginPath } from "@/lib/auth/redirect";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -28,8 +29,9 @@ const tiers: Array<{ name: MembershipPlan; price: string; description: string; p
 ];
 
 export default function MembershipPlans() {
-  const { isUserSignedIn, purchaseMembership } = useAuth();
+  const { isUserSignedIn, isLoading, purchaseMembership } = useAuth();
   // adds button functionality
+  const [loginTier, setLoginTier] = useState<MembershipPlan | null>(null);
   const [selectedTier, setSelectedTier] = useState<(typeof tiers)[number] | null>(null);
   // disables background click
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -42,6 +44,16 @@ export default function MembershipPlans() {
   const [pending, setPending] = useState(false);
   const busy = useRef(false);
   const checkoutKey = useRef("");
+
+  useEffect(() => {
+    if (!isUserSignedIn) return;
+    const name = new URLSearchParams(window.location.search).get("plan");
+    const tier = tiers.find((item) => item.name === name);
+    if (tier) {
+      checkoutKey.current = crypto.randomUUID();
+      setSelectedTier(tier);
+    }
+  }, [isUserSignedIn]);
 
   useEffect(() => {
     if (selectedTier) dialogRef.current?.showModal();
@@ -85,9 +97,10 @@ export default function MembershipPlans() {
 
               <button
                 className="tierButton"
-                disabled={pending}
+                disabled={pending || isLoading}
                 onClick={() => {
                   if (!isUserSignedIn) {
+                    setLoginTier(tier.name);
                     loginPromptRef.current?.showModal();
                     return;
                   }
@@ -112,7 +125,7 @@ export default function MembershipPlans() {
           <button type="button" onClick={() => loginPromptRef.current?.close()}>
             Not Now
           </button>
-          <Link href="/profile">Continue to Log In</Link>
+          <Link href={loginPath(`/purchase?plan=${loginTier ?? "Standard"}`)}>Continue to Log In</Link>
         </div>
       </dialog>
 

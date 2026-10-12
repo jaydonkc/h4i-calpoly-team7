@@ -51,3 +51,9 @@ For the live test, run on `http://localhost:3000`, which is already allowed by t
 Issue: https://github.com/jaydonkc/h4i-calpoly-team7/issues/32
 
 References: [Supabase SSR client guide](https://supabase.com/docs/guides/auth/server-side/creating-a-client?framework=nextjs), [password recovery API](https://supabase.com/docs/reference/javascript/auth-resetpasswordforemail).
+
+## Login and account access
+
+`/login` hosts the public login, registration, and recovery forms. `/profile` verifies the cookie session with Supabase on the server before rendering account controls. Signed-out requests are redirected to login with a validated internal return path; authentication outages show a retry state. Account APIs independently verify identity and return 401 for signed-out requests or 503 for provider outages.
+
+The browser client persists the session in cookies and listens for authentication changes; middleware refreshes those cookies across pages. Log Out ends the current browser session with Supabase's local sign-out scope and clears all account state. Class login links preserve the class date and selection and focus its Reserve action after login. Membership login links restore the selected plan's confirmation dialog. Returning after login does not automatically book a class or complete checkout.

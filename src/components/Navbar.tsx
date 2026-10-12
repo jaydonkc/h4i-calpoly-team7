@@ -118,9 +118,9 @@ export default function Navbar() {
         <div className={styles.actions}>
           <Link
             className={styles.account}
-            href="/profile"
+            href={user || isLoading ? "/profile" : "/login"}
             aria-label={user ? "Account for " + user.firstName + " " + user.lastName : "Log in"}
-            aria-current={isActive(pathname, "/profile") ? "page" : undefined}
+            aria-current={isActive(pathname, "/profile") || isActive(pathname, "/login") ? "page" : undefined}
             onClick={() => setMenuOpen(false)}
           >
             <span>{accountLabel}</span>
