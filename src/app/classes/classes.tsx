@@ -57,10 +57,12 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
       ),
     [initialSchedule.classes],
   );
-  const levels = useMemo(
-    () => Array.from(new Set(initialSchedule.classes.map((item) => item.level))).sort(),
-    [initialSchedule.classes],
-  );
+  const levels = useMemo(() => {
+    const schedule = ["All levels", "Beginner", "Intermediate", "Advanced"];
+    return Array.from(new Set(initialSchedule.classes.map((item) => item.level))).sort((a, b) => {
+      return schedule.indexOf(a) - schedule.indexOf(b);
+    });
+  }, [initialSchedule.classes]);
   const instructors = useMemo(
     () => Array.from(new Set(initialSchedule.classes.map((item) => item.coach))).sort(),
     [initialSchedule.classes],
