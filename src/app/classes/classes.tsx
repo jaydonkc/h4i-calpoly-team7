@@ -13,9 +13,10 @@ type ClassesPageProps = {
   initialSchedule: ClassSchedule;
   errorMessage?: string | null;
   onRetry?: () => void;
+  onRefresh?: () => void;
 };
 
-export default function ClassesPage({ initialSchedule, errorMessage = null, onRetry }: ClassesPageProps) {
+export default function ClassesPage({ initialSchedule, errorMessage = null, onRetry, onRefresh }: ClassesPageProps) {
   const router = useRouter();
   const { preferences, profileLoading, profileError, user, isLoading, reservationsError, retryAccount } = useAuth();
   const preferenceApplied = useRef<string | null | undefined>(undefined);
@@ -57,10 +58,12 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
       ),
     [initialSchedule.classes],
   );
-  const levels = useMemo(
-    () => Array.from(new Set(initialSchedule.classes.map((item) => item.level))).sort(),
-    [initialSchedule.classes],
-  );
+  const levels = useMemo(() => {
+    const schedule = ["All levels", "Beginner", "Intermediate", "Advanced"];
+    return Array.from(new Set(initialSchedule.classes.map((item) => item.level))).sort((a, b) => {
+      return schedule.indexOf(a) - schedule.indexOf(b);
+    });
+  }, [initialSchedule.classes]);
   const instructors = useMemo(
     () => Array.from(new Set(initialSchedule.classes.map((item) => item.coach))).sort(),
     [initialSchedule.classes],
@@ -78,6 +81,7 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
     setAppliedLevels(draftLevels);
     setAppliedInstructors(draftInstructors);
     setOpenFilter(null);
+    onRefresh?.();
   }
 
   function toggleFilter(filter: FilterMenu) {

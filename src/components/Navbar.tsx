@@ -49,6 +49,24 @@ export default function Navbar() {
   }, [pathname]);
 
   useEffect(() => {
+    const header = navRef.current?.closest("header");
+    if (!header) return;
+
+    // Keep floating notifications below the header when its height changes.
+    const updateHeaderHeight = () => {
+      document.documentElement.style.setProperty("--site-header-height", `${header.getBoundingClientRect().height}px`);
+    };
+    updateHeaderHeight();
+
+    const observer = new ResizeObserver(updateHeaderHeight);
+    observer.observe(header, { box: "border-box" });
+    return () => {
+      observer.disconnect();
+      document.documentElement.style.removeProperty("--site-header-height");
+    };
+  }, []);
+
+  useEffect(() => {
     if (!menuOpen) return;
 
     function onKeyDown(event: KeyboardEvent) {

@@ -552,8 +552,8 @@
 
 .booking-popup {
   position: fixed;
-  z-index: 1000;
-  top: 6.5rem;
+  z-index: 20;
+  top: calc(var(--site-header-height, 89px) + 0.75rem);
   right: 1.5rem;
   box-sizing: border-box;
   display: grid;

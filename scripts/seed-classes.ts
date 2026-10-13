@@ -12,8 +12,8 @@ async function main() {
 
   try {
     await connectDB();
-    const count = await seedClasses(); // calls function to change days in classes.json to  current date
-    console.log(`Seeded ${count} example classes for today.`);
+    const count = await seedClasses();
+    console.log(`Seeded ${count} example classes across the current week.`);
   } finally {
     await mongoose.disconnect();
   }
