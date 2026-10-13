@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from "react";
 import type { Membership } from "@/types/membership";
+import { isAuthProviderUnavailable, signInErrorMessage } from "@/lib/auth/errors";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -30,6 +31,7 @@ type AuthContextValue = {
   reservedClasses: FitnessClass[];
   isLoading: boolean;
   authError: string;
+  retrySession: () => void;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (user: AccountUser, password: string, next: string) => Promise<boolean>;
   requestPasswordReset: (email: string) => Promise<void>;
@@ -73,6 +75,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const [isLoading, setIsLoading] = useState(true);
   const [authError, setAuthError] = useState("");
+
+  const [sessionAttempt, setSessionAttempt] = useState(0);
 
   const userId = useRef<string | null>(null);
   const authRevision = useRef(0);
@@ -120,6 +124,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
+    setIsLoading(true);
+    setAuthError("");
     let unsubscribe = () => {};
     try {
       const client = createClient();
@@ -131,6 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         authRevision.current += 1;
         applyUser(session?.user ?? null);
         setIsLoading(false);
+        setAuthError("");
         if (!session) {
           setMembership(null);
           setReservedClasses([]);
@@ -142,11 +149,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .getUser()
         .then(({ data, error }) => {
           if (!active || revision !== authRevision.current) return;
-          applyUser(error ? null : data.user);
+          if (isAuthProviderUnavailable(error)) {
+            setAuthError("Unable to check your session. Please try again.");
+          } else {
+            applyUser(error ? null : data.user);
+          }
           setIsLoading(false);
         })
         .catch(() => {
-          if (active) {
+          if (active && revision === authRevision.current) {
             setAuthError("Unable to check your session. Please try again.");
             setIsLoading(false);
           }
@@ -159,7 +170,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       active = false;
       unsubscribe();
     };
-  }, []);
+  }, [sessionAttempt]);
 
   const accountId = user?.id;
   useEffect(() => {
@@ -250,10 +261,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [accountId, accountAttempt]);
 
   async function signIn(email: string, password: string) {
-    const { data, error } = await createClient().auth.signInWithPassword({ email, password });
-    if (error) throw new Error(error.message);
-    applyUser(data.user);
-    setAuthError("");
+    try {
+      const { data, error } = await createClient().auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      if (!data.user) throw new Error("Missing identity");
+      authRevision.current += 1;
+      applyUser(data.user);
+      setIsLoading(false);
+      setAuthError("");
+    } catch (error) {
+      throw new Error(signInErrorMessage(error));
+    }
   }
 
   function emailCallback(next: string) {
@@ -349,11 +367,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signOut() {
-    const { error } = await createClient().auth.signOut();
-    if (error) throw new Error(error.message);
-    setUser(null);
-    setMembership(null);
-    setReservedClasses([]);
+    const { error } = await createClient().auth.signOut({ scope: "local" });
+    if (error) throw new Error("Unable to log out. Check your connection and try again.");
+    authRevision.current += 1;
+    applyUser(null);
+    setIsLoading(false);
+    setAuthError("");
   }
 
   return (
@@ -367,6 +386,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         reservedClasses,
         isLoading,
         authError,
+        retrySession: () => setSessionAttempt((current) => current + 1),
         signIn,
         signUp,
         requestPasswordReset,

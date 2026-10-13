@@ -59,7 +59,7 @@ describe("authentication redirects", () => {
   it("returns a recoverable error for an expired code", async () => {
     auth.exchangeCodeForSession.mockResolvedValue({ error: new Error("expired") });
     const response = await callback(new NextRequest("https://gym.example/auth/callback?code=expired"));
-    expect(response.headers.get("location")).toBe("https://gym.example/profile?authError=callback");
+    expect(response.headers.get("location")).toBe("https://gym.example/login?next=%2Fprofile&authError=callback");
   });
   it("does not exchange a missing code", async () => {
     await callback(new NextRequest("https://gym.example/auth/callback"));

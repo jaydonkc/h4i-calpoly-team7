@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { safeNextPath } from "@/lib/auth/redirect";
+import { loginPath, safeNextPath } from "@/lib/auth/redirect";
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
@@ -26,5 +26,5 @@ export async function GET(request: NextRequest) {
       // Show a recoverable error without exposing provider details or tokens.
     }
   }
-  return NextResponse.redirect(new URL("/profile?authError=callback", request.nextUrl.origin));
+  return NextResponse.redirect(new URL(loginPath(next, "callback"), request.nextUrl.origin));
 }

@@ -20,6 +20,7 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
   const router = useRouter();
   const { preferences, profileLoading, profileError, user, isLoading, reservationsError, retryAccount } = useAuth();
   const preferenceApplied = useRef<string | null | undefined>(undefined);
+  const returnApplied = useRef(false);
   const today = initialSchedule.days.find((item) => item.isToday)?.date ?? initialSchedule.days[0]?.date ?? "";
   const classList = initialSchedule.classes;
 
@@ -40,6 +41,18 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
     setAppliedCategories(categories);
     preferenceApplied.current = user?.id ?? null;
   }, [isLoading, profileLoading, profileError, user?.id, preferences.defaultClassCategory]);
+  useEffect(() => {
+    if (profileLoading || !initialSchedule.days.length || returnApplied.current) return;
+    returnApplied.current = true;
+    const query = new URLSearchParams(window.location.search);
+    const requestedDay = query.get("day");
+    if (initialSchedule.days.some((item) => item.date === requestedDay)) setDay(requestedDay!);
+    // Return to the selected class even if the saved default filter would hide it.
+    if (query.has("class")) {
+      setAppliedCategories([]);
+      setDraftCategories([]);
+    }
+  }, [initialSchedule.days, profileLoading]);
   const classes = useMemo(() => {
     const list = classList.filter((item) => item.date === day);
     return list.filter(

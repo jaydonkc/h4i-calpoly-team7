@@ -15,6 +15,6 @@ export default async function ResetPassword() {
   } catch {
     // Invalid/expired recovery sessions return to the login flow.
   }
-  if (!signedIn) redirect("/profile?authError=recovery");
+  if (!signedIn) redirect("/login?authError=recovery");
   return <PasswordResetForm />;
 }
