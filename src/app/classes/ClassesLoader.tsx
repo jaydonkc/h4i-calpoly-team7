@@ -13,6 +13,10 @@ export default function ClassesLoader() {
   const { reservationsRevision } = useAuth();
   const [attempt, setAttempt] = useState(0);
 
+  function refreshSchedule() {
+    setAttempt((current) => current + 1);
+  }
+
   useEffect(() => {
     const controller = new AbortController();
     // Keep the current schedule and booking confirmation visible during refresh.
@@ -46,10 +50,11 @@ export default function ClassesLoader() {
 
   return (
     <ClassesPage
-      key={errorMessage === null ? (schedule.days[0]?.date ?? "empty") : errorMessage}
+      key={schedule.days[0]?.date ?? "empty"}
       initialSchedule={schedule}
       errorMessage={errorMessage}
-      onRetry={() => setAttempt((current) => current + 1)}
+      onRetry={refreshSchedule}
+      onRefresh={refreshSchedule}
     />
   );
 }
