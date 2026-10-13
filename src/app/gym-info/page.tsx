@@ -141,7 +141,7 @@ export default async function GymInfoPage() {
             <article key={location.name}>
               <h3>{location.name}</h3>
               <address>{location.region}</address>
-              <p>Address and hours pending partner review.</p>
+              <p>{location.hours}</p>
             </article>
           ))}
         </div>
