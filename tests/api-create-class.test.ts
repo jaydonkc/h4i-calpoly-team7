@@ -1,9 +1,11 @@
+import { adminAccess } from "@/lib/admin/access";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Error as MongooseError } from "mongoose";
 import connectDB from "@/database/db";
 import Model from "@/database/userSchema";
 import { GET, POST } from "@/app/api/classes/route";
 
+vi.mock("@/lib/admin/access", () => ({ adminAccess: vi.fn(async () => ({ status: 200 })) }));
 vi.mock("@/database/db", () => ({ default: vi.fn() }));
 vi.mock("@/lib/account/reservations", () => ({ availableSchedule: async (schedule: unknown) => schedule }));
 afterEach(() => {
@@ -32,6 +34,20 @@ const request = (body: unknown) =>
   });
 
 describe("POST /api/classes", () => {
+  it.each([401, 403, 503])("denies access with %s before any write", async (status) => {
+    vi.mocked(adminAccess).mockResolvedValueOnce({ status, message: "Denied" });
+    const create = vi.spyOn(Model, "create");
+    const response = await POST(request(validClass));
+    expect(response.status).toBe(status);
+    expect(create).not.toHaveBeenCalled();
+  });
+  it("rejects a cross-site mutation before writing", async () => {
+    const req = request(validClass);
+    req.headers.set("origin", "https://elsewhere.example");
+    const response = await POST(req);
+    expect(response.status).toBe(403);
+    expect(connectDB).not.toHaveBeenCalled();
+  });
   it("accepts a leap date, midnight start, and zero spots", async () => {
     const input = { ...validClass, date: "2028-02-29", time: "00:00", end: "00:01", spots: 0 };
     const saved = new Model(input);
@@ -70,7 +86,9 @@ describe("POST /api/classes", () => {
       exec: vi.fn().mockResolvedValue([saved.toObject()]),
     };
     vi.spyOn(Model, "find").mockReturnValue(query as unknown as ReturnType<typeof Model.find>);
-    expect((await (await GET()).json()).data.classes).toEqual([{ ...validClass, id: saved._id.toString() }]);
+    expect((await (await GET(new Request("http://localhost/api/classes"))).json()).data.classes).toEqual([
+      { ...validClass, id: saved._id.toString() },
+    ]);
   });
 
   it.each([
@@ -122,7 +140,13 @@ describe("POST /api/classes", () => {
 
   it("rejects malformed JSON without writing", async () => {
     const create = vi.spyOn(Model, "create");
-    const response = await POST(new Request("http://localhost/api/classes", { method: "POST", body: "{" }));
+    const response = await POST(
+      new Request("http://localhost/api/classes", {
+        method: "POST",
+        body: "{",
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
     expect(response.status).toBe(400);
     expect((await response.json()).fieldErrors._form).toBeDefined();
     expect(connectDB).not.toHaveBeenCalled();

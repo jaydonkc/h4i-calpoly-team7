@@ -11,20 +11,20 @@ const tiers: Array<{ name: MembershipPlan; price: string; description: string; p
   {
     name: "Student",
     price: "$10/mo",
-    description: "Student membership for gym.",
-    perks: ["perk1", "perk2", "perk3"],
+    description: "For study breaks that turn into personal bests.",
+    perks: ["All four gym locations", "Every scheduled group class", "A study break with actual movement"],
   },
   {
     name: "Standard",
     price: "$15/mo",
-    description: "Standard Membership.",
-    perks: ["perk1", "perk2", "perk3"],
+    description: "Your everyday training arc starts here.",
+    perks: ["All four gym locations", "Every scheduled group class", "A routine worth showing up for"],
   },
   {
     name: "Premium",
     price: "$30/mo",
-    description: "Access to a spa or smth.",
-    perks: ["perk1", "perk2", "perk3"],
+    description: "Same great gym. Maximum main-character energy.",
+    perks: ["All four gym locations", "Every scheduled group class", "Premium bragging rights on your member card"],
   },
 ];
 

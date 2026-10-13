@@ -10,6 +10,7 @@ export type FitnessClass = {
   end: string;
   coach: string;
   room: string;
+  location?: string;
   level: string;
   duration: string;
   spots: number;
@@ -22,4 +23,4 @@ export type ClassSchedule = {
   classes: FitnessClass[];
 };
 
-export type ClassQuery = { date?: string; category?: ClassCategory };
+export type ClassQuery = { weekStart?: string; date?: string; category?: ClassCategory };

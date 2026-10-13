@@ -13,6 +13,8 @@ import ReservationModel from "@/database/reservationSchema";
 import OccurrenceModel from "@/database/classOccurrenceSchema";
 import OrderModel from "@/database/demoOrderSchema";
 import MembershipModel from "@/database/membershipSchema";
+import ContactModel from "@/database/contactMessageSchema";
+import { validateMessage } from "@/lib/account/contact";
 const scope = vi.hoisted(() => ({ prefix: `accounttest_${Date.now()}_${Math.random().toString(16).slice(2, 10)}` }));
 vi.mock("@/database/accountSchema", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/database/accountSchema")>();
@@ -44,6 +46,11 @@ vi.mock("@/database/userSchema", async (importOriginal) => {
   const { default: db } = await import("mongoose");
   return { default: db.model(`${scope.prefix}_classes`, actual.default.schema, `${scope.prefix}_classes`) };
 });
+vi.mock("@/database/contactMessageSchema", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/database/contactMessageSchema")>();
+  const { default: db } = await import("mongoose");
+  return { default: db.model(`${scope.prefix}_messages`, actual.default.schema, `${scope.prefix}_messages`) };
+});
 const integration = process.env.ACCOUNT_INTEGRATION_TESTS === "1" ? describe : describe.skip;
 integration("MongoDB account persistence and transactions in isolated test collections", () => {
   const user = {
@@ -74,7 +81,7 @@ integration("MongoDB account persistence and transactions in isolated test colle
       (
         await ClassModel.create({
           date,
-          time: "23:59",
+          time: "23:58",
           end: "23:59",
           title: "Test class",
           category: "Cardio",
@@ -98,6 +105,35 @@ integration("MongoDB account persistence and transactions in isolated test colle
       await mongoose.disconnect();
     }
   }, 30000);
+  it("persists a created class and reads it back with its location", async () => {
+    const input = {
+      date,
+      time: "22:00",
+      end: "23:00",
+      title: "Integration strength",
+      category: "Strength" as const,
+      coach: "Jaydon Chen",
+      room: "The Yard",
+      location: "San Luis Obispo",
+      level: "Beginner",
+      duration: "60 min",
+      spots: 5,
+      description: "Isolated persistence verification",
+    };
+    const saved = await classRepository.create(input);
+    expect(await classRepository.getById(saved.id)).toEqual(saved);
+  });
+  it("saves a validated contact message and reads the inbox record back", async () => {
+    const input = validateMessage({
+      name: "Test Member",
+      email: "test@example.com",
+      topic: "classes",
+      message: "More morning classes please.",
+    });
+    const saved = await ContactModel.create({ ...input, userId: user.id });
+    const loaded = await ContactModel.findById(saved._id).lean();
+    expect(loaded).toMatchObject({ ...input, userId: user.id });
+  });
   it("imports metadata once and persists MongoDB edits and preferences independently per account", async () => {
     expect((await loadProfile(user)).firstName).toBe("Original");
     await saveProfile(user, { firstName: "Updated", lastName: "Member", phone: "8055550199" });
@@ -138,14 +174,22 @@ integration("MongoDB account persistence and transactions in isolated test colle
     const owner = reservation!.userId;
     await reserve(owner, classId, date);
     expect(await ReservationModel.countDocuments({ classId, date })).toBe(1);
-    expect((await availableSchedule(await classRepository.getSchedule())).classes[0].spots).toBe(0);
+    expect(
+      (await availableSchedule(await classRepository.getSchedule())).classes.find(
+        (item) => String(item.id) === classId,
+      )!.spots,
+    ).toBe(0);
     await cancel("unrelated-owner", classId, date);
     expect(await ReservationModel.countDocuments({ classId, date })).toBe(1);
     await cancel(owner, classId, date);
     await cancel(owner, classId, date);
     expect(await listReservations(owner)).toEqual([]);
     expect((await OccurrenceModel.findOne({ classId, date }))!.reservedCount).toBe(0);
-    expect((await availableSchedule(await classRepository.getSchedule())).classes[0].spots).toBe(1);
+    expect(
+      (await availableSchedule(await classRepository.getSchedule())).classes.find(
+        (item) => String(item.id) === classId,
+      )!.spots,
+    ).toBe(1);
   }, 30000);
   it("rejects nonexistent or past classes without creating reservations", async () => {
     await expect(reserve(user.id, classId, "2000-01-01")).rejects.toMatchObject({ status: 404 });

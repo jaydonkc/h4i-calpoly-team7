@@ -5,19 +5,22 @@ import Navbar from "@/components/Navbar";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Gym Website",
-  description: "Gym website details pending partner review.",
+  title: "Fitness Maxxing",
+  description: "A fictional gym with big energy, outrageous coaches, and a working class schedule.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
+        <a className="skip-link" href="#main-content">
+          Skip to content
+        </a>
         <AuthProvider>
           <header className="site-header">
             <Navbar />
           </header>
-          <main>{children}</main>
+          <main id="main-content">{children}</main>
           <Footer />
         </AuthProvider>
       </body>

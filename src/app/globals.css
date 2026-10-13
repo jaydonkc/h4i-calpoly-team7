@@ -26,3 +26,25 @@ a:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 3px;
 }
+
+.skip-link {
+  position: absolute;
+  top: -80px;
+  left: 16px;
+  padding: 12px;
+  background: white;
+  color: #19211e;
+  z-index: 100;
+}
+.skip-link:focus {
+  top: 12px;
+}
+.admin-inbox {
+  max-width: 900px;
+  margin: auto;
+  padding: 48px 24px;
+}
+.admin-inbox article {
+  padding: 24px 0;
+  border-bottom: 1px solid #d8d6cf;
+}

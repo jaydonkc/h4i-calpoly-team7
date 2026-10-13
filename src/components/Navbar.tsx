@@ -10,7 +10,7 @@ import styles from "./Navbar.module.css";
 const links = [
   { href: "/", label: "Home" },
   { href: "/classes", label: "Classes" },
-  { href: "/gym-info", label: "Our gyms" },
+  { href: "/gym-info", label: "About Us" },
   { href: "/contact", label: "Contact" },
 ];
 

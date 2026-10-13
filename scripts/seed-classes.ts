@@ -13,7 +13,7 @@ async function main() {
   try {
     await connectDB();
     const count = await seedClasses();
-    console.log(`Seeded ${count} example classes across the current week.`);
+    console.log(`Seeded ${count} classes across the current week.`);
   } finally {
     await mongoose.disconnect();
   }

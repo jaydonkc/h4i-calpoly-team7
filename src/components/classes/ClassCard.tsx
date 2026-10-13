@@ -75,7 +75,9 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
       </div>
       <div className="table-cell classmain" data-label="Class">
         <div>
-          <mark>{fitnessClass.category}</mark>
+          <mark className={{ Strength: "coral", Cardio: "yellow", "Mind & Body": "blue" }[fitnessClass.category]}>
+            {fitnessClass.category}
+          </mark>
         </div>
         <h3>{fitnessClass.title}</h3>
         <p className="class-description">{fitnessClass.description}</p>
@@ -86,7 +88,7 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
       </div>
       <div className="table-cell" data-label="Location">
         <Icon name="pin" />
-        <span>{fitnessClass.room}</span>
+        <span>{fitnessClass.location ?? fitnessClass.room}</span>
       </div>
       <div className="table-cell" data-label="Duration">
         {fitnessClass.duration}

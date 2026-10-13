@@ -21,6 +21,7 @@ const fitnessClassSchema = new Schema(
     },
     coach: { type: String, required: true, trim: true },
     room: { type: String, required: true, trim: true },
+    location: { type: String, trim: true },
     level: { type: String, required: true, enum: ["All levels", "Beginner", "Intermediate", "Advanced"] },
     duration: { type: String, required: true, trim: true },
     spots: { type: Number, required: true, min: 0, validate: Number.isInteger },

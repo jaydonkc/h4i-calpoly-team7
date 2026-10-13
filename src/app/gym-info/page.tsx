@@ -1,7 +1,5 @@
 import Link from "next/link";
-import { gymLocations } from "@/data/site-content";
-import { classRepository } from "@/lib/classes/class-repository";
-import type { ClassCategory } from "@/types/fitness-class";
+import { gymLocations, coaches } from "@/data/site-content";
 import "./info.css";
 
 export const dynamic = "force-dynamic";
@@ -73,38 +71,21 @@ function AmenityIcon({ name }: { name: AmenityIconName }) {
   );
 }
 
-export default async function GymInfoPage() {
-  const coachCategories = new Map<string, Set<ClassCategory>>();
-
-  try {
-    const schedule = await classRepository.getSchedule();
-    schedule.classes.forEach((fitnessClass) => {
-      const categories = coachCategories.get(fitnessClass.coach) ?? new Set<ClassCategory>();
-      categories.add(fitnessClass.category);
-      coachCategories.set(fitnessClass.coach, categories);
-    });
-  } catch {
-    // The rest of the About page remains available if class data cannot load.
-  }
-
-  const coaches = Array.from(coachCategories, ([name, categories]) => ({
-    name,
-    specialties: Array.from(categories).join(" & "),
-  }));
-
+export default function GymInfoPage() {
   return (
     <div className="about-page">
       <section className="about-intro" aria-labelledby="about-title">
         <h1 id="about-title">About Us</h1>
         <p>
-          FitnessMaxxing is a community-focused gym with quality equipment, experienced coaches, and a variety of
-          classes for every fitness journey.
+          Serious about showing up. Deeply unserious about everything else. Fitness Maxxing is our fictional gym for big
+          lifts, good company, and coaches with wildly questionable trophy cabinets.
         </p>
       </section>
 
       <section className="about-section" aria-labelledby="coaches-title">
         <div className="about-section-heading">
           <h2 id="coaches-title">Our Coaches</h2>
+          <p>Fictional accolades. Excellent energy.</p>
           <Link href="/classes">View Classes →</Link>
         </div>
 
@@ -118,10 +99,7 @@ export default async function GymInfoPage() {
                     <p>{coach.specialties}</p>
                   </div>
                 </div>
-                <p>
-                  Specializes in {coach.specialties.toLowerCase()} sessions and helps members train with confidence and
-                  consistency.
-                </p>
+                <p>{coach.bio}</p>
               </article>
             ))}
           </div>
@@ -141,7 +119,9 @@ export default async function GymInfoPage() {
             <article key={location.name}>
               <h3>{location.name}</h3>
               <address>{location.region}</address>
-              <p>Address and hours pending partner review.</p>
+              <p>{location.address}</p>
+              <p>{location.hours}</p>
+              <p>{location.vibe}</p>
             </article>
           ))}
         </div>

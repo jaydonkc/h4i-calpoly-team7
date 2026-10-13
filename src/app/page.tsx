@@ -7,8 +7,8 @@ type FeatureIcon = "equipment" | "classes" | "location" | "coach";
 const features: Array<{ icon: FeatureIcon; title: string; description: string }> = [
   { icon: "equipment", title: "Modern Equipment", description: "Free weights, cardio, and more" },
   { icon: "classes", title: "Group Classes", description: "A variety of classes every week" },
-  { icon: "location", title: "Multiple Locations", description: "Convenient gyms across the city" },
-  { icon: "coach", title: "Expert Coaches", description: "Support for all fitness levels" },
+  { icon: "location", title: "Multiple Locations", description: "Four clubs. One extremely committed bit." },
+  { icon: "coach", title: "Expert Coaches", description: "Wild trophy cabinets. Welcoming coaching." },
 ];
 
 function FeatureIcon({ name }: { name: FeatureIcon }) {
@@ -60,7 +60,7 @@ export default function Home() {
     <div className={styles.home}>
       <section className={styles.hero} aria-labelledby="home-title">
         <h1 id="home-title">FitnessMaxxing</h1>
-        <p>Quality equipment, expert coaches, and a welcoming community to help you stay consistent.</p>
+        <p>Big lifts. Legendary lore. A gym for your next training arc.</p>
         <div className={styles.actions}>
           <Link className={styles.primaryButton} href="/purchase">
             View Membership Plans
@@ -92,7 +92,8 @@ export default function Home() {
             <article key={location.name}>
               <div>
                 <h3>{location.name}</h3>
-                <address>{location.region}</address>
+                <address>{location.address}</address>
+                <p>{location.hours}</p>
               </div>
               <Link href="/gym-info" aria-label={`Learn more about the ${location.name} location`}>
                 →

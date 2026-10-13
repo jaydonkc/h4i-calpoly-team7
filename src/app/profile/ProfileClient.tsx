@@ -267,9 +267,9 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
               )}
             </dl>
             {membership ? (
-              <button className={styles.accountAction} type="button" disabled title="Digital barcode coming soon">
-                View Barcode
-              </button>
+              <Link className={styles.accountAction} href="/purchase">
+                Change Membership
+              </Link>
             ) : (
               <Link className={styles.accountAction} href="/purchase">
                 View Memberships

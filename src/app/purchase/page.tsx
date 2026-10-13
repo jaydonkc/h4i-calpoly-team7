@@ -69,7 +69,11 @@ export default async function MembershipsPage() {
                       <td>{fitnessClass.room}</td>
                       <td>{fitnessClass.spots}</td>
                       <td>
-                        <Link href="/classes">Sign Up</Link>
+                        <Link
+                          href={`/classes?day=${fitnessClass.date}&class=${fitnessClass.id}#class-${fitnessClass.id}-${fitnessClass.date}`}
+                        >
+                          Sign Up
+                        </Link>
                       </td>
                     </tr>
                   ))}
@@ -91,19 +95,31 @@ export default async function MembershipsPage() {
         <div>
           <details>
             <summary>Can I cancel anytime?</summary>
-            <p>Cancellation terms are pending partner review.</p>
+            <p>
+              There is no recurring billing. Your simulated membership lasts one month, then expires unless you choose a
+              plan again.
+            </p>
           </details>
           <details>
             <summary>Can I change plans?</summary>
-            <p>Plan-change details are pending partner review.</p>
+            <p>
+              Choose another plan and complete its simulated checkout. Your latest selection becomes your current plan
+              for a new month.
+            </p>
           </details>
           <details>
             <summary>Can I visit other locations?</summary>
-            <p>Location access details are pending partner review.</p>
+            <p>
+              Yes. Every plan includes all four Fitness Maxxing locations. Pick the one that best matches your training
+              arc.
+            </p>
           </details>
           <details>
             <summary>Are classes included?</summary>
-            <p>Class access varies by plan and is pending partner review.</p>
+            <p>
+              Every plan includes every group class. Reservations depend on available spots; booking is open to
+              signed-in members of our fictional gym.
+            </p>
           </details>
         </div>
       </section>

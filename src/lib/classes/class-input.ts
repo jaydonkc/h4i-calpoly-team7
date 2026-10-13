@@ -15,7 +15,7 @@ const textFields = [
   "duration",
   "description",
 ] as const;
-const writableFields = new Set<string>([...textFields, "spots"]);
+const writableFields = new Set<string>([...textFields, "spots", "location"]);
 
 export function validateClassInput(
   value: unknown,
@@ -33,6 +33,15 @@ export function validateClassInput(
     const text = typeof input[field] === "string" ? input[field].trim() : "";
     if (!text) fieldErrors[field] = "Enter a nonempty text value.";
     else data[field] = text;
+  }
+  if (input.location !== undefined) {
+    if (typeof input.location !== "string" || !input.location.trim() || input.location.length > 120)
+      fieldErrors.location = "Enter a location up to 120 characters.";
+    else data.location = input.location.trim();
+  }
+  for (const field of textFields) {
+    if (typeof data[field] === "string" && (data[field] as string).length > (field === "description" ? 2000 : 160))
+      fieldErrors[field] = "This value is too long.";
   }
   if (data.date && !isValidClassDate(data.date as string)) fieldErrors.date = "Enter a real date as YYYY-MM-DD.";
   if (data.category && !classCategories.includes(data.category as ClassInput["category"])) {
