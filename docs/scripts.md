@@ -11,7 +11,7 @@ The entry point is `scripts/seed-classes.ts`. Running `npm run dev` in another
 terminal does not set `NODE_ENV` for this command. If `NODE_ENV` != "development", seeding
 cannot occur.
 
-This script copies the examples in `src/data/classes.json` into MongoDB with today's date in `America/Los_Angeles`. Rerunning updates the same examples, including their dates and available spots, without creating duplicates. The JSON stays unchanged. Page loads never
+This script copies the examples in `src/data/classes.json` into MongoDB across the current Monday–Sunday week in `America/Los_Angeles`. The eight examples provide at least one class per day, with two on Monday. Rerunning updates the same examples, including their dates and available spots, without creating duplicates. The JSON stays unchanged. Page loads never
 run the seed command.
 
 If any object in classes.json fails validation, the entire seed is rejected.
