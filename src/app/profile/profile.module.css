@@ -231,6 +231,7 @@
 }
 
 .enrolledTableWrapper {
+  position: relative;
   margin-top: 1rem;
   border: 1px solid #dedfd9;
   border-radius: 8px;
@@ -569,5 +570,86 @@
 @media (prefers-reduced-motion: reduce) {
   .loginButton {
     transition: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .profilePage {
+    padding: 1.25rem 0;
+  }
+
+  .loginCard {
+    padding: 1.5rem 1rem;
+  }
+
+  .accountPage {
+    width: 100%;
+  }
+
+  .accountCard {
+    padding: 1.125rem;
+  }
+
+  .cardTitleRow {
+    flex-wrap: wrap;
+  }
+
+  .unenrollDialog > div,
+  .editActions {
+    flex-wrap: wrap;
+  }
+
+  .unenrollDialog button,
+  .editActions button {
+    flex: 1 1 130px;
+  }
+}
+
+@media (max-width: 600px) {
+  .enrolledTableWrapper table,
+  .enrolledTableWrapper tbody {
+    display: block;
+  }
+
+  .enrolledTableWrapper thead {
+    display: none;
+  }
+
+  .enrolledTableWrapper tbody tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    padding: 1rem;
+    border-bottom: 1px solid #dedfd9;
+  }
+
+  .enrolledTableWrapper td {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0;
+    border: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .enrolledTableWrapper td::before {
+    content: attr(data-label);
+    color: #626963;
+    font-size: 0.75rem;
+  }
+
+  .enrolledTableWrapper td:first-child,
+  .enrolledTableWrapper td:last-child {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
+
+  .enrolledTableWrapper td:first-child {
+    font-weight: 700;
+  }
+
+  .enrolledTableWrapper td:last-child::before {
+    content: none;
   }
 }

@@ -1,11 +1,12 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { createPortal } from "react-dom";
 import { useEffect, useRef, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import ClassCard from "@/components/classes/ClassCard";
 import Icon from "@/components/classes/Icon";
 import MultiSelectFilter from "@/components/classes/MultiSelectFilter";
-import { classCategories, type ClassCategory, type ClassSchedule } from "@/types/fitness-class";
+import { classCategories, type ClassCategory, type ClassSchedule, type FitnessClass } from "@/types/fitness-class";
 type FilterMenu = "categories" | "durations" | "levels" | "instructors";
 type FilterDimension = "category" | "duration" | "level" | "instructor";
 
@@ -34,6 +35,7 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
     [appliedLevels, setAppliedLevels] = useState<string[]>([]),
     [appliedInstructors, setAppliedInstructors] = useState<string[]>([]),
     [openFilter, setOpenFilter] = useState<FilterMenu | null>(null);
+  const [bookedClass, setBookedClass] = useState<FitnessClass | null>(null);
   useEffect(() => {
     if (isLoading || profileLoading || profileError || preferenceApplied.current === (user?.id ?? null)) return;
     const categories = preferences.defaultClassCategory === "All" ? [] : [preferences.defaultClassCategory];
@@ -128,7 +130,7 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
     }).length;
   }
   return (
-    <main id="top">
+    <div id="top">
       <div className="classes-back-row">
         <button type="button" className="classes-back-link" onClick={() => router.back()}>
           <span aria-hidden="true">←</span> Back
@@ -252,7 +254,16 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
                 <span />
               </div>
               {classes.map((fitnessClass) => (
-                <ClassCard key={fitnessClass.id} fitnessClass={fitnessClass} />
+                <ClassCard
+                  key={fitnessClass.id}
+                  fitnessClass={fitnessClass}
+                  onBooked={setBookedClass}
+                  onCanceled={(canceled) =>
+                    setBookedClass((current) =>
+                      current?.id === canceled.id && current.date === canceled.date ? null : current,
+                    )
+                  }
+                />
               ))}
             </div>
           ) : (
@@ -277,6 +288,22 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
           </div>
         )}
       </section>
-    </main>
+      {bookedClass &&
+        createPortal(
+          <div className="booking-popup" role="status" aria-live="polite">
+            <span>
+              <Icon name="check" />
+            </span>
+            <div>
+              <strong>Class Booked!</strong>
+              <small>{bookedClass.title}</small>
+            </div>
+            <button type="button" aria-label="Dismiss confirmation" onClick={() => setBookedClass(null)}>
+              ×
+            </button>
+          </div>,
+          document.body,
+        )}
+    </div>
   );
 }

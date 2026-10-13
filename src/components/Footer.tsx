@@ -4,11 +4,9 @@ import styles from "./Footer.module.css";
 export default function Footer() {
   return (
     <footer className={styles.footer}>
-      <Link className={styles.brand} href="/" aria-label="Fitness Maxxing home">
-        <span className={styles.brandMark} aria-hidden="true">
-          FM
-        </span>
-        <span className={styles.brandName} aria-hidden="true">
+      <Link className={styles.brand} href="/">
+        <span className={styles.brandMark}>FM</span>
+        <span className={styles.brandName}>
           FITNESS
           <br />
           MAXXING
@@ -20,7 +18,7 @@ export default function Footer() {
           href="https://www.instagram.com/fitnessmaxxing_demo/"
           target="_blank"
           rel="noreferrer"
-          aria-label="Fitness Maxxing demo account on Instagram"
+          aria-label="@fitnessmaxxing_demo on Instagram"
         >
           <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
             <rect x="3" y="3" width="18" height="18" rx="5" />

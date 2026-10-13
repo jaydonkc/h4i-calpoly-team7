@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { classReturnPath, loginPath } from "@/lib/auth/redirect";
-import { createPortal } from "react-dom";
 import { formatClassTime } from "@/types/account";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -11,9 +10,11 @@ import Icon from "./Icon";
 
 type ClassCardProps = {
   fitnessClass: FitnessClass;
+  onBooked?: (fitnessClass: FitnessClass) => void;
+  onCanceled?: (fitnessClass: FitnessClass) => void;
 };
 
-export default function ClassCard({ fitnessClass }: ClassCardProps) {
+export default function ClassCard({ fitnessClass, onBooked, onCanceled }: ClassCardProps) {
   const router = useRouter();
   const {
     isUserSignedIn,
@@ -25,7 +26,6 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
     reservationsLoading,
     reservationsError,
   } = useAuth();
-  const [showConfirmation, setShowConfirmation] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const busy = useRef(false);
@@ -56,9 +56,13 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
     setPending(true);
     setError("");
     try {
-      if (isBooked) await cancelReservation(fitnessClass);
-      else await reserveClass(fitnessClass);
-      setShowConfirmation(!isBooked);
+      if (isBooked) {
+        await cancelReservation(fitnessClass);
+        onCanceled?.(fitnessClass);
+      } else {
+        await reserveClass(fitnessClass);
+        onBooked?.(fitnessClass);
+      }
     } catch (error) {
       setError(error instanceof Error ? error.message : "Unable to update your reservation.");
     } finally {
@@ -129,22 +133,6 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
           {error}
         </p>
       )}
-      {showConfirmation &&
-        createPortal(
-          <div className="booking-popup" role="status" aria-live="polite">
-            <span>
-              <Icon name="check" />
-            </span>
-            <div>
-              <strong>Class Booked!</strong>
-              <small>{fitnessClass.title}</small>
-            </div>
-            <button aria-label="Dismiss confirmation" onClick={() => setShowConfirmation(false)}>
-              ×
-            </button>
-          </div>,
-          document.body,
-        )}
     </article>
   );
 }

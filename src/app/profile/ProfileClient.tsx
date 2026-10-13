@@ -62,6 +62,8 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
   const [profileMessage, setProfileMessage] = useState("");
   const [pendingUnenrollment, setPendingUnenrollment] = useState<FitnessClass | null>(null);
   const unenrollDialogRef = useRef<HTMLDialogElement>(null);
+  const unenrollTrigger = useRef<HTMLButtonElement | null>(null);
+  const enrolledHeading = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
     const dialog = unenrollDialogRef.current;
@@ -365,7 +367,9 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
 
         <section className={styles.enrolledSection} aria-labelledby="enrolled-classes-title">
           <div className={styles.enrolledHeading}>
-            <h2 id="enrolled-classes-title">Enrolled Classes</h2>
+            <h2 id="enrolled-classes-title" ref={enrolledHeading} tabIndex={-1}>
+              Enrolled Classes
+            </h2>
             <Link href="/classes">Browse Classes →</Link>
           </div>
           {reservationsLoading ? (
@@ -396,12 +400,12 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
                 <tbody>
                   {reservedClasses.map((fitnessClass) => (
                     <tr key={`${fitnessClass.id}-${fitnessClass.date}`}>
-                      <td>{fitnessClass.title}</td>
-                      <td>{fitnessClass.coach}</td>
-                      <td>{displayClassDate(fitnessClass.date)}</td>
-                      <td>{formatClassTime(fitnessClass.time, preferences.timeFormat)}</td>
-                      <td>{fitnessClass.room}</td>
-                      <td>
+                      <td data-label="Class">{fitnessClass.title}</td>
+                      <td data-label="Instructor">{fitnessClass.coach}</td>
+                      <td data-label="Date">{displayClassDate(fitnessClass.date)}</td>
+                      <td data-label="Time">{formatClassTime(fitnessClass.time, preferences.timeFormat)}</td>
+                      <td data-label="Location">{fitnessClass.room}</td>
+                      <td data-label="Status">
                         <span>Enrolled</span>
                       </td>
                       <td>
@@ -409,7 +413,10 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
                           className={styles.unenrollButton}
                           type="button"
                           aria-label={`Unenroll from ${fitnessClass.title}`}
-                          onClick={() => setPendingUnenrollment(fitnessClass)}
+                          onClick={(event) => {
+                            unenrollTrigger.current = event.currentTarget;
+                            setPendingUnenrollment(fitnessClass);
+                          }}
                         >
                           Unenroll
                         </button>
@@ -431,7 +438,11 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
           ref={unenrollDialogRef}
           className={styles.unenrollDialog}
           aria-labelledby="unenroll-dialog-title"
-          onClose={() => setPendingUnenrollment(null)}
+          onClose={() => {
+            setPendingUnenrollment(null);
+            if (unenrollTrigger.current?.isConnected) unenrollTrigger.current.focus();
+            else enrolledHeading.current?.focus();
+          }}
         >
           <h2 id="unenroll-dialog-title">Unenroll from this class?</h2>
           <p>
