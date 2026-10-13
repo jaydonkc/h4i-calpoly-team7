@@ -91,19 +91,25 @@ export default async function MembershipsPage() {
         <div>
           <details>
             <summary>Can I cancel anytime?</summary>
-            <p>Cancellation terms are pending partner review.</p>
+            <p>
+              Cancelling your membership within the first month will result in a early cancellation fee. To cancel your
+              membership, talk to a representative at one of our locations.
+            </p>
           </details>
           <details>
             <summary>Can I change plans?</summary>
-            <p>Plan-change details are pending partner review.</p>
+            <p>To change your plan, please talk to a representative at one of our locations.</p>
           </details>
           <details>
             <summary>Can I visit other locations?</summary>
-            <p>Location access details are pending partner review.</p>
+            <p>Yes! Any membership tier gives you access to all of our locations.</p>
           </details>
           <details>
             <summary>Are classes included?</summary>
-            <p>Class access varies by plan and is pending partner review.</p>
+            <p>
+              Standard members can book up to 4 fitness classes per week, while premium members can book unlimited
+              fitness classes.
+            </p>
           </details>
         </div>
       </section>

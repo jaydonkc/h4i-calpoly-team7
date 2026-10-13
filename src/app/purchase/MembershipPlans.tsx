@@ -11,20 +11,20 @@ const tiers: Array<{ name: MembershipPlan; price: string; description: string; p
   {
     name: "Student",
     price: "$10/mo",
-    description: "Student membership for gym.",
-    perks: ["perk1", "perk2", "perk3"],
+    description: "Student Membership",
+    perks: ["Access to Sports Facilities", "Access to Locker Rooms", "Free Sports Equipment Rental"],
   },
   {
     name: "Standard",
     price: "$15/mo",
-    description: "Standard Membership.",
-    perks: ["perk1", "perk2", "perk3"],
+    description: "Standard Membership (Includes Student Perks)",
+    perks: ["4 Fitness Classes / Week", "3 Personal Training Sessions", "Sauna Access"],
   },
   {
     name: "Premium",
     price: "$30/mo",
-    description: "Access to a spa or smth.",
-    perks: ["perk1", "perk2", "perk3"],
+    description: "Unlimited Access to Everything (Includes Standard Perks)",
+    perks: ["Unlimited Fitness Classes", "Free Personal Training", "Unlimited Guests"],
   },
 ];
 
@@ -70,7 +70,6 @@ export default function MembershipPlans() {
       <section>
         <div className="membershipBanner">
           <h1>Memberships</h1>
-          <p>Start working out</p>
         </div>
       </section>
 
