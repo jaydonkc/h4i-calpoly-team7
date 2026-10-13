@@ -16,7 +16,7 @@ export async function getMembership(userId: string): Promise<Membership | null> 
   return {
     plan: record.plan,
     memberId: record.memberId,
-    price: record.source === "manual_demo" ? "Complimentary demo" : "Demo — no charge",
+    price: record.source === "manual_demo" ? "Complimentary" : "No charge",
     source: record.source,
     renewalDate: new Intl.DateTimeFormat("en-CA", {
       timeZone: "America/Los_Angeles",

@@ -6,7 +6,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Fitness Maxxing",
-  description: "A fictional gym with big energy, outrageous coaches, and a working class schedule.",
+  description: "Big energy, legendary coaches, and classes for your next training arc.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

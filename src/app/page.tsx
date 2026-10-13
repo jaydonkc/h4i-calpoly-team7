@@ -7,7 +7,7 @@ type FeatureIcon = "equipment" | "classes" | "location" | "coach";
 const features: Array<{ icon: FeatureIcon; title: string; description: string }> = [
   { icon: "equipment", title: "Modern Equipment", description: "Free weights, cardio, and more" },
   { icon: "classes", title: "Group Classes", description: "A variety of classes every week" },
-  { icon: "location", title: "Multiple Locations", description: "Four clubs. One extremely committed bit." },
+  { icon: "location", title: "Multiple Locations", description: "Four clubs. Find your training home." },
   { icon: "coach", title: "Expert Coaches", description: "Wild trophy cabinets. Welcoming coaching." },
 ];
 

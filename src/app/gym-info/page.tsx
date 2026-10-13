@@ -77,15 +77,15 @@ export default function GymInfoPage() {
       <section className="about-intro" aria-labelledby="about-title">
         <h1 id="about-title">About Us</h1>
         <p>
-          Serious about showing up. Deeply unserious about everything else. Fitness Maxxing is our fictional gym for big
-          lifts, good company, and coaches with wildly questionable trophy cabinets.
+          Serious about showing up. Deeply unserious about everything else. Fitness Maxxing is built for big lifts, good
+          company, and coaches with wildly questionable trophy cabinets.
         </p>
       </section>
 
       <section className="about-section" aria-labelledby="coaches-title">
         <div className="about-section-heading">
           <h2 id="coaches-title">Our Coaches</h2>
-          <p>Fictional accolades. Excellent energy.</p>
+          <p>Legendary coaches. Excellent energy.</p>
           <Link href="/classes">View Classes →</Link>
         </div>
 

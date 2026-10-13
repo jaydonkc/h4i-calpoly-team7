@@ -96,15 +96,15 @@ export default async function MembershipsPage() {
           <details>
             <summary>Can I cancel anytime?</summary>
             <p>
-              There is no recurring billing. Your simulated membership lasts one month, then expires unless you choose a
-              plan again.
+              There is no recurring billing. Your membership lasts one month, then expires unless you choose a plan
+              again.
             </p>
           </details>
           <details>
             <summary>Can I change plans?</summary>
             <p>
-              Choose another plan and complete its simulated checkout. Your latest selection becomes your current plan
-              for a new month.
+              Choose another plan and complete checkout. Your latest selection becomes your current plan for a new
+              month.
             </p>
           </details>
           <details>
@@ -118,7 +118,7 @@ export default async function MembershipsPage() {
             <summary>Are classes included?</summary>
             <p>
               Every plan includes every group class. Reservations depend on available spots; booking is open to
-              signed-in members of our fictional gym.
+              signed-in members of Fitness Maxxing.
             </p>
           </details>
         </div>

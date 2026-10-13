@@ -1,4 +1,4 @@
-// Fitness Maxxing is a fictional gym. These are its finished in-universe details.
+// Shared gym locations and coach biographies.
 export const gymLocations = [
   {
     name: "San Luis Obispo",

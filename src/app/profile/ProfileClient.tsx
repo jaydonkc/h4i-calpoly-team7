@@ -463,7 +463,7 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
         <div className={styles.accountGrid}>
           <AccountPreferences />
           <section className={styles.accountCard} aria-labelledby="orders-title">
-            <h2 id="orders-title">Demo Checkout History</h2>
+            <h2 id="orders-title">Membership History</h2>
             <p>No payments or automatic renewals are processed.</p>
             {ordersLoading ? (
               <p role="status">Loading checkout history…</p>
@@ -475,13 +475,13 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
               <ul>
                 {orders.map((order) => (
                   <li key={order.id}>
-                    {order.plan} — ${(order.amountCents / 100).toFixed(2)} simulated,{" "}
+                    {order.plan} — ${(order.amountCents / 100).toFixed(2)} plan price,{" "}
                     {new Date(order.createdAt).toLocaleDateString("en-US", { timeZone: "America/Los_Angeles" })}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p>No demo checkouts yet.</p>
+              <p>No membership selections yet.</p>
             )}
           </section>
         </div>

@@ -18,7 +18,7 @@ export default function Contact() {
       <aside className={styles.details} aria-label="Contact details and frequently asked questions">
         <section>
           <h2>The front desk</h2>
-          <p>Our fictional gym lives right here. Messages stay in the app; we do not send email or make phone calls.</p>
+          <p>Leave a message for the team. You can ask about memberships, classes, or your next visit.</p>
           <Link href="/gym-info">Meet the team →</Link>
         </section>
         <section>
@@ -46,8 +46,7 @@ export default function Contact() {
             <details>
               <summary>Locations &amp; Hours</summary>
               <p>
-                All four clubs have their own opening hours. Check the list above and meet us in the fictional Fitness
-                Maxxing universe.
+                Find opening hours for all four clubs in the list above. Choose your location and plan your next visit.
               </p>
             </details>
             <details>

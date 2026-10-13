@@ -78,7 +78,7 @@ export default function MembershipPlans() {
         <div className="planChoice">
           <h2>Choose your plan</h2>
           <p>Flexible options for all.</p>
-          <p>Demo checkout saves your selection. No payment or automatic renewal will be processed.</p>
+          <p>Choose a plan to get started.</p>
           <p role="status">{purchaseSuccess}</p>
         </div>
 
@@ -139,7 +139,7 @@ export default function MembershipPlans() {
           }}
           onClose={() => setSelectedTier(null)}
         >
-          <h2 id="purchase-dialog-title">Demo checkout: {selectedTier.name}</h2>
+          <h2 id="purchase-dialog-title">Select your membership: {selectedTier.name}</h2>
 
           <div>
             <h3>Billing summary</h3>
@@ -158,7 +158,7 @@ export default function MembershipPlans() {
               setPaymentError("");
               try {
                 await purchaseMembership(selectedTier.name, checkoutKey.current);
-                setPurchaseSuccess(`Demo ${selectedTier.name} checkout saved. No payment was processed.`);
+                setPurchaseSuccess(`${selectedTier.name} membership saved.`);
                 setConfirmedPlan(selectedTier.name);
                 setSelectedTier(null);
               } catch (error) {
@@ -169,12 +169,12 @@ export default function MembershipPlans() {
               }
             }}
           >
-            <p>This is a simulated checkout. No card or billing details are needed.</p>
+            <p>No payment will be taken. No card details are needed.</p>
 
             {paymentError && <p role="alert">{paymentError}</p>}
 
             <button type="submit" disabled={pending}>
-              {pending ? "Saving…" : "Confirm Demo Checkout"}
+              {pending ? "Saving…" : "Confirm Membership"}
             </button>
             <button type="button" disabled={pending} onClick={() => setSelectedTier(null)}>
               Cancel
@@ -189,11 +189,8 @@ export default function MembershipPlans() {
         aria-labelledby="purchase-confirmation-title"
         onClose={() => setConfirmedPlan("")}
       >
-        <h2 id="purchase-confirmation-title">Demo checkout saved</h2>
-        <p>
-          Your {confirmedPlan} demo selection is saved in your checkout history. View your account for your current
-          membership status. No payment was processed.
-        </p>
+        <h2 id="purchase-confirmation-title">Membership saved</h2>
+        <p>Your {confirmedPlan} membership is saved. View your account for your membership details and history.</p>
         <div>
           <button type="button" onClick={() => confirmationRef.current?.close()}>
             Close
