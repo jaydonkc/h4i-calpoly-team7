@@ -21,6 +21,13 @@ describe("server account page protection", () => {
     await expect(ProfilePage({ searchParams: { next } })).rejects.toThrow("redirect");
     expect(mock.redirect).toHaveBeenCalledWith(loginPath(next));
   });
+  it("rejects repeated next values and ignores repeated auth errors", async () => {
+    mock.getUser.mockResolvedValue({ data: { user: null }, error: null });
+    await expect(
+      ProfilePage({ searchParams: { next: ["/classes", "/purchase"], authError: ["a", "b"] } }),
+    ).rejects.toThrow("redirect");
+    expect(mock.redirect).toHaveBeenCalledWith("/login?next=%2Fprofile");
+  });
   it("rejects an unverified user supplied with an auth error", async () => {
     mock.getUser.mockResolvedValue({ data: { user: { id: "forged" } }, error: { status: 401 } });
     await expect(ProfilePage({ searchParams: {} })).rejects.toThrow("redirect");
