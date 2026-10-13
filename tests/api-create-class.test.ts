@@ -169,4 +169,21 @@ describe("POST /api/classes", () => {
     expect(errors?.title).toBeDefined();
     expect(errors?.end).toBeDefined();
   });
+
+  it.each([
+    ["10:00", true],
+    ["09:00", false],
+    ["08:00", false],
+  ])("validates seeded update times ending at %s", async (end, valid) => {
+    const update = { $set: { ...validClass, end } };
+    const query = Model.updateOne({}, update, { upsert: true, runValidators: true });
+    // Exercise Mongoose's update-validation pipeline without sending a database write.
+    const validation = (
+      query as unknown as {
+        validate(update: unknown, options: unknown, overwrite: boolean): Promise<void>;
+      }
+    ).validate(update, { runValidators: true }, false);
+    if (valid) await expect(validation).resolves.toBeUndefined();
+    else await expect(validation).rejects.toThrow("Validation failed");
+  });
 });

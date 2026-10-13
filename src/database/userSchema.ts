@@ -12,9 +12,11 @@ const fitnessClassSchema = new Schema(
       type: String,
       required: true,
       match: /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/,
-      validate: function (this: { time: string }, end: string) {
+      validate: function (this: { get(path: string): unknown }, end: string) {
         const minutes = (time: string) => Number(time.split(":")[0]) * 60 + Number(time.split(":")[1]);
-        return minutes(end) > minutes(this.time ?? "");
+        // Documents and update queries both expose get(), but only documents have this.time.
+        const time = this.get("time");
+        return typeof time === "string" && minutes(end) > minutes(time);
       },
     },
     coach: { type: String, required: true, trim: true },
