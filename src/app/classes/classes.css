@@ -550,69 +550,6 @@
   transform: none;
 }
 
-.class-login-prompt {
-  box-sizing: border-box;
-  width: min(420px, calc(100% - 2rem));
-  padding: 1.5rem;
-  border: 1px solid var(--classes-line);
-  border-radius: 8px;
-  color: var(--classes-ink);
-  background: var(--classes-paper);
-  box-shadow: 0 18px 50px rgb(17 25 20 / 22%);
-}
-
-.class-login-prompt::backdrop {
-  background: rgb(16 25 20 / 45%);
-}
-
-.class-login-prompt h2 {
-  margin: 0;
-  font-size: 1.25rem;
-}
-
-.class-login-prompt p {
-  margin: 0.75rem 0 1.5rem;
-  color: var(--classes-muted);
-  font-size: 0.88rem;
-  line-height: 1.5;
-}
-
-.class-login-prompt > div {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.65rem;
-}
-
-#top .class-login-prompt button,
-#top .class-login-prompt a {
-  padding: 0.65rem 0.9rem;
-  border: 1px solid var(--classes-green);
-  border-radius: 5px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-#top .class-login-prompt button {
-  color: var(--classes-green);
-  background: transparent;
-}
-
-#top .class-login-prompt button:hover {
-  background: var(--classes-soft-green);
-}
-
-#top .class-login-prompt a {
-  color: white;
-  background: var(--classes-green);
-  text-decoration: none;
-}
-
-#top .class-login-prompt a:hover {
-  background: var(--classes-green-dark);
-}
-
 .booking-popup {
   position: fixed;
   z-index: 20;

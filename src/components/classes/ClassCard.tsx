@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { createPortal } from "react-dom";
 import { formatClassTime } from "@/types/account";
-import { useId, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import type { FitnessClass } from "@/types/fitness-class";
 import Icon from "./Icon";
@@ -15,7 +14,6 @@ type ClassCardProps = {
 export default function ClassCard({ fitnessClass }: ClassCardProps) {
   const {
     isUserSignedIn,
-    isLoading,
     reservedClasses,
     reserveClass,
     cancelReservation,
@@ -27,18 +25,11 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const busy = useRef(false);
-  const loginPromptRef = useRef<HTMLDialogElement>(null);
-  const loginPromptTitleId = useId();
   const isBooked = reservedClasses.some(
     (reservedClass) => reservedClass.id === fitnessClass.id && reservedClass.date === fitnessClass.date,
   );
 
   async function toggleReservation() {
-    if (!isUserSignedIn) {
-      loginPromptRef.current?.showModal();
-      return;
-    }
-
     if (busy.current) return;
     busy.current = true;
     setPending(true);
@@ -87,15 +78,15 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
         <span> spots</span>
       </div>
       <button
-        type="button"
         className={`reserve ${isBooked ? "cancel" : ""}`}
         aria-pressed={isUserSignedIn ? isBooked : undefined}
         aria-label={isUserSignedIn ? undefined : `Log in to reserve ${fitnessClass.title}`}
         disabled={
-          isLoading ||
+          !isUserSignedIn ||
           pending ||
-          (isUserSignedIn &&
-            (reservationsLoading || Boolean(reservationsError) || (!isBooked && fitnessClass.spots === 0)))
+          reservationsLoading ||
+          Boolean(reservationsError) ||
+          (!isBooked && fitnessClass.spots === 0)
         }
         onClick={toggleReservation}
       >
@@ -109,18 +100,6 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
                 : "Reserve"
             : "Log in to reserve"}
       </button>
-      <dialog ref={loginPromptRef} className="class-login-prompt" aria-labelledby={loginPromptTitleId}>
-        <h2 id={loginPromptTitleId}>Log in to reserve a class</h2>
-        <p>You need to log in or create an account before reserving {fitnessClass.title}.</p>
-        <div>
-          <button type="button" onClick={() => loginPromptRef.current?.close()}>
-            Not Now
-          </button>
-          <Link href="/profile?next=/classes" onClick={() => loginPromptRef.current?.close()}>
-            Continue to Log In
-          </Link>
-        </div>
-      </dialog>
       {error && (
         <p role="alert" className="reservation-error">
           {error}
