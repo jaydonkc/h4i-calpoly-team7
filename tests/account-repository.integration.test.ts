@@ -74,7 +74,7 @@ integration("MongoDB account persistence and transactions in isolated test colle
       (
         await ClassModel.create({
           date,
-          time: "23:59",
+          time: "23:58",
           end: "23:59",
           title: "Test class",
           category: "Cardio",

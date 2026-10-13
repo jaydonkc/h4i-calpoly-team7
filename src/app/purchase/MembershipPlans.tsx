@@ -44,6 +44,7 @@ export default function MembershipPlans() {
   const [pending, setPending] = useState(false);
   const busy = useRef(false);
   const checkoutKey = useRef("");
+  const selectionTrigger = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     if (!isUserSignedIn) return;
@@ -98,7 +99,8 @@ export default function MembershipPlans() {
               <button
                 className="tierButton"
                 disabled={pending || isLoading}
-                onClick={() => {
+                onClick={(event) => {
+                  selectionTrigger.current = event.currentTarget;
                   if (!isUserSignedIn) {
                     setLoginTier(tier.name);
                     loginPromptRef.current?.showModal();
@@ -118,7 +120,15 @@ export default function MembershipPlans() {
         </div>
       </section>
 
-      <dialog ref={loginPromptRef} className="loginPrompt" aria-labelledby="membership-login-title">
+      <dialog
+        ref={loginPromptRef}
+        className="loginPrompt"
+        aria-labelledby="membership-login-title"
+        onClose={() => {
+          setLoginTier(null);
+          selectionTrigger.current?.focus();
+        }}
+      >
         <h2 id="membership-login-title">Log in to select a membership</h2>
         <p>You need to log in or create an account before purchasing a membership.</p>
         <div>
@@ -137,7 +147,10 @@ export default function MembershipPlans() {
           onCancel={(event) => {
             if (pending) event.preventDefault();
           }}
-          onClose={() => setSelectedTier(null)}
+          onClose={() => {
+            setSelectedTier(null);
+            selectionTrigger.current?.focus();
+          }}
         >
           <h2 id="purchase-dialog-title">Demo checkout: {selectedTier.name}</h2>
 
@@ -187,7 +200,10 @@ export default function MembershipPlans() {
         ref={confirmationRef}
         className="purchaseConfirmation"
         aria-labelledby="purchase-confirmation-title"
-        onClose={() => setConfirmedPlan("")}
+        onClose={() => {
+          setConfirmedPlan("");
+          selectionTrigger.current?.focus();
+        }}
       >
         <h2 id="purchase-confirmation-title">Demo checkout saved</h2>
         <p>

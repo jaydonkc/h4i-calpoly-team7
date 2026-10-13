@@ -823,3 +823,89 @@
   color: #9b2828;
   padding: 0.5rem;
 }
+
+@media (max-width: 760px) {
+  #top {
+    padding: 0;
+  }
+
+  .classes-header {
+    padding: 0.75rem 0 1.25rem;
+  }
+
+  .schedule {
+    padding-top: 1.25rem;
+  }
+
+  .heading {
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .days {
+    grid-template-columns: repeat(7, minmax(64px, 1fr));
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
+  }
+
+  .days button {
+    min-height: 76px;
+    scroll-snap-align: start;
+  }
+
+  .filter-trigger,
+  .filter-option {
+    min-height: 44px;
+    font-size: 0.875rem;
+  }
+
+  .classcard {
+    padding: 1.125rem;
+    gap: 1rem;
+  }
+
+  .table-cell::before {
+    font-size: 0.7rem;
+  }
+
+  .booking-popup {
+    right: 1rem;
+    max-height: calc(100dvh - var(--site-header-height, 89px) - 2rem);
+    overflow-y: auto;
+  }
+
+  .booking-popup > button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .booking-popup {
+    grid-template-columns: 32px 1fr 44px;
+  }
+}
+
+@media (max-width: 520px) {
+  .filter-menus {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.625rem;
+  }
+
+  .filter-trigger {
+    min-width: 0;
+    padding: 0.625rem;
+    font-size: 0.8rem;
+  }
+
+  .filter-menu.open,
+  .apply-filters {
+    grid-column: 1 / -1;
+  }
+
+  .filter-options {
+    position: static;
+    margin-top: 0.5rem;
+    max-height: 50dvh;
+    overflow-y: auto;
+  }
+}

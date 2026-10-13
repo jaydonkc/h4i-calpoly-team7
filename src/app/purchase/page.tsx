@@ -62,12 +62,12 @@ export default async function MembershipsPage() {
                 <tbody>
                   {classes.map((fitnessClass) => (
                     <tr key={fitnessClass.id}>
-                      <td>{fitnessClass.title}</td>
-                      <td>{fitnessClass.coach}</td>
-                      <td>{displayDate(fitnessClass.date, schedule)}</td>
-                      <td>{fitnessClass.time}</td>
-                      <td>{fitnessClass.room}</td>
-                      <td>{fitnessClass.spots}</td>
+                      <td data-label="Class">{fitnessClass.title}</td>
+                      <td data-label="Instructor">{fitnessClass.coach}</td>
+                      <td data-label="Date">{displayDate(fitnessClass.date, schedule)}</td>
+                      <td data-label="Time">{fitnessClass.time}</td>
+                      <td data-label="Room">{fitnessClass.room}</td>
+                      <td data-label="Spots">{fitnessClass.spots}</td>
                       <td>
                         <Link href="/classes">Sign Up</Link>
                       </td>

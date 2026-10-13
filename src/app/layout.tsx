@@ -5,8 +5,8 @@ import Navbar from "@/components/Navbar";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Gym Website",
-  description: "Gym website details pending partner review.",
+  title: "Fitness Maxxing",
+  description: "Explore gym classes, meet our coaches, and try the Fitness Maxxing demo.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

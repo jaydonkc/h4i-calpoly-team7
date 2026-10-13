@@ -36,7 +36,7 @@ export default function Contact() {
             href="https://www.instagram.com/fitnessmaxxing_demo/"
             target="_blank"
             rel="noreferrer"
-            aria-label="Fitness Maxxing demo account on Instagram"
+            aria-label="@fitnessmaxxing_demo on Instagram"
           >
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
               <rect x="3" y="3" width="18" height="18" rx="5" />
