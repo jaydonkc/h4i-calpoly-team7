@@ -119,7 +119,7 @@ it("keeps loading, empty and error states distinct", () => {
   expect(error).not.toContain("Rest day, for now.");
 });
 
-it("places completed classes last while retaining time order in both groups", () => {
+it("places reservable classes first and completed classes last while retaining group order", () => {
   vi.useFakeTimers();
   vi.setSystemTime(new Date("2026-10-30T12:00:00-07:00"));
   const schedule = scheduleFor(week, "2026-10-30");
@@ -146,13 +146,41 @@ it("places completed classes last while retaining time order in both groups", ()
   ];
   const html = renderToStaticMarkup(createElement(ClassesPage, { initialSchedule: schedule }));
   const expected = [
-    "Ongoing class",
     "Afternoon class",
     "Evening class",
+    "Ongoing class",
     "Early completed class",
     "Just completed class",
   ];
   for (let i = 1; i < expected.length; i++) {
     expect(html.indexOf(expected[i - 1])).toBeLessThan(html.indexOf(expected[i]));
   }
+});
+
+it("puts full and in-progress classes below reservable classes", () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-10-30T12:00:00-07:00"));
+  const schedule = scheduleFor(week, "2026-10-30");
+  const base: FitnessClass = {
+    id: "full",
+    title: "Full class",
+    category: "Cardio",
+    date: "2026-10-30",
+    time: "13:00",
+    end: "14:00",
+    coach: "Alex",
+    room: "Studio",
+    level: "Beginner",
+    duration: "60 min",
+    spots: 0,
+    description: "Example",
+  };
+  schedule.classes = [
+    { ...base, id: "ongoing", title: "In progress class", time: "12:00", end: "13:00", spots: 10 },
+    base,
+    { ...base, id: "available", title: "Available class", time: "14:00", end: "15:00", spots: 1 },
+  ];
+  const html = renderToStaticMarkup(createElement(ClassesPage, { initialSchedule: schedule }));
+  expect(html.indexOf("Available class")).toBeLessThan(html.indexOf("Full class"));
+  expect(html.indexOf("Available class")).toBeLessThan(html.indexOf("In progress class"));
 });

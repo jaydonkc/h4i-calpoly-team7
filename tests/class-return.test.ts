@@ -31,11 +31,7 @@ beforeEach(() => {
   hooks.refs = [];
   hooks.setters = [];
   hooks.profileLoading = true;
-  vi.stubGlobal("window", {
-    location: { search: "?day=2026-10-14&class=selected" },
-    setInterval: vi.fn(() => 1),
-    clearInterval: vi.fn(),
-  });
+  vi.stubGlobal("window", { location: { search: "?day=2026-10-14&class=selected" } });
 });
 
 function render(days: ClassSchedule["days"]) {
@@ -54,11 +50,11 @@ it("waits for the schedule and preferences, then restores the class return only 
   render(days);
   expect(hooks.setters[0]).toHaveBeenCalledExactlyOnceWith("2026-10-14");
   // Saved preferences are applied first; the login return then reveals the selected class.
-  expect(hooks.setters[7]).toHaveBeenLastCalledWith([]);
-  const categoryCalls = hooks.setters[7].mock.calls.length;
+  expect(hooks.setters[6]).toHaveBeenLastCalledWith([]);
+  const categoryCalls = hooks.setters[6].mock.calls.length;
   // A reservation/filter refresh must preserve the user's subsequent selection.
   render(days.map((day) => ({ ...day })));
   expect(hooks.setters[0]).toHaveBeenCalledTimes(1);
-  expect(hooks.setters[7]).toHaveBeenCalledTimes(categoryCalls);
+  expect(hooks.setters[6]).toHaveBeenCalledTimes(categoryCalls);
   vi.unstubAllGlobals();
 });
