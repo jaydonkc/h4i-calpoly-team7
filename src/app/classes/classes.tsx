@@ -1,12 +1,13 @@
 "use client";
 import Link from "next/link";
+import BookingNotice from "@/components/classes/BookingNotice";
 import { useEffect, useRef, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import ClassesLoading from "./loading";
 import ClassCard from "@/components/classes/ClassCard";
 import Icon from "@/components/classes/Icon";
 import MultiSelectFilter from "@/components/classes/MultiSelectFilter";
-import { classCategories, type ClassCategory, type ClassSchedule } from "@/types/fitness-class";
+import { classCategories, type ClassCategory, type ClassSchedule, type FitnessClass } from "@/types/fitness-class";
 type FilterMenu = "categories" | "durations" | "levels" | "instructors" | "locations";
 type FilterDimension = "category" | "duration" | "level" | "instructor" | "location";
 
@@ -44,6 +45,7 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
     [appliedInstructors, setAppliedInstructors] = useState<string[]>([]),
     [appliedLocations, setAppliedLocations] = useState<string[]>([]),
     [openFilter, setOpenFilter] = useState<FilterMenu | null>(null);
+  const [bookedClass, setBookedClass] = useState<FitnessClass | null>(null);
   useEffect(() => {
     if (isLoading || profileLoading || profileError || preferenceApplied.current === (user?.id ?? null)) return;
     const categories = preferences.defaultClassCategory === "All" ? [] : [preferences.defaultClassCategory];
@@ -174,10 +176,28 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
             </svg>
           </Link>
           <div className="days" role="tablist" aria-label="Schedule dates">
-            {initialSchedule.days.map((item) => (
+            {initialSchedule.days.map((item, index) => (
               <button
                 role="tab"
                 aria-selected={day === item.date}
+                tabIndex={day === item.date ? 0 : -1}
+                onKeyDown={(event) => {
+                  const count = initialSchedule.days.length;
+                  const next =
+                    event.key === "ArrowRight"
+                      ? (index + 1) % count
+                      : event.key === "ArrowLeft"
+                        ? (index + count - 1) % count
+                        : event.key === "Home"
+                          ? 0
+                          : event.key === "End"
+                            ? count - 1
+                            : null;
+                  if (next === null) return;
+                  event.preventDefault();
+                  setDay(initialSchedule.days[next].date);
+                  event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>("[role=tab]")[next]?.focus();
+                }}
                 className={day === item.date ? "selected" : ""}
                 key={item.date}
                 onClick={() => setDay(item.date)}
@@ -296,7 +316,16 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
                 <span />
               </div>
               {classes.map((fitnessClass) => (
-                <ClassCard key={fitnessClass.id} fitnessClass={fitnessClass} />
+                <ClassCard
+                  key={fitnessClass.id}
+                  fitnessClass={fitnessClass}
+                  onBooked={setBookedClass}
+                  onCanceled={(canceled) =>
+                    setBookedClass((current) =>
+                      current?.id === canceled.id && current.date === canceled.date ? null : current,
+                    )
+                  }
+                />
               ))}
             </div>
           ) : (
@@ -319,6 +348,7 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
           </div>
         )}
       </section>
+      <BookingNotice fitnessClass={bookedClass} onDismiss={() => setBookedClass(null)} />
     </div>
   );
 }

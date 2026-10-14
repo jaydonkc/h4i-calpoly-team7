@@ -28,7 +28,18 @@ export default function MultiSelectFilter<T extends string>({
   onOpenChange,
 }: MultiSelectFilterProps<T>) {
   return (
-    <details className={`filter-menu ${isOpen ? "open" : ""}`} open={isOpen}>
+    <details
+      className={`filter-menu ${isOpen ? "open" : ""}`}
+      open={isOpen}
+      onKeyDown={(event) => {
+        if (event.key === "Escape" && isOpen) {
+          event.preventDefault();
+          event.stopPropagation();
+          onOpenChange();
+          event.currentTarget.querySelector("summary")?.focus();
+        }
+      }}
+    >
       <summary
         className="filter-trigger"
         aria-expanded={isOpen}

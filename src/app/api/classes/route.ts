@@ -1,3 +1,4 @@
+import { AccountError } from "@/lib/account/http";
 import { adminAccess } from "@/lib/admin/access";
 import { classRepository } from "@/lib/classes/class-repository";
 import { availableSchedule } from "@/lib/account/reservations";
@@ -38,6 +39,7 @@ export async function POST(request: Request) {
     const saved = await classRepository.create(input.data);
     return NextResponse.json({ success: true, data: saved }, { status: 201 });
   } catch (error) {
+    if (error instanceof AccountError) return invalidInput({ coachId: error.message });
     if (error instanceof MongooseError.ValidationError) {
       return invalidInput(
         Object.fromEntries(Object.keys(error.errors).map((field) => [field, "Enter a valid value for this field."])),

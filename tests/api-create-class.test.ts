@@ -4,8 +4,14 @@ import { Error as MongooseError } from "mongoose";
 import connectDB from "@/database/db";
 import Model from "@/database/userSchema";
 import { GET, POST } from "@/app/api/classes/route";
+import { resolveClassCoach } from "@/lib/coaches/repository";
+import { AccountError } from "@/lib/account/http";
 
 vi.mock("@/lib/admin/access", () => ({ adminAccess: vi.fn(async () => ({ status: 200 })) }));
+vi.mock("@/lib/coaches/repository", () => ({
+  resolveClassCoach: vi.fn(async (input: unknown) => input),
+  resolveCoachNames: async (classes: unknown) => classes,
+}));
 vi.mock("@/database/db", () => ({ default: vi.fn() }));
 vi.mock("@/lib/account/reservations", () => ({ availableSchedule: async (schedule: unknown) => schedule }));
 afterEach(() => {
@@ -34,6 +40,16 @@ const request = (body: unknown) =>
   });
 
 describe("POST /api/classes", () => {
+  it("rejects an instructor missing from the database roster before creating a class", async () => {
+    vi.mocked(resolveClassCoach).mockRejectedValueOnce(
+      new AccountError("Choose an instructor from the coach roster.", 400),
+    );
+    const create = vi.spyOn(Model, "create");
+    const response = await POST(request({ ...validClass, coachId: "missing-coach" }));
+    expect(response.status).toBe(400);
+    expect((await response.json()).fieldErrors.coachId).toContain("coach roster");
+    expect(create).not.toHaveBeenCalled();
+  });
   it.each([401, 403, 503])("denies access with %s before any write", async (status) => {
     vi.mocked(adminAccess).mockResolvedValueOnce({ status, message: "Denied" });
     const create = vi.spyOn(Model, "create");

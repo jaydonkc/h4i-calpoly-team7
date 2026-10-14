@@ -9,11 +9,13 @@ export type FitnessClass = {
   time: string;
   end: string;
   coach: string;
+  coachId?: string;
   room: string;
   location?: string;
   level: string;
   duration: string;
   spots: number;
+  capacity?: number;
   description: string;
 };
 

@@ -1,6 +1,9 @@
 import Link from "next/link";
-import { gymLocations, coaches } from "@/data/site-content";
+import Image from "next/image";
+import { gymLocations } from "@/data/site-content";
 import "./info.css";
+import { listCoaches } from "@/lib/coaches/repository";
+import type { Coach } from "@/types/coach";
 
 export const dynamic = "force-dynamic";
 
@@ -71,7 +74,13 @@ function AmenityIcon({ name }: { name: AmenityIconName }) {
   );
 }
 
-export default function GymInfoPage() {
+export default async function GymInfoPage() {
+  let coaches: Coach[] = [];
+  try {
+    coaches = await listCoaches();
+  } catch {
+    /* Show the roster unavailable state. */
+  }
   return (
     <div className="about-page">
       <section className="about-intro" aria-labelledby="about-title">
@@ -85,7 +94,6 @@ export default function GymInfoPage() {
       <section className="about-section" aria-labelledby="coaches-title">
         <div className="about-section-heading">
           <h2 id="coaches-title">Our Coaches</h2>
-          <p>Legendary coaches. Excellent energy.</p>
           <Link href="/classes">View Classes →</Link>
         </div>
 
@@ -94,6 +102,24 @@ export default function GymInfoPage() {
             {coaches.map((coach) => (
               <article key={coach.name}>
                 <div className="card-heading">
+                  <div className="coach-headshot">
+                    {coach.headshot ? (
+                      <Image
+                        src={coach.headshot}
+                        alt={`Headshot of ${coach.name}`}
+                        width={80}
+                        height={80}
+                        sizes="80px"
+                      />
+                    ) : (
+                      <span aria-hidden="true">
+                        {coach.name
+                          .split(" ")
+                          .map((part) => part[0])
+                          .join("")}
+                      </span>
+                    )}
+                  </div>
                   <div>
                     <h3>{coach.name}</h3>
                     <p>{coach.specialties}</p>

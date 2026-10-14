@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ClassSchedule } from "@/types/fitness-class";
 import { useAuth } from "@/components/AuthProvider";
 import ClassesPage from "./classes";
+import ClassCreationForm from "@/components/classes/ClassCreationForm";
 
 const emptySchedule: ClassSchedule = { weekLabel: "", days: [], classes: [] };
 
@@ -11,10 +12,12 @@ export default function ClassesLoader({
   initialSchedule,
   initialError,
   weekStart,
+  canManage = false,
 }: {
   initialSchedule?: ClassSchedule;
   initialError?: string;
   weekStart?: string;
+  canManage?: boolean;
 }) {
   const firstRender = useRef(true);
   const [schedule, setSchedule] = useState<ClassSchedule>(initialSchedule ?? emptySchedule);
@@ -65,12 +68,21 @@ export default function ClassesLoader({
   }, [attempt, reservationsRevision, initialSchedule, initialError, weekStart]);
 
   return (
-    <ClassesPage
-      key={schedule.days[0]?.date ?? "empty"}
-      initialSchedule={schedule}
-      errorMessage={errorMessage}
-      onRetry={refreshSchedule}
-      onRefresh={refreshSchedule}
-    />
+    <>
+      {canManage && (
+        <ClassCreationForm
+          date={schedule.days.find((day) => day.isToday)?.date ?? schedule.days[0]?.date ?? ""}
+          classes={schedule.classes}
+          onCreated={refreshSchedule}
+        />
+      )}
+      <ClassesPage
+        key={schedule.days[0]?.date ?? "empty"}
+        initialSchedule={schedule}
+        errorMessage={errorMessage}
+        onRetry={refreshSchedule}
+        onRefresh={refreshSchedule}
+      />
+    </>
   );
 }

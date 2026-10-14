@@ -1,7 +1,7 @@
 import { isValidClassDate } from "@/lib/classes/class-dates";
 import { classCategories, type FitnessClass } from "@/types/fitness-class";
 
-export type ClassInput = Omit<FitnessClass, "id">;
+export type ClassInput = Omit<FitnessClass, "id" | "capacity">;
 export type ClassFieldErrors = Record<string, string>;
 const textFields = [
   "date",
@@ -15,7 +15,7 @@ const textFields = [
   "duration",
   "description",
 ] as const;
-const writableFields = new Set<string>([...textFields, "spots", "location"]);
+const writableFields = new Set<string>([...textFields, "spots", "location", "coachId"]);
 
 export function validateClassInput(
   value: unknown,
@@ -26,6 +26,11 @@ export function validateClassInput(
   const input = value as Record<string, unknown>;
   const fieldErrors: ClassFieldErrors = Object.create(null);
   const data: Record<string, unknown> = {};
+  if (input.coachId !== undefined) {
+    if (typeof input.coachId !== "string" || !/^[a-z0-9-]{1,80}$/.test(input.coachId))
+      fieldErrors.coachId = "Choose a valid instructor.";
+    else data.coachId = input.coachId;
+  }
   for (const field of Object.keys(input)) {
     if (!writableFields.has(field)) fieldErrors[field] = "This field is not writable. Remove it.";
   }

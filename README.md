@@ -1,15 +1,15 @@
 # Fitness Maxxing — Team 7
 
-Fitness Maxxing is a fictional gym with an intentionally playful identity. Coach accolades and street addresses are part of the story. The application stores accounts, class reservations, membership selections, and contact messages in MongoDB; checkout is simulated and never charges money.
+Fitness Maxxing is a gym application with an intentionally playful identity. Coach bios and locations use the site’s playful identity. The application stores accounts, class reservations, membership selections, and contact messages in MongoDB; checkout is simulated and never charges money.
 
 ## What the app does
 
-- Supabase signup, email confirmation, login, logout, password recovery, and server-protected account pages.
+- Supabase instant signup, login, logout, and server-protected account pages.
 - MongoDB profiles and preferences, class reservations with transactional capacity checks, and idempotent simulated membership checkout.
 - Server-rendered class schedules streamed behind a loading shell; client filters, location selection, and booking refreshes.
 - Protected class creation through `POST /api/classes`, with input validation and MongoDB persistence.
 - Signed-in contact messages saved to MongoDB. No email, SMS, or external messaging service is used.
-- Finished fictional coach bios, four locations, opening hours, membership descriptions, and FAQs.
+- Finished coach bios, gym locations, opening hours, membership descriptions, and FAQs.
 
 ## Local setup
 
@@ -52,6 +52,10 @@ npm run build
 
 The integration suite uses isolated MongoDB collections and removes its test collections afterward. It tests profile/preferences persistence, reservations and capacity, cancellation, and checkout transactions. Run only against the development database.
 
-Feature PRs target `dev`. Production tracks `main`. Before release, verify the deployed signup/confirmation flow, login returns, booking/refresh/cancellation, simulated checkout persistence, signed-out protection, class creation through the protected API, and contact-message persistence. A build or deployment success does not establish those user flows.
+Feature PRs target `dev`. Production tracks `main`. Before release, verify deployed instant signup, login returns, booking/refresh/cancellation, simulated checkout persistence, signed-out protection, class creation through the protected API, and contact-message persistence. A build or deployment success does not establish those user flows.
 
 See [contributing](docs/contributing.md) and [release checklist](docs/release-checklist.md). Development preview: [Vercel dev app](https://h4i-calpoly-team7-git-dev-jaydonkchen-4999s-projects.vercel.app).
+
+## Public signup
+
+Email confirmation is disabled in the Supabase project for the event. New users sign in immediately after registration; email addresses are unverified. Custom SMTP is not configured, so recovery and confirmation-email controls are hidden. Set `NEXT_PUBLIC_AUTH_EMAIL_DELIVERY=true` only after configuring a sender that supports public recipients. Existing account email addresses remain read-only while email delivery is unavailable.

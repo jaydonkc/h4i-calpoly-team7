@@ -58,7 +58,7 @@
       "spots": 12,
       "color": "green",
       "description": "Learn the essentials of functional strength with an emphasis on safe, confident movement.",
-      "location": "Bakersfield"
+      "location": "San Luis Obispo"
     },
     {
       "id": 5,
@@ -118,7 +118,7 @@
       "spots": 5,
       "color": "yellow",
       "description": "A beat-driven indoor cycling class blending speed work and sustained climbs.",
-      "location": "Bakersfield"
+      "location": "San Luis Obispo"
     }
   ]
 }

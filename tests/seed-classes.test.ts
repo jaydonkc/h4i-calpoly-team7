@@ -17,15 +17,19 @@ it("seeds every day of the gym's current week and reuses IDs on reruns", async (
   vi.stubEnv("NODE_ENV", "development");
   const stored = new Map<string, Record<string, unknown>>();
   const update = vi.spyOn(FitnessClassModel, "updateOne").mockImplementation((filter, changes) => {
-    const { _id } = filter as { _id: Types.ObjectId };
-    const { $set } = changes as { $set: Record<string, unknown> };
-    stored.set(_id.toString(), $set);
+    const { date, title } = filter as { date: string; title: string };
+    const { $setOnInsert } = changes as { $setOnInsert: Record<string, unknown> & { _id: Types.ObjectId } };
+    if (!Array.from(stored.values()).some((record) => record.date === date && record.title === title))
+      stored.set($setOnInsert._id.toString(), $setOnInsert);
     return Promise.resolve({ acknowledged: true }) as unknown as ReturnType<typeof FitnessClassModel.updateOne>;
   });
 
   expect(await seedClasses(new Date("2026-10-07T12:00:00-07:00"))).toBe(sampleSchedule.classes.length * 7);
   const firstIds = Array.from(stored.keys());
+  // A staff member's capacity edit must survive an idempotent reseed.
+  stored.get(firstIds[0])!.spots = 3;
   await seedClasses(new Date("2026-10-09T01:00:00Z"));
+  expect(stored.get(firstIds[0])!.spots).toBe(3);
 
   expect(stored.size).toBe(sampleSchedule.classes.length * 7);
   expect(Array.from(stored.keys())).toEqual(firstIds);

@@ -14,5 +14,5 @@ export function loginPath(next = "/profile", authError?: string) {
   return `/login?${query}`;
 }
 export function classReturnPath(id: string, date: string) {
-  return `/classes?${new URLSearchParams({ day: date, class: id })}#class-${id}-${date}`;
+  return `/classes?${new URLSearchParams({ week: date, day: date, class: id })}#class-${id}-${date}`;
 }

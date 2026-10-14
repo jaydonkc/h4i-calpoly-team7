@@ -21,43 +21,42 @@ export const gymLocations = [
     hours: "Mon–Fri 7 AM–10 PM · Sat–Sun 8 AM–9 PM",
     vibe: "Progressive overload, excellent coffee, and absolutely no pitch decks between sets.",
   },
-  {
-    name: "Bakersfield",
-    region: "The hometown power house",
-    address: "99 Gains Avenue, Bakersfield",
-    hours: "Mon–Fri 7 AM–10 PM · Sat–Sun 8 AM–9 PM",
-    vibe: "Heavy weights, warm welcomes, and enough energy to power the entire block.",
-  },
 ] as const;
 
 export const coaches = [
   {
     name: "Jaydon Chen",
+    headshot: "/images/coaches/jaydon-chen.jpg",
     specialties: "Strength & functional fitness",
     bio: "Four-time Olympian in carrying every grocery bag in one trip. Jaydon retired undefeated to teach clean technique, sensible progressions, and the art of looking casual after a very difficult set.",
   },
   {
     name: "Steven Mossman",
+    headshot: "/images/coaches/steven-mossman.webp",
     specialties: "Barbell strength",
     bio: "Three-time world champion in picking things up and putting them down. Steven can identify an unracked plate from across the building and believes every good squat deserves a standing ovation.",
   },
   {
     name: "Francis Corpuz",
+    headshot: "/images/coaches/francis-corpuz.png",
     specialties: "Mobility & cycling",
     bio: "Gold medalist in stretching before anyone else remembers to. Francis brings calm coaching, smooth transitions, and the rare ability to make a stationary bike feel like a scenic escape.",
   },
   {
     name: "Emi Okumoto",
+    headshot: "/images/coaches/emi-okumoto.jpg",
     specialties: "Cardio & rhythm rides",
     bio: "Seven-time Tour de Living Room winner. Emi builds rides around big choruses, adjustable resistance, and the belief that the last interval deserves its own victory lap.",
   },
   {
     name: "Harold Huynh",
+    headshot: "/images/coaches/harold-huynh.jpg",
     specialties: "HIIT & conditioning",
     bio: "Former captain of the national sprint-to-the-bus team. Harold makes tough intervals approachable, celebrates every finish, and has never once believed anyone who says they love burpees.",
   },
   {
     name: "Jacob Lee",
+    headshot: "/images/coaches/jacob-lee.jpg",
     specialties: "Pilates & recovery",
     bio: "Reigning world champion of the extremely controlled sit-up. Jacob makes low-impact sessions feel surprisingly powerful and treats recovery like the main event it deserves to be.",
   },

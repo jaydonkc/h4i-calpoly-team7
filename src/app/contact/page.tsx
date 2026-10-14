@@ -45,9 +45,7 @@ export default function Contact() {
             </details>
             <details>
               <summary>Locations &amp; Hours</summary>
-              <p>
-                Find opening hours for all four clubs in the list above. Choose your location and plan your next visit.
-              </p>
+              <p>Find opening hours for our clubs in the list above. Choose your location and plan your next visit.</p>
             </details>
             <details>
               <summary>Other</summary>

@@ -1,3 +1,14 @@
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--site-header-height, 89px) + 1rem);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
   display: flex;
   min-height: 100vh;
@@ -25,6 +36,42 @@ main {
 a:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 3px;
+}
+
+@media (max-width: 959px) {
+  main {
+    padding: 0.875rem;
+  }
+
+  button,
+  summary {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  button {
+    min-width: 44px;
+  }
+
+  /* Keep iOS from zooming the page when a form field receives focus. */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+    min-height: 44px;
+  }
+
+  dialog {
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 .skip-link {

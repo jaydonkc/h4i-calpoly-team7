@@ -318,6 +318,7 @@
 }
 
 .purchaseTableWrapper {
+  position: relative;
   overflow-x: auto;
   border: 1px solid #d8dcd6;
   border-radius: 7px;
@@ -429,5 +430,134 @@
   .tierButton,
   .paymentForm button[type="submit"] {
     transition: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .loginPrompt > div,
+  .purchaseConfirmation > div {
+    flex-wrap: wrap;
+  }
+
+  .loginPrompt > div > *,
+  .purchaseConfirmation > div > * {
+    flex: 1 1 150px;
+    min-height: 44px;
+    text-align: center;
+  }
+
+  .paymentForm {
+    max-height: calc(100dvh - 2rem);
+    padding: 1.125rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .membershipPage {
+    padding: 0 0 2rem;
+  }
+
+  .planTier {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .purchaseTableWrapper table,
+  .purchaseTableWrapper tbody {
+    display: block;
+  }
+
+  .purchaseTableWrapper thead {
+    display: none;
+  }
+
+  .purchaseTableWrapper tbody tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    padding: 1rem;
+    border-bottom: 1px solid #d8dcd6;
+  }
+
+  .purchaseTableWrapper td {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0;
+    border: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .purchaseTableWrapper td::before {
+    content: attr(data-label);
+    color: #626963;
+    font-size: 0.75rem;
+  }
+
+  .purchaseTableWrapper td:first-child,
+  .purchaseTableWrapper td:last-child {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
+
+  .purchaseTableWrapper td:first-child {
+    font-weight: 700;
+  }
+
+  .purchaseTableWrapper td:last-child::before {
+    content: none;
+  }
+
+  .purchaseTableWrapper td a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+  }
+}
+
+/* The membership preview uses cards within its narrower content column. */
+.purchase-upcoming-classes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.purchase-upcoming-classes > p {
+  grid-column: 1 / -1;
+}
+.purchase-upcoming-classes .classcard {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  border: 1px solid #d8dcd6;
+  border-radius: 6px;
+}
+.purchase-upcoming-classes .classmain {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+.purchase-upcoming-classes .reserve {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+.purchase-upcoming-classes .table-cell {
+  position: relative;
+  padding-top: 18px;
+}
+.purchase-upcoming-classes .table-cell::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #626963;
+  font-size: 0.7rem;
+  content: attr(data-label);
+}
+@media (max-width: 760px) {
+  .purchase-upcoming-classes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 520px) {
+  .purchase-upcoming-classes .classcard {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

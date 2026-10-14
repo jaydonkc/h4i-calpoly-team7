@@ -4,5 +4,5 @@ export type Membership = {
   renewalDate: string;
   memberId: string;
   status: "active" | "expired";
-  source: "manual_demo" | "demo_checkout";
+  source: "manual_demo" | "demo_checkout" | "default_demo";
 };

@@ -5,9 +5,12 @@ import mongoose from "mongoose";
 import type { User } from "@supabase/supabase-js";
 import { loadProfile, saveProfile, savePreferences } from "@/lib/account/profiles";
 import { reserve, cancel, availableSchedule, listReservations } from "@/lib/account/reservations";
+import { ensureDemoMembership } from "@/lib/memberships/repository";
 import { demoCheckout } from "@/lib/account/checkout";
+import { updateClass, archiveClass } from "@/lib/classes/class-management";
 import { classRepository } from "@/lib/classes/class-repository";
 import { getGymCalendarDate, toIsoDate } from "@/lib/classes/class-dates";
+import CoachModel from "@/database/coachSchema";
 import ClassModel from "@/database/userSchema";
 import ReservationModel from "@/database/reservationSchema";
 import OccurrenceModel from "@/database/classOccurrenceSchema";
@@ -16,6 +19,11 @@ import MembershipModel from "@/database/membershipSchema";
 import ContactModel from "@/database/contactMessageSchema";
 import { validateMessage } from "@/lib/account/contact";
 const scope = vi.hoisted(() => ({ prefix: `accounttest_${Date.now()}_${Math.random().toString(16).slice(2, 10)}` }));
+vi.mock("@/database/coachSchema", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/database/coachSchema")>();
+  const { default: db } = await import("mongoose");
+  return { default: db.model(`${scope.prefix}_coaches`, actual.default.schema, `${scope.prefix}_coaches`) };
+});
 vi.mock("@/database/accountSchema", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/database/accountSchema")>();
   const { default: db } = await import("mongoose");
@@ -77,6 +85,10 @@ integration("MongoDB account persistence and transactions in isolated test colle
           await model.createIndexes();
         }),
     );
+    await CoachModel.create([
+      { _id: "test-coach", name: "Test Coach", specialties: "Testing", bio: "Isolated test coach" },
+      { _id: "jaydon-chen", name: "Jaydon Chen", specialties: "Strength", bio: "Isolated test roster" },
+    ]);
     classId = String(
       (
         await ClassModel.create({
@@ -191,6 +203,112 @@ integration("MongoDB account persistence and transactions in isolated test colle
       )!.spots,
     ).toBe(1);
   }, 30000);
+  it("reserves classes in a future week and reads coach names from the same roster", async () => {
+    const future = new Date(`${date}T12:00:00Z`);
+    future.setUTCDate(future.getUTCDate() + 7);
+    const futureDate = future.toISOString().slice(0, 10);
+    const saved = await classRepository.create({
+      date: futureDate,
+      time: "09:00",
+      end: "10:00",
+      title: "Next-week regression",
+      category: "Strength",
+      coach: "Jaydon Chen",
+      coachId: "jaydon-chen",
+      room: "Test Studio",
+      level: "All levels",
+      duration: "60 min",
+      spots: 1,
+      description: "Isolated test",
+    });
+    expect((await reserve("future-owner", String(saved.id), futureDate))[0]).toMatchObject({
+      id: saved.id,
+      date: futureDate,
+      coachId: "jaydon-chen",
+    });
+    expect(
+      (await availableSchedule(await classRepository.getSchedule({ weekStart: futureDate }))).classes.find(
+        (item) => item.id === saved.id,
+      )?.spots,
+    ).toBe(0);
+    await CoachModel.updateOne({ _id: "jaydon-chen" }, { $set: { name: "Updated Coach" } });
+    expect((await classRepository.getById(saved.id))?.coach).toBe("Updated Coach");
+    expect((await listReservations("future-owner"))[0].coach).toBe("Updated Coach");
+    await CoachModel.updateOne({ _id: "jaydon-chen" }, { $set: { name: "Jaydon Chen" } });
+    await cancel("future-owner", String(saved.id), futureDate);
+    expect(await listReservations("future-owner")).toEqual([]);
+    expect(
+      (await availableSchedule(await classRepository.getSchedule({ weekStart: futureDate }))).classes.find(
+        (item) => item.id === saved.id,
+      )?.spots,
+    ).toBe(1);
+  }, 30000);
+  it("safely edits capacity and preserves booking details before archiving an unbooked class", async () => {
+    const future = new Date(`${date}T12:00:00Z`);
+    future.setUTCDate(future.getUTCDate() + 7);
+    const input = {
+      date: future.toISOString().slice(0, 10),
+      time: "10:00",
+      end: "11:00",
+      title: "Staff management test",
+      category: "Strength" as const,
+      coach: "Jaydon Chen",
+      coachId: "jaydon-chen",
+      room: "Test Studio",
+      level: "All levels",
+      duration: "60 min",
+      spots: 2,
+      description: "Isolated management test",
+    };
+    const saved = await classRepository.create(input);
+    const id = String(saved.id);
+    await reserve("management-owner", id, input.date);
+    await expect(updateClass(id, { ...input, spots: 0 })).rejects.toMatchObject({ status: 409 });
+    await expect(updateClass(id, { ...input, time: "11:00", end: "12:00" })).rejects.toMatchObject({ status: 409 });
+    await expect(archiveClass(id)).rejects.toMatchObject({ status: 409 });
+    await updateClass(id, { ...input, spots: 3, title: "Updated management class" });
+    expect((await listReservations("management-owner"))[0].title).toBe("Updated management class");
+    expect(
+      (await availableSchedule(await classRepository.getSchedule({ weekStart: input.date }))).classes.find(
+        (item) => item.id === id,
+      )?.spots,
+    ).toBe(2);
+    await cancel("management-owner", id, input.date);
+    await archiveClass(id);
+    expect(await classRepository.getById(id)).toBeNull();
+    expect((await classRepository.getSchedule({ weekStart: input.date })).classes.some((item) => item.id === id)).toBe(
+      false,
+    );
+    expect((await ClassModel.findById(id))?.archived).toBe(true);
+  }, 30000);
+  it("serializes booking with class removal under concurrency", async () => {
+    const future = new Date(`${date}T12:00:00Z`);
+    future.setUTCDate(future.getUTCDate() + 7);
+    const input = {
+      date: future.toISOString().slice(0, 10),
+      time: "10:00",
+      end: "11:00",
+      title: "Concurrent archive test",
+      category: "Strength" as const,
+      coach: "Jaydon Chen",
+      room: "Test Studio",
+      level: "All levels",
+      duration: "60 min",
+      spots: 1,
+      description: "Isolated race verification",
+    };
+    const saved = await classRepository.create(input);
+    const id = String(saved.id);
+    const results = await Promise.allSettled([reserve("race-owner", id, input.date), archiveClass(id)]);
+    expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1);
+    const booked = await ReservationModel.exists({ classId: id });
+    const record = await ClassModel.findById(id);
+    expect(Boolean(booked) && record.archived).toBe(false);
+    if (booked) {
+      await cancel("race-owner", id, input.date);
+      await archiveClass(id);
+    }
+  }, 30000);
   it("rejects nonexistent or past classes without creating reservations", async () => {
     await expect(reserve(user.id, classId, "2000-01-01")).rejects.toMatchObject({ status: 404 });
     expect(await ReservationModel.countDocuments()).toBe(0);
@@ -206,6 +324,27 @@ integration("MongoDB account persistence and transactions in isolated test colle
     expect(results[1].orders[0].amountCents).toBe(3000);
     await expect(demoCheckout(user.id, user.email!, "Student", key)).rejects.toMatchObject({ status: 409 });
     expect(await OrderModel.countDocuments({ userId: user.id })).toBe(1);
+  }, 30000);
+  it("grants Basic once under concurrent loads and preserves a selected plan", async () => {
+    const owner = "default-demo-owner";
+    const results = await Promise.all([
+      ensureDemoMembership(owner, "fake@example.com"),
+      ensureDemoMembership(owner, "fake@example.com"),
+    ]);
+    expect(results[0]).toMatchObject({
+      plan: "Basic",
+      status: "active",
+      price: "Complimentary",
+      source: "default_demo",
+    });
+    expect(results[1]?.memberId).toBe(results[0]?.memberId);
+    expect(await MembershipModel.countDocuments({ userId: owner })).toBe(1);
+    expect(await OrderModel.countDocuments({ userId: owner })).toBe(0);
+    await demoCheckout(owner, "fake@example.com", "Premium", randomUUID());
+    expect(await ensureDemoMembership(owner, "fake@example.com")).toMatchObject({
+      plan: "Premium",
+      source: "demo_checkout",
+    });
   }, 30000);
   it("preserves an active manual membership when saving a demo order", async () => {
     await MembershipModel.create({

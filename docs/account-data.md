@@ -8,7 +8,7 @@ Supabase authenticates users; it does not automatically send records to MongoDB.
 - `reservations`: unique `(userId, classId, date)` with a server-provided class snapshot. Historical enrollments retain their original details.
 - `classoccurrences`: unique `(classId, date)` with capacity and reservation count. Dated capacity keeps legacy recurring class records independent across weeks.
 - `demoorders`: unique `(userId, idempotencyKey)`, plan, server-selected simulated amount, and timestamp. No card, billing address, or real payment data is accepted.
-- `memberships`: one per user. A demo order can create or update a simulated membership, but cannot overwrite an active manually granted complimentary membership. There are no payments or automatic renewals.
+- `memberships`: one per user. On the first authenticated membership load, accounts without a membership receive a complimentary active Basic demo plan valid for one year. This also covers existing accounts without a plan; existing memberships are preserved. Basic can be replaced by a selected demo plan. The default grant creates no order or payment. A demo order can create or update a simulated membership, but cannot overwrite an active manually granted complimentary membership. There are no payments or automatic renewals.
 
 ## Authenticated APIs
 

@@ -1,6 +1,6 @@
 # Fitness Maxxing integration review
 
-The branch combines merged login/account/class APIs with the classes loading shell, About Us navigation, finished fictional content, location filtering, protected class creation through the API, and saved contact messages.
+The branch combines merged login/account/class APIs with the classes loading shell, About Us navigation, finished gym content, location filtering, protected class creation through the API, and saved contact messages.
 
 ## Configuration
 
@@ -12,12 +12,12 @@ The branch combines merged login/account/class APIs with the classes loading she
 
 - Desktop and mobile: Home, About Us, Classes, Memberships, Contact, and Account.
 - Classes: loading shell, date selection, location/category filters, retry after a database outage, and reservation availability refresh.
-- Account: signup, confirmation, invalid login, valid login, refresh persistence, safe return paths, logout, and signed-out protection.
+- Account: instant signup, invalid login, valid login, refresh persistence, safe return paths, logout, and signed-out protection.
 - Reservations: book a future class, refresh, cancel, and confirm the available seat returns.
 - Checkout: select a plan, refresh the account, verify saved membership/history, and confirm retry does not duplicate an order.
 - Protected API: create a class and read it back after refresh. A signed-out user receives 401 and an ordinary member receives 403 from POST /api/classes. The public website has no administrator screens.
 - Contact: signed-in submission returns a saved receipt and the message persists in MongoDB.
-- Content: no pending-review text, fake outbound social/contact links, or unfinished membership perks. Fictional coach accolades and addresses are labeled in the site story.
+- Content: no pending-review text, fake outbound social/contact links, or unfinished membership perks. Coach bios and addresses follow the finished site copy.
 
 ## Delivery
 

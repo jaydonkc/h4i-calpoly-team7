@@ -4,6 +4,7 @@ import connectDB from "@/database/db";
 import FitnessClassModel from "@/database/userSchema";
 import type { ClassQuery, ClassSchedule, FitnessClass } from "@/types/fitness-class";
 import type { ClassInput } from "@/lib/classes/class-input";
+import { resolveClassCoach, resolveCoachNames } from "@/lib/coaches/repository";
 
 export interface ClassRepository {
   create(input: ClassInput): Promise<FitnessClass>;
@@ -26,6 +27,7 @@ function toFitnessClass(record: ClassRecord, date = record.date): FitnessClass {
     time: record.time,
     end: record.end,
     coach: record.coach,
+    ...(record.coachId ? { coachId: record.coachId } : {}),
     room: record.room,
     ...(record.location ? { location: record.location } : {}),
     level: record.level,
@@ -91,7 +93,7 @@ function getTimeSortValue(time: string) {
 class MongoClassRepository implements ClassRepository {
   async create(input: ClassInput): Promise<FitnessClass> {
     await connectDB();
-    const record = await FitnessClassModel.create(input);
+    const record = await FitnessClassModel.create(await resolveClassCoach(input));
     return toFitnessClass(record.toObject() as ClassRecord);
   }
 
@@ -99,7 +101,10 @@ class MongoClassRepository implements ClassRepository {
     await connectDB();
 
     const week = getWeekDates(new Date(), query.weekStart);
-    const records = await FitnessClassModel.find().sort({ date: 1, time: 1 }).lean<ClassRecord[]>().exec();
+    const records = await FitnessClassModel.find({ archived: { $ne: true } })
+      .sort({ date: 1, time: 1 })
+      .lean<ClassRecord[]>()
+      .exec();
     const classes = records
       .flatMap((record) => {
         if (typeof record.time !== "string") return [];
@@ -126,15 +131,17 @@ class MongoClassRepository implements ClassRepository {
         date: isoDate,
         ...(isToday ? { isToday: true } : {}),
       })),
-      classes,
+      classes: await resolveCoachNames(classes),
     };
   }
 
   async getById(id: FitnessClass["id"]): Promise<FitnessClass | null> {
     if (!isObjectIdOrHexString(id)) return null;
     await connectDB();
-    const record = await FitnessClassModel.findOne({ _id: id }).lean<ClassRecord>().exec();
-    return record ? toFitnessClass(record) : null;
+    const record = await FitnessClassModel.findOne({ _id: id, archived: { $ne: true } })
+      .lean<ClassRecord>()
+      .exec();
+    return record ? (await resolveCoachNames([toFitnessClass(record)]))[0] : null;
   }
 }
 
