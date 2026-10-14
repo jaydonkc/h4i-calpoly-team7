@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import type { FitnessClass } from "@/types/fitness-class";
 import Icon from "./Icon";
-import { hasClassStarted } from "@/lib/classes/class-start";
+import { getClassStatus } from "@/lib/classes/class-start";
 
 type ClassCardProps = {
   fitnessClass: FitnessClass;
@@ -29,6 +29,11 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
   const busy = useRef(false);
   const reserveButton = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -47,7 +52,11 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
     (reservedClass) => reservedClass.id === fitnessClass.id && reservedClass.date === fitnessClass.date,
   );
 
+  const status = getClassStatus(fitnessClass.date, fitnessClass.time, fitnessClass.end, now);
+  const hasStarted = status !== "Upcoming";
+
   async function toggleReservation() {
+    if (hasStarted) return;
     if (!isUserSignedIn) {
       router.push(loginPath(classReturnPath(String(fitnessClass.id), fitnessClass.date)));
       return;
@@ -67,8 +76,6 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
       setPending(false);
     }
   }
-
-  const hasStarted = hasClassStarted(fitnessClass.date, fitnessClass.time);
 
   return (
     <article className="classcard" id={`class-${fitnessClass.id}-${fitnessClass.date}`}>
@@ -105,7 +112,15 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
         ref={reserveButton}
         className={`reserve ${isBooked ? "cancel" : ""}`}
         aria-pressed={isUserSignedIn ? isBooked : undefined}
-        aria-label={isUserSignedIn ? undefined : `Log in to reserve ${fitnessClass.title}`}
+        aria-label={
+          isLoading || pending
+            ? undefined
+            : hasStarted
+              ? `${status}: ${fitnessClass.title}`
+              : isUserSignedIn
+                ? undefined
+                : `Log in to reserve ${fitnessClass.title}`
+        }
         disabled={
           isLoading ||
           pending ||
@@ -121,7 +136,7 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
           : pending
             ? "Saving…"
             : hasStarted
-              ? "Class has already started"
+              ? status
               : isUserSignedIn
                 ? isBooked
                   ? "Cancel"
