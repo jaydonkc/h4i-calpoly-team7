@@ -1,4 +1,7 @@
 .membershipPage {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
   max-width: 960px;
   margin: 0 auto;
   padding: 0 1rem 3rem;
@@ -60,18 +63,31 @@
 
 /* Tier cards */
 .planTier {
+  box-sizing: border-box;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(240px, 1fr);
   gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 0.25rem 0.25rem 0.75rem;
 }
 
 .planTier article {
+  scroll-snap-align: center;
   display: flex;
   flex-direction: column;
   padding: 1.5rem;
   border: 1px solid #d8dcd6;
   border-radius: 8px;
   background: #fffefa;
+}
+
+.planTier .standardTier {
+  scroll-initial-target: nearest;
 }
 
 .planTier ul {
