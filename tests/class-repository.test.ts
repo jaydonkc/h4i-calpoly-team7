@@ -180,7 +180,7 @@ describe("class repository", () => {
     const id = schedule.classes[0].id;
     expect(id).toBe(record._id.toString());
     expect((await classRepository.getById(id))?.id).toBe(id);
-    expect(findOne).toHaveBeenCalledWith({ _id: id });
+    expect(findOne).toHaveBeenCalledWith({ _id: id, archived: { $ne: true } });
   });
 
   it("looks up a generated ID using _id and preserves result conversion", async () => {
@@ -193,7 +193,7 @@ describe("class repository", () => {
 
     const result = await classRepository.getById(id);
 
-    expect(findOne).toHaveBeenCalledWith({ _id: id });
+    expect(findOne).toHaveBeenCalledWith({ _id: id, archived: { $ne: true } });
     expect(result).toMatchObject({ id, date: record.date, time: record.time });
     expect(result).not.toHaveProperty("color");
   });

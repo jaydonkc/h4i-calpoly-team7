@@ -17,19 +17,23 @@ it("seeds every day of the gym's current week and reuses IDs on reruns", async (
   vi.stubEnv("NODE_ENV", "development");
   const stored = new Map<string, Record<string, unknown>>();
   const update = vi.spyOn(FitnessClassModel, "updateOne").mockImplementation((filter, changes) => {
-    const { _id } = filter as { _id: Types.ObjectId };
-    const { $set } = changes as { $set: Record<string, unknown> };
-    stored.set(_id.toString(), $set);
+    const { date, title } = filter as { date: string; title: string };
+    const { $setOnInsert } = changes as { $setOnInsert: Record<string, unknown> & { _id: Types.ObjectId } };
+    if (!Array.from(stored.values()).some((record) => record.date === date && record.title === title))
+      stored.set($setOnInsert._id.toString(), $setOnInsert);
     return Promise.resolve({ acknowledged: true }) as unknown as ReturnType<typeof FitnessClassModel.updateOne>;
   });
 
-  expect(await seedClasses(new Date("2026-10-07T12:00:00-07:00"))).toBe(sampleSchedule.classes.length);
+  expect(await seedClasses(new Date("2026-10-07T12:00:00-07:00"))).toBe(sampleSchedule.classes.length * 7);
   const firstIds = Array.from(stored.keys());
+  // A staff member's capacity edit must survive an idempotent reseed.
+  stored.get(firstIds[0])!.spots = 3;
   await seedClasses(new Date("2026-10-09T01:00:00Z"));
+  expect(stored.get(firstIds[0])!.spots).toBe(3);
 
-  expect(stored.size).toBe(sampleSchedule.classes.length);
+  expect(stored.size).toBe(sampleSchedule.classes.length * 7);
   expect(Array.from(stored.keys())).toEqual(firstIds);
-  expect(update).toHaveBeenCalledTimes(sampleSchedule.classes.length * 2);
+  expect(update).toHaveBeenCalledTimes(sampleSchedule.classes.length * 14);
   expect(Array.from(new Set(Array.from(stored.values(), (fields) => fields.date))).sort()).toEqual([
     "2026-10-05",
     "2026-10-06",
@@ -48,15 +52,15 @@ it("seeds every day of the gym's current week and reuses IDs on reruns", async (
 
   await seedClasses(new Date("2026-11-02T00:00:00Z"));
   // It is still Sunday in California, so use the week ending November 1.
-  expect(stored.size).toBe(sampleSchedule.classes.length);
-  expect(Array.from(stored.keys())).toEqual(firstIds);
-  expect(Array.from(new Set(Array.from(stored.values(), (fields) => fields.date))).sort()).toEqual([
-    "2026-10-26",
-    "2026-10-27",
-    "2026-10-28",
-    "2026-10-29",
-    "2026-10-30",
-    "2026-10-31",
-    "2026-11-01",
-  ]);
+  expect(stored.size).toBe(sampleSchedule.classes.length * 14);
+  expect(Array.from(stored.keys()).slice(0, firstIds.length)).toEqual(firstIds);
+  expect(
+    Array.from(
+      new Set(
+        Array.from(stored.values())
+          .slice(firstIds.length)
+          .map((fields) => fields.date),
+      ),
+    ).sort(),
+  ).toEqual(["2026-10-26", "2026-10-27", "2026-10-28", "2026-10-29", "2026-10-30", "2026-10-31", "2026-11-01"]);
 });

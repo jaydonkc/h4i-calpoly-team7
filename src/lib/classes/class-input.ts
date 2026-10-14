@@ -1,7 +1,7 @@
 import { isValidClassDate } from "@/lib/classes/class-dates";
 import { classCategories, type FitnessClass } from "@/types/fitness-class";
 
-export type ClassInput = Omit<FitnessClass, "id">;
+export type ClassInput = Omit<FitnessClass, "id" | "capacity">;
 export type ClassFieldErrors = Record<string, string>;
 const textFields = [
   "date",
@@ -15,7 +15,7 @@ const textFields = [
   "duration",
   "description",
 ] as const;
-const writableFields = new Set<string>([...textFields, "spots"]);
+const writableFields = new Set<string>([...textFields, "spots", "location", "coachId"]);
 
 export function validateClassInput(
   value: unknown,
@@ -26,6 +26,11 @@ export function validateClassInput(
   const input = value as Record<string, unknown>;
   const fieldErrors: ClassFieldErrors = Object.create(null);
   const data: Record<string, unknown> = {};
+  if (input.coachId !== undefined) {
+    if (typeof input.coachId !== "string" || !/^[a-z0-9-]{1,80}$/.test(input.coachId))
+      fieldErrors.coachId = "Choose a valid instructor.";
+    else data.coachId = input.coachId;
+  }
   for (const field of Object.keys(input)) {
     if (!writableFields.has(field)) fieldErrors[field] = "This field is not writable. Remove it.";
   }
@@ -33,6 +38,15 @@ export function validateClassInput(
     const text = typeof input[field] === "string" ? input[field].trim() : "";
     if (!text) fieldErrors[field] = "Enter a nonempty text value.";
     else data[field] = text;
+  }
+  if (input.location !== undefined) {
+    if (typeof input.location !== "string" || !input.location.trim() || input.location.length > 120)
+      fieldErrors.location = "Enter a location up to 120 characters.";
+    else data.location = input.location.trim();
+  }
+  for (const field of textFields) {
+    if (typeof data[field] === "string" && (data[field] as string).length > (field === "description" ? 2000 : 160))
+      fieldErrors[field] = "This value is too long.";
   }
   if (data.date && !isValidClassDate(data.date as string)) fieldErrors.date = "Enter a real date as YYYY-MM-DD.";
   if (data.category && !classCategories.includes(data.category as ClassInput["category"])) {

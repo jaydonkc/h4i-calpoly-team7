@@ -15,3 +15,9 @@ export function hasClassStarted(date: string, time: string, now = new Date()): b
   };
   return minutes(time) <= minutes(currentTime);
 }
+
+export function getClassStatus(date: string, time: string, end: string, now = new Date()) {
+  if (hasClassStarted(date, end, now)) return "Completed";
+  if (hasClassStarted(date, time, now)) return "In progress";
+  return "Upcoming";
+}

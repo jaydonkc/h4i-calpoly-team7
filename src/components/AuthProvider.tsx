@@ -1,5 +1,6 @@
 "use client";
 
+import { emailDeliveryEnabled } from "@/lib/auth/features";
 import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from "react";
 import type { Membership } from "@/types/membership";
 import { isAuthProviderUnavailable, signInErrorMessage } from "@/lib/auth/errors";
@@ -296,6 +297,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function requestPasswordReset(email: string) {
+    if (!emailDeliveryEnabled) throw new Error("Password recovery is currently unavailable. Please contact the team.");
     const { error } = await createClient().auth.resetPasswordForEmail(email, {
       redirectTo: emailCallback("/auth/reset-password"),
     });
@@ -303,6 +305,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function resendConfirmation(email: string, next: string) {
+    if (!emailDeliveryEnabled) throw new Error("Email confirmation is not required to create an account.");
     const { error } = await createClient().auth.resend({
       type: "signup",
       email,

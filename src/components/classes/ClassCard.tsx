@@ -1,8 +1,8 @@
 "use client";
 
+import { getClassStatus } from "@/lib/classes/class-start";
 import { useRouter } from "next/navigation";
 import { classReturnPath, loginPath } from "@/lib/auth/redirect";
-import { createPortal } from "react-dom";
 import { formatClassTime } from "@/types/account";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -11,9 +11,11 @@ import Icon from "./Icon";
 
 type ClassCardProps = {
   fitnessClass: FitnessClass;
+  onBooked?: (fitnessClass: FitnessClass) => void;
+  onCanceled?: (fitnessClass: FitnessClass) => void;
 };
 
-export default function ClassCard({ fitnessClass }: ClassCardProps) {
+export default function ClassCard({ fitnessClass, onBooked, onCanceled }: ClassCardProps) {
   const router = useRouter();
   const {
     isUserSignedIn,
@@ -25,9 +27,13 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
     reservationsLoading,
     reservationsError,
   } = useAuth();
-  const [showConfirmation, setShowConfirmation] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
   const busy = useRef(false);
   const reserveButton = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -46,7 +52,11 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
     (reservedClass) => reservedClass.id === fitnessClass.id && reservedClass.date === fitnessClass.date,
   );
 
+  const status = getClassStatus(fitnessClass.date, fitnessClass.time, fitnessClass.end, now);
+  const hasStarted = status !== "Upcoming";
+
   async function toggleReservation() {
+    if (hasStarted) return;
     if (!isUserSignedIn) {
       router.push(loginPath(classReturnPath(String(fitnessClass.id), fitnessClass.date)));
       return;
@@ -56,9 +66,13 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
     setPending(true);
     setError("");
     try {
-      if (isBooked) await cancelReservation(fitnessClass);
-      else await reserveClass(fitnessClass);
-      setShowConfirmation(!isBooked);
+      if (isBooked) {
+        await cancelReservation(fitnessClass);
+        onCanceled?.(fitnessClass);
+      } else {
+        await reserveClass(fitnessClass);
+        onBooked?.(fitnessClass);
+      }
     } catch (error) {
       setError(error instanceof Error ? error.message : "Unable to update your reservation.");
     } finally {
@@ -75,7 +89,9 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
       </div>
       <div className="table-cell classmain" data-label="Class">
         <div>
-          <mark>{fitnessClass.category}</mark>
+          <mark className={{ Strength: "coral", Cardio: "yellow", "Mind & Body": "blue" }[fitnessClass.category]}>
+            {fitnessClass.category}
+          </mark>
         </div>
         <h3>{fitnessClass.title}</h3>
         <p className="class-description">{fitnessClass.description}</p>
@@ -86,7 +102,7 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
       </div>
       <div className="table-cell" data-label="Location">
         <Icon name="pin" />
-        <span>{fitnessClass.room}</span>
+        <span>{fitnessClass.location ?? fitnessClass.room}</span>
       </div>
       <div className="table-cell" data-label="Duration">
         {fitnessClass.duration}
@@ -102,13 +118,22 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
         ref={reserveButton}
         className={`reserve ${isBooked ? "cancel" : ""}`}
         aria-pressed={isUserSignedIn ? isBooked : undefined}
-        aria-label={isUserSignedIn ? undefined : `Log in to reserve ${fitnessClass.title}`}
+        aria-label={
+          isLoading || pending
+            ? undefined
+            : hasStarted
+              ? `${status}: ${fitnessClass.title}`
+              : isUserSignedIn
+                ? undefined
+                : `Log in to reserve ${fitnessClass.title}`
+        }
         disabled={
           isLoading ||
           pending ||
           (isUserSignedIn && reservationsLoading) ||
           (isUserSignedIn && Boolean(reservationsError)) ||
-          (isUserSignedIn && !isBooked && fitnessClass.spots === 0)
+          (isUserSignedIn && !isBooked && fitnessClass.spots === 0) ||
+          hasStarted
         }
         onClick={toggleReservation}
       >
@@ -116,35 +141,21 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
           ? "Checking session…"
           : pending
             ? "Saving…"
-            : isUserSignedIn
-              ? isBooked
-                ? "Cancel"
-                : fitnessClass.spots === 0
-                  ? "Full"
-                  : "Reserve"
-              : "Log in to reserve"}
+            : hasStarted
+              ? status
+              : isUserSignedIn
+                ? isBooked
+                  ? "Cancel"
+                  : fitnessClass.spots === 0
+                    ? "Full"
+                    : "Reserve"
+                : "Log in to reserve"}
       </button>
       {error && (
         <p role="alert" className="reservation-error">
           {error}
         </p>
       )}
-      {showConfirmation &&
-        createPortal(
-          <div className="booking-popup" role="status" aria-live="polite">
-            <span>
-              <Icon name="check" />
-            </span>
-            <div>
-              <strong>Class Booked!</strong>
-              <small>{fitnessClass.title}</small>
-            </div>
-            <button aria-label="Dismiss confirmation" onClick={() => setShowConfirmation(false)}>
-              ×
-            </button>
-          </div>,
-          document.body,
-        )}
     </article>
   );
 }

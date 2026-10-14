@@ -50,11 +50,11 @@ it("waits for the schedule and preferences, then restores the class return only 
   render(days);
   expect(hooks.setters[0]).toHaveBeenCalledExactlyOnceWith("2026-10-14");
   // Saved preferences are applied first; the login return then reveals the selected class.
-  expect(hooks.setters[5]).toHaveBeenLastCalledWith([]);
-  const categoryCalls = hooks.setters[5].mock.calls.length;
+  expect(hooks.setters[6]).toHaveBeenLastCalledWith([]);
+  const categoryCalls = hooks.setters[6].mock.calls.length;
   // A reservation/filter refresh must preserve the user's subsequent selection.
   render(days.map((day) => ({ ...day })));
   expect(hooks.setters[0]).toHaveBeenCalledTimes(1);
-  expect(hooks.setters[5]).toHaveBeenCalledTimes(categoryCalls);
+  expect(hooks.setters[6]).toHaveBeenCalledTimes(categoryCalls);
   vi.unstubAllGlobals();
 });

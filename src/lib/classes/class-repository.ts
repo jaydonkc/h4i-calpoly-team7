@@ -1,9 +1,10 @@
 import { isObjectIdOrHexString } from "mongoose";
-import { getGymCalendarDate, toIsoDate } from "@/lib/classes/class-dates";
+import { getGymCalendarDate, isValidClassDate, toIsoDate } from "@/lib/classes/class-dates";
 import connectDB from "@/database/db";
 import FitnessClassModel from "@/database/userSchema";
 import type { ClassQuery, ClassSchedule, FitnessClass } from "@/types/fitness-class";
 import type { ClassInput } from "@/lib/classes/class-input";
+import { resolveClassCoach, resolveCoachNames } from "@/lib/coaches/repository";
 
 export interface ClassRepository {
   create(input: ClassInput): Promise<FitnessClass>;
@@ -26,7 +27,9 @@ function toFitnessClass(record: ClassRecord, date = record.date): FitnessClass {
     time: record.time,
     end: record.end,
     coach: record.coach,
+    ...(record.coachId ? { coachId: record.coachId } : {}),
     room: record.room,
+    ...(record.location ? { location: record.location } : {}),
     level: record.level,
     duration: record.duration,
     spots: record.spots,
@@ -34,9 +37,9 @@ function toFitnessClass(record: ClassRecord, date = record.date): FitnessClass {
   };
 }
 
-function getWeekDates(now: Date) {
+function getWeekDates(now: Date, weekStart?: string) {
   const today = getGymCalendarDate(now);
-  const monday = new Date(today);
+  const monday = weekStart && isValidClassDate(weekStart) ? new Date(`${weekStart}T00:00:00Z`) : new Date(today);
   monday.setUTCDate(monday.getUTCDate() - ((monday.getUTCDay() + 6) % 7));
 
   return Array.from({ length: 7 }, (_, index) => {
@@ -90,15 +93,18 @@ function getTimeSortValue(time: string) {
 class MongoClassRepository implements ClassRepository {
   async create(input: ClassInput): Promise<FitnessClass> {
     await connectDB();
-    const record = await FitnessClassModel.create(input);
+    const record = await FitnessClassModel.create(await resolveClassCoach(input));
     return toFitnessClass(record.toObject() as ClassRecord);
   }
 
   async getSchedule(query: ClassQuery = {}): Promise<ClassSchedule> {
     await connectDB();
 
-    const week = getWeekDates(new Date());
-    const records = await FitnessClassModel.find().sort({ date: 1, time: 1 }).lean<ClassRecord[]>().exec();
+    const week = getWeekDates(new Date(), query.weekStart);
+    const records = await FitnessClassModel.find({ archived: { $ne: true } })
+      .sort({ date: 1, time: 1 })
+      .lean<ClassRecord[]>()
+      .exec();
     const classes = records
       .flatMap((record) => {
         if (typeof record.time !== "string") return [];
@@ -125,15 +131,17 @@ class MongoClassRepository implements ClassRepository {
         date: isoDate,
         ...(isToday ? { isToday: true } : {}),
       })),
-      classes,
+      classes: await resolveCoachNames(classes),
     };
   }
 
   async getById(id: FitnessClass["id"]): Promise<FitnessClass | null> {
     if (!isObjectIdOrHexString(id)) return null;
     await connectDB();
-    const record = await FitnessClassModel.findOne({ _id: id }).lean<ClassRecord>().exec();
-    return record ? toFitnessClass(record) : null;
+    const record = await FitnessClassModel.findOne({ _id: id, archived: { $ne: true } })
+      .lean<ClassRecord>()
+      .exec();
+    return record ? (await resolveCoachNames([toFitnessClass(record)]))[0] : null;
   }
 }
 

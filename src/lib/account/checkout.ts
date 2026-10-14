@@ -61,7 +61,7 @@ export async function demoCheckout(userId: string, email: string, plan: Membersh
   } catch (error) {
     if ((error as { code?: number }).code !== 11000) throw error;
     const existing = await OrderModel.findOne({ userId, idempotencyKey });
-    if (!existing || existing.plan !== plan) throw new AccountError("Please retry the demo checkout.", 409);
+    if (!existing || existing.plan !== plan) throw new AccountError("Please retry checkout.", 409);
   } finally {
     await session.endSession();
   }
