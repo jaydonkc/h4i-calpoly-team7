@@ -7,6 +7,7 @@ import ClassesLoading from "./loading";
 import ClassCard from "@/components/classes/ClassCard";
 import Icon from "@/components/classes/Icon";
 import MultiSelectFilter from "@/components/classes/MultiSelectFilter";
+import { hasClassStarted } from "@/lib/classes/class-start";
 import { classCategories, type ClassCategory, type ClassSchedule, type FitnessClass } from "@/types/fitness-class";
 type FilterMenu = "categories" | "durations" | "levels" | "instructors" | "locations";
 type FilterDimension = "category" | "duration" | "level" | "instructor" | "location";
@@ -34,6 +35,7 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
   const classList = initialSchedule.classes;
 
   const [day, setDay] = useState(today),
+    [now, setNow] = useState(() => new Date()),
     [draftCategories, setDraftCategories] = useState<ClassCategory[]>([]),
     [draftDurations, setDraftDurations] = useState<string[]>([]),
     [draftLevels, setDraftLevels] = useState<string[]>([]),
@@ -46,6 +48,10 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
     [appliedLocations, setAppliedLocations] = useState<string[]>([]),
     [openFilter, setOpenFilter] = useState<FilterMenu | null>(null);
   const [bookedClass, setBookedClass] = useState<FitnessClass | null>(null);
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
   useEffect(() => {
     if (isLoading || profileLoading || profileError || preferenceApplied.current === (user?.id ?? null)) return;
     const categories = preferences.defaultClassCategory === "All" ? [] : [preferences.defaultClassCategory];
@@ -67,15 +73,20 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
   }, [initialSchedule.days, profileLoading]);
   const classes = useMemo(() => {
     const list = classList.filter((item) => item.date === day);
-    return list.filter(
-      (item) =>
-        (appliedCategories.length === 0 || appliedCategories.includes(item.category)) &&
-        (appliedDurations.length === 0 || appliedDurations.includes(item.duration)) &&
-        (appliedLevels.length === 0 || appliedLevels.includes(item.level)) &&
-        (appliedInstructors.length === 0 || appliedInstructors.includes(item.coach)) &&
-        (appliedLocations.length === 0 || appliedLocations.includes(item.location ?? item.room)),
-    );
-  }, [day, appliedCategories, appliedDurations, appliedLevels, appliedInstructors, appliedLocations, classList]);
+    return list
+      .filter(
+        (item) =>
+          (appliedCategories.length === 0 || appliedCategories.includes(item.category)) &&
+          (appliedDurations.length === 0 || appliedDurations.includes(item.duration)) &&
+          (appliedLevels.length === 0 || appliedLevels.includes(item.level)) &&
+          (appliedInstructors.length === 0 || appliedInstructors.includes(item.coach)) &&
+          (appliedLocations.length === 0 || appliedLocations.includes(item.location ?? item.room)),
+      )
+      .sort(
+        (first, second) =>
+          Number(hasClassStarted(first.date, first.time, now)) - Number(hasClassStarted(second.date, second.time, now)),
+      );
+  }, [day, appliedCategories, appliedDurations, appliedLevels, appliedInstructors, appliedLocations, classList, now]);
 
   const durations = useMemo(
     () =>

@@ -76,6 +76,30 @@ it("does not add next-week tabs when today is Sunday", () => {
   expect(html).not.toContain("<strong>2</strong>");
 });
 
+it("places started classes after upcoming classes", () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-10-30T12:00:00-07:00"));
+  const schedule = scheduleFor(week, "2026-10-30");
+  const base = {
+    category: "Cardio" as const,
+    date: "2026-10-30",
+    coach: "Alex",
+    room: "Studio",
+    level: "Beginner",
+    duration: "60 min",
+    spots: 10,
+    description: "Example",
+  };
+  schedule.classes = [
+    { ...base, id: "started", title: "Started class", time: "09:00", end: "10:00" },
+    { ...base, id: "upcoming", title: "Upcoming class", time: "13:00", end: "14:00" },
+  ];
+
+  const html = renderToStaticMarkup(createElement(ClassesPage, { initialSchedule: schedule }));
+
+  expect(html.indexOf("Upcoming class")).toBeLessThan(html.indexOf("Started class"));
+});
+
 it("keeps loading, empty and error states distinct", () => {
   const schedule = scheduleFor(week, "2026-10-30");
   const empty = renderToStaticMarkup(createElement(ClassesPage, { initialSchedule: schedule }));
