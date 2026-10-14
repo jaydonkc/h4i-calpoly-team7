@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { gymLocations } from "@/data/site-content";
+import { gymLocations, coaches as coachProfiles } from "@/data/site-content";
 import "./info.css";
 import { listCoaches } from "@/lib/coaches/repository";
 import type { Coach } from "@/types/coach";
@@ -77,7 +77,10 @@ function AmenityIcon({ name }: { name: AmenityIconName }) {
 export default async function GymInfoPage() {
   let coaches: Coach[] = [];
   try {
-    coaches = await listCoaches();
+    coaches = (await listCoaches()).map((coach) => {
+      const profile = coachProfiles.find((profile) => profile.name === coach.name);
+      return profile ? { ...coach, specialties: profile.specialties, bio: profile.bio } : coach;
+    });
     coaches.sort((a, b) => Number(a.name === "Jaydon Chen") - Number(b.name === "Jaydon Chen"));
   } catch {
     /* Show the roster unavailable state. */
@@ -86,10 +89,6 @@ export default async function GymInfoPage() {
     <div className="about-page">
       <section className="about-intro" aria-labelledby="about-title">
         <h1 id="about-title">About Us</h1>
-        <p>
-          Serious about showing up. Deeply unserious about everything else. Fitness Maxxing is built for big lifts, good
-          company, and coaches with wildly questionable trophy cabinets.
-        </p>
       </section>
 
       <section className="about-section" aria-labelledby="coaches-title">
