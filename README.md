@@ -23,7 +23,7 @@ npm run dev
 
 Preserve an existing `.env.local`. Fill in `MONGO_URI` with the Atlas application credential; keep all credentials out of Git. The Supabase URL and publishable key are public client configuration.
 
-Creating classes through the API requires a server-only `GYM_ADMIN_USER_IDS` list of Supabase user UUIDs, or an `admin` role in trusted Supabase `app_metadata`. Member-editable `user_metadata` never grants access. An empty list grants nobody access unless they have the trusted role. Apply the same configuration in Vercel when releasing. The website has no administrator screens.
+Creating classes through the API requires a server-only `GYM_ADMIN_USER_IDS` list of Supabase user UUIDs, or an `admin` role in trusted Supabase `app_metadata`. Member-editable `user_metadata` never grants access. An empty list grants nobody access unless they have the trusted role. Apply the same configuration in Vercel when releasing. Authorized staff also receive class creation, editing, and removal controls on the Classes page; these controls are hidden from ordinary members.
 
 ## Class data
 

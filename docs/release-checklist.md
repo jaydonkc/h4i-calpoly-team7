@@ -15,7 +15,7 @@ The branch combines merged login/account/class APIs with the classes loading she
 - Account: instant signup, invalid login, valid login, refresh persistence, safe return paths, logout, and signed-out protection.
 - Reservations: book a future class, refresh, cancel, and confirm the available seat returns.
 - Checkout: select a plan, refresh the account, verify saved membership/history, and confirm retry does not duplicate an order.
-- Protected API: create a class and read it back after refresh. A signed-out user receives 401 and an ordinary member receives 403 from POST /api/classes. The public website has no administrator screens.
+- Protected API: create a class and read it back after refresh. A signed-out user receives 401 and an ordinary member receives 403 from POST /api/classes. Staff can create, edit, and remove classes from the Classes page; these controls remain hidden from signed-out visitors and ordinary members.
 - Contact: signed-in submission returns a saved receipt and the message persists in MongoDB.
 - Content: no pending-review text, fake outbound social/contact links, or unfinished membership perks. Coach bios and addresses follow the finished site copy.
 
