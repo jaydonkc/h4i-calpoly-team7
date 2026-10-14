@@ -10,7 +10,7 @@ import styles from "./Navbar.module.css";
 const links = [
   { href: "/", label: "Home" },
   { href: "/classes", label: "Classes" },
-  { href: "/gym-info", label: "Our gyms" },
+  { href: "/gym-info", label: "About Us" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -137,7 +137,7 @@ export default function Navbar() {
           <Link
             className={styles.account}
             href={user || isLoading ? "/profile" : "/login"}
-            aria-label={user ? "Account for " + user.firstName + " " + user.lastName : "Log in"}
+            aria-label={user ? `${accountLabel}, account for ${user.firstName} ${user.lastName}` : accountLabel}
             aria-current={isActive(pathname, "/profile") || isActive(pathname, "/login") ? "page" : undefined}
             onClick={() => setMenuOpen(false)}
           >

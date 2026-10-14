@@ -12,15 +12,22 @@ const fitnessClassSchema = new Schema(
       type: String,
       required: true,
       match: /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/,
-      validate: function (this: { get(path: string): unknown }, end: string) {
+      validate: function (
+        this: { get(path: string): unknown; getUpdate?(): { $setOnInsert?: { time?: string } } },
+        end: string,
+      ) {
         const minutes = (time: string) => Number(time.split(":")[0]) * 60 + Number(time.split(":")[1]);
         // Documents and update queries both expose get(), but only documents have this.time.
-        const time = this.get("time");
+        const time = this.get("time") ?? this.getUpdate?.().$setOnInsert?.time;
         return typeof time === "string" && minutes(end) > minutes(time);
       },
     },
     coach: { type: String, required: true, trim: true },
+    coachId: { type: String, ref: "Coach" },
+    archived: { type: Boolean, default: false },
+    bookingVersion: { type: Number, default: 0 },
     room: { type: String, required: true, trim: true },
+    location: { type: String, trim: true },
     level: { type: String, required: true, enum: ["All levels", "Beginner", "Intermediate", "Advanced"] },
     duration: { type: String, required: true, trim: true },
     spots: { type: Number, required: true, min: 0, validate: Number.isInteger },

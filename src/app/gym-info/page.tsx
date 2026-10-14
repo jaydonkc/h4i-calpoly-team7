@@ -1,9 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
-import { gymLocations, coachHeadshots } from "@/data/site-content";
-import { classRepository } from "@/lib/classes/class-repository";
-import type { ClassCategory } from "@/types/fitness-class";
+import { gymLocations } from "@/data/site-content";
 import "./info.css";
+import { listCoaches } from "@/lib/coaches/repository";
+import type { Coach } from "@/types/coach";
 
 export const dynamic = "force-dynamic";
 
@@ -75,31 +75,19 @@ function AmenityIcon({ name }: { name: AmenityIconName }) {
 }
 
 export default async function GymInfoPage() {
-  const coachCategories = new Map<string, Set<ClassCategory>>();
-
+  let coaches: Coach[] = [];
   try {
-    const schedule = await classRepository.getSchedule();
-    schedule.classes.forEach((fitnessClass) => {
-      const categories = coachCategories.get(fitnessClass.coach) ?? new Set<ClassCategory>();
-      categories.add(fitnessClass.category);
-      coachCategories.set(fitnessClass.coach, categories);
-    });
+    coaches = await listCoaches();
   } catch {
-    // The rest of the About page remains available if class data cannot load.
+    /* Show the roster unavailable state. */
   }
-
-  const coaches = Array.from(coachCategories, ([name, categories]) => ({
-    name,
-    specialties: Array.from(categories).join(" & "),
-  }));
-
   return (
     <div className="about-page">
       <section className="about-intro" aria-labelledby="about-title">
         <h1 id="about-title">About Us</h1>
         <p>
-          FitnessMaxxing is a community-focused gym with quality equipment, experienced coaches, and a variety of
-          classes for every fitness journey.
+          Serious about showing up. Deeply unserious about everything else. Fitness Maxxing is built for big lifts, good
+          company, and coaches with wildly questionable trophy cabinets.
         </p>
       </section>
 
@@ -115,9 +103,9 @@ export default async function GymInfoPage() {
               <article key={coach.name}>
                 <div className="card-heading">
                   <div className="coach-headshot">
-                    {coachHeadshots[coach.name] ? (
+                    {coach.headshot ? (
                       <Image
-                        src={coachHeadshots[coach.name]}
+                        src={coach.headshot}
                         alt={`Headshot of ${coach.name}`}
                         width={80}
                         height={80}
@@ -127,7 +115,7 @@ export default async function GymInfoPage() {
                       <span aria-hidden="true">
                         {coach.name
                           .split(" ")
-                          .map((name) => name[0])
+                          .map((part) => part[0])
                           .join("")}
                       </span>
                     )}
@@ -137,10 +125,7 @@ export default async function GymInfoPage() {
                     <p>{coach.specialties}</p>
                   </div>
                 </div>
-                <p>
-                  Specializes in {coach.specialties.toLowerCase()} sessions and helps members train with confidence and
-                  consistency.
-                </p>
+                <p>{coach.bio}</p>
               </article>
             ))}
           </div>
@@ -160,7 +145,9 @@ export default async function GymInfoPage() {
             <article key={location.name}>
               <h3>{location.name}</h3>
               <address>{location.region}</address>
+              <p>{location.address}</p>
               <p>{location.hours}</p>
+              <p>{location.vibe}</p>
             </article>
           ))}
         </div>

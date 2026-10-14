@@ -11,20 +11,20 @@ const tiers: Array<{ name: MembershipPlan; price: string; description: string; p
   {
     name: "Student",
     price: "$10/mo",
-    description: "Student Membership",
-    perks: ["Access to Sports Facilities", "Access to Locker Rooms", "Free Sports Equipment Rental"],
+    description: "For study breaks that turn into personal bests.",
+    perks: ["Every gym location", "Every scheduled group class", "A study break with actual movement"],
   },
   {
     name: "Standard",
     price: "$15/mo",
-    description: "Standard Membership (Includes Student Perks)",
-    perks: ["4 Fitness Classes / Week", "3 Personal Training Sessions", "Sauna Access"],
+    description: "Your everyday training arc starts here.",
+    perks: ["Every gym location", "Every scheduled group class", "A routine worth showing up for"],
   },
   {
     name: "Premium",
     price: "$30/mo",
-    description: "Unlimited Access to Everything (Includes Standard Perks)",
-    perks: ["Unlimited Fitness Classes", "Free Personal Training", "Unlimited Guests"],
+    description: "Same great gym. Maximum main-character energy.",
+    perks: ["Every gym location", "Every scheduled group class", "Premium bragging rights on your member card"],
   },
 ];
 
@@ -44,6 +44,7 @@ export default function MembershipPlans() {
   const [pending, setPending] = useState(false);
   const busy = useRef(false);
   const checkoutKey = useRef("");
+  const selectionTrigger = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     if (!isUserSignedIn) return;
@@ -70,6 +71,7 @@ export default function MembershipPlans() {
       <section>
         <div className="membershipBanner">
           <h1>Memberships</h1>
+          <p>Start working out</p>
         </div>
       </section>
 
@@ -77,7 +79,7 @@ export default function MembershipPlans() {
         <div className="planChoice">
           <h2>Choose your plan</h2>
           <p>Flexible options for all.</p>
-          <p>Demo checkout saves your selection. No payment or automatic renewal will be processed.</p>
+          <p>Choose a plan to get started.</p>
           <p role="status">{purchaseSuccess}</p>
         </div>
 
@@ -97,7 +99,8 @@ export default function MembershipPlans() {
               <button
                 className="tierButton"
                 disabled={pending || isLoading}
-                onClick={() => {
+                onClick={(event) => {
+                  selectionTrigger.current = event.currentTarget;
                   if (!isUserSignedIn) {
                     setLoginTier(tier.name);
                     loginPromptRef.current?.showModal();
@@ -117,7 +120,15 @@ export default function MembershipPlans() {
         </div>
       </section>
 
-      <dialog ref={loginPromptRef} className="loginPrompt" aria-labelledby="membership-login-title">
+      <dialog
+        ref={loginPromptRef}
+        className="loginPrompt"
+        aria-labelledby="membership-login-title"
+        onClose={() => {
+          setLoginTier(null);
+          selectionTrigger.current?.focus();
+        }}
+      >
         <h2 id="membership-login-title">Log in to select a membership</h2>
         <p>You need to log in or create an account before purchasing a membership.</p>
         <div>
@@ -136,9 +147,12 @@ export default function MembershipPlans() {
           onCancel={(event) => {
             if (pending) event.preventDefault();
           }}
-          onClose={() => setSelectedTier(null)}
+          onClose={() => {
+            setSelectedTier(null);
+            selectionTrigger.current?.focus();
+          }}
         >
-          <h2 id="purchase-dialog-title">Demo checkout: {selectedTier.name}</h2>
+          <h2 id="purchase-dialog-title">Select your membership: {selectedTier.name}</h2>
 
           <div>
             <h3>Billing summary</h3>
@@ -157,7 +171,7 @@ export default function MembershipPlans() {
               setPaymentError("");
               try {
                 await purchaseMembership(selectedTier.name, checkoutKey.current);
-                setPurchaseSuccess(`Demo ${selectedTier.name} checkout saved. No payment was processed.`);
+                setPurchaseSuccess(`${selectedTier.name} membership saved.`);
                 setConfirmedPlan(selectedTier.name);
                 setSelectedTier(null);
               } catch (error) {
@@ -168,12 +182,12 @@ export default function MembershipPlans() {
               }
             }}
           >
-            <p>This is a simulated checkout. No card or billing details are needed.</p>
+            <p>No payment will be taken. No card details are needed.</p>
 
             {paymentError && <p role="alert">{paymentError}</p>}
 
             <button type="submit" disabled={pending}>
-              {pending ? "Saving…" : "Confirm Demo Checkout"}
+              {pending ? "Saving…" : "Confirm Membership"}
             </button>
             <button type="button" disabled={pending} onClick={() => setSelectedTier(null)}>
               Cancel
@@ -186,13 +200,13 @@ export default function MembershipPlans() {
         ref={confirmationRef}
         className="purchaseConfirmation"
         aria-labelledby="purchase-confirmation-title"
-        onClose={() => setConfirmedPlan("")}
+        onClose={() => {
+          setConfirmedPlan("");
+          selectionTrigger.current?.focus();
+        }}
       >
-        <h2 id="purchase-confirmation-title">Demo checkout saved</h2>
-        <p>
-          Your {confirmedPlan} demo selection is saved in your checkout history. View your account for your current
-          membership status. No payment was processed.
-        </p>
+        <h2 id="purchase-confirmation-title">Membership saved</h2>
+        <p>Your {confirmedPlan} membership is saved. View your account for your membership details and history.</p>
         <div>
           <button type="button" onClick={() => confirmationRef.current?.close()}>
             Close

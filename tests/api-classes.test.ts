@@ -29,7 +29,7 @@ describe("GET /api/classes", () => {
       { ...base, time: "19:00" },
       { ...base, _id: new Types.ObjectId(), time: "09:00" },
     ]);
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/classes"));
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.success).toBe(true);
@@ -41,7 +41,7 @@ describe("GET /api/classes", () => {
 
   it("returns 200 and calendar metadata when the database is empty", async () => {
     mockRecords([]);
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/classes"));
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.data.classes).toEqual([]);
@@ -50,7 +50,7 @@ describe("GET /api/classes", () => {
 
   it("returns safe JSON 503 when connecting fails", async () => {
     vi.mocked(connectDB).mockRejectedValueOnce(new Error("private connection details"));
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/classes"));
     expect(response.status).toBe(503);
     expect(await response.json()).toEqual({
       success: false,
@@ -65,7 +65,7 @@ describe("GET /api/classes", () => {
       exec: vi.fn().mockRejectedValue(new Error("private query details")),
     };
     vi.spyOn(Model, "find").mockReturnValue(query as unknown as ReturnType<typeof Model.find>);
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/classes"));
     expect(response.status).toBe(503);
     expect(await response.json()).toEqual({
       success: false,

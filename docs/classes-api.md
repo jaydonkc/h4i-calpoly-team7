@@ -68,3 +68,15 @@ Invalid cases: malformed JSON, blank title, impossible date, unknown category, i
 6. Add the date, development environment, statuses, saved ID, GET/refresh/restart results, and failed-request count checks to the PR. Never include credentials. The saved demo class remains in Atlas; remove it manually only if the team wants cleanup.
 
 A network failure during an in-flight write can have an uncertain outcome: check GET before retrying a submitted class to avoid duplicates. Idempotency is outside this minimal endpoint.
+
+## Staff class management and coaches
+
+The classes page shows creation, editing, and removal controls only for a server-verified gym administrator or an account in `GYM_ADMIN_USER_IDS`. Every mutation repeats authorization on the server and checks the request origin; client visibility never grants access.
+
+`GET /api/coaches` reads MongoDB records with id, name, specialties, bio, and headshot. Class creation/editing resolve coachId against that roster. Public schedules, instructor filters, and profile reservations read the referenced coach name.
+
+`POST /api/classes` creates a class. `PATCH /api/classes/:id` accepts the same complete validated fields. `DELETE /api/classes/:id` archives an unbooked class while retaining its record. Mutations require JSON. Dates/times use America/Los_Angeles; the form calculates duration from start/end times.
+
+Schedules expose spots as remaining availability and capacity as total capacity. Staff edit capacity. It cannot drop below existing reservations. Date/time changes and removal are blocked while reservations exist. Booking and staff changes share a transaction lock, preventing races during removal/capacity edits. Permitted metadata edits update existing reservation snapshots.
+
+Initialize/link the roster with `NODE_ENV=development npm run seed:coaches`. Seed a requested week with `NODE_ENV=development npm run seed:classes -- --week=2026-10-19` (replace the date as needed). Seeding matches date/title and only inserts missing templates, retaining existing IDs, staff edits, and bookings. Reruns do not reset capacity or unarchive removed classes.

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAuthProviderUnavailable } from "@/lib/auth/errors";
 import { createClient } from "@/lib/supabase/server";
-import { getMembership } from "@/lib/memberships/repository";
+import { ensureDemoMembership } from "@/lib/memberships/repository";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +18,7 @@ export async function GET() {
       );
     if (error || !user)
       return NextResponse.json({ error: "Please log in." }, { status: 401, headers: { "Cache-Control": "no-store" } });
-    const membership = await getMembership(user.id);
+    const membership = await ensureDemoMembership(user.id, user.email ?? "");
     return NextResponse.json({ membership }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
     console.error("Membership storage request failed", { name: error instanceof Error ? error.name : "UnknownError" });
