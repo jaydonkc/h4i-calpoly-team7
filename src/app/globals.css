@@ -73,3 +73,16 @@ a:focus-visible {
     scroll-behavior: auto;
   }
 }
+
+.skip-link {
+  position: absolute;
+  top: -80px;
+  left: 16px;
+  padding: 12px;
+  background: white;
+  color: #19211e;
+  z-index: 100;
+}
+.skip-link:focus {
+  top: 12px;
+}

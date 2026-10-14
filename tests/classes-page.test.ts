@@ -87,7 +87,9 @@ it("keeps loading, empty and error states distinct", () => {
   );
   expect(empty).toContain("Rest day, for now.");
   expect(loading).toContain('role="status"');
-  expect(loading).toContain("Loading Classes...");
+  expect(loading).toContain("Loading class schedule…");
+  expect(loading).toContain('aria-busy="true"');
+  expect(loading).not.toContain("Rest day, for now.");
   expect(error).toContain('role="alert"');
   expect(error).toContain("Reload");
   expect(error).not.toContain("Rest day, for now.");

@@ -34,6 +34,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Local browser verification artifacts
+# Browser verification artifacts
 .playwright-cli/
-/output/playwright/
+output/

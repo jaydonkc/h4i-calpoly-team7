@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "seed:classes": "tsx scripts/seed-classes.ts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "seed:coaches": "tsx scripts/seed-coaches.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

@@ -1,102 +1,61 @@
 # Fitness Maxxing — Team 7
 
-A gym web application for browsing fitness classes, viewing gym information, exploring memberships, and accessing a member profile.
+Fitness Maxxing is a gym application with an intentionally playful identity. Coach bios and locations use the site’s playful identity. The application stores accounts, class reservations, membership selections, and contact messages in MongoDB; checkout is simulated and never charges money.
 
-**Live app:** [h4i-calpoly-team7.vercel.app](https://h4i-calpoly-team7.vercel.app)
+## What the app does
 
-**Development preview:** [dev branch deployment](https://h4i-calpoly-team7-git-dev-jaydonkchen-4999s-projects.vercel.app)
+- Supabase instant signup, login, logout, and server-protected account pages.
+- MongoDB profiles and preferences, class reservations with transactional capacity checks, and idempotent simulated membership checkout.
+- Server-rendered class schedules streamed behind a loading shell; client filters, location selection, and booking refreshes.
+- Protected class creation through `POST /api/classes`, with input validation and MongoDB persistence.
+- Signed-in contact messages saved to MongoDB. No email, SMS, or external messaging service is used.
+- Finished coach bios, gym locations, opening hours, membership descriptions, and FAQs.
 
-## Table of Contents
+## Local setup
 
-- [Overview](#overview)
-  - [Purpose](#purpose)
-  - [Team](#team)
-  - [Tech Stack](#tech-stack)
-  - [Deployment and Milestone Status](#deployment-and-milestone-status)
-- [Getting Started And Contributing](#getting-started-and-contributing)
-
-## Overview
-
-### Purpose
-
-Team 7 is building a gym application that brings class schedules, membership information, gym details, and account access into one responsive website. The current release is a development demo with sample gym content and simulated membership checkout. A confirmed nonprofit partner mission is not established in the repository; this is not yet a partner-approved production release.
-
-### Team
-
-Repository owner: [Jaydon (@jaydonkc)](https://github.com/jaydonkc).
-
-Feature owners listed in the repository's issue tracker:
-
-- [Emi Okumoto (@eokumoto)](https://github.com/eokumoto)
-- [Francis Corpuz (@francis-corpuz)](https://github.com/francis-corpuz)
-- [Harold Huynh (@HaroldHuynh)](https://github.com/HaroldHuynh)
-- [Jacob Lee (@JMLee1231)](https://github.com/JMLee1231)
-- [Steven Mossman (@speedisparrow)](https://github.com/speedisparrow)
-
-See the [issue tracker](https://github.com/jaydonkc/h4i-calpoly-team7/issues) for current assignments.
-
-### Tech Stack
-
-- **Application:** Next.js 14 App Router, React 18, TypeScript, and CSS.
-- **Database:** MongoDB Atlas and Mongoose; fitness-class persistence integration is in progress.
-- **Authentication:** Supabase email/password authentication implemented; live verification is tracked in [#32](https://github.com/jaydonkc/h4i-calpoly-team7/issues/32).
-- **Hosting:** Vercel with GitHub deployment integration.
-- **Quality checks:** ESLint, Prettier, TypeScript, Vitest, and GitHub Actions.
-
-### Deployment and Milestone Status
-
-Vercel tracks `main` for Production and `dev` for Preview. Both branches have successful deployments. The production dependency conflict was fixed in commit `82af663`, and the primary URL now serves `main`. The gym UI is on the newer `dev` branch; `main` currently contains the earlier starter application. Reviewed feature changes still need to be released to `main`.
-
-Live verification on October 7, 2026:
-
-| Check                   | Result                                             |
-| ----------------------- | -------------------------------------------------- |
-| Main home page          | HTTP 200                                           |
-| Dev classes page        | HTTP 200; sample JSON data                         |
-| `GET /api/classes`      | HTTP 404; not implemented on the deployed branches |
-| Main `GET /api/example` | HTTP 200; Atlas connection confirmed               |
-
-**Milestone 2's live CRUD verification is pending.** The minimum planned operations are reading classes ([#26](https://github.com/jaydonkc/h4i-calpoly-team7/issues/26)) and creating classes ([#27](https://github.com/jaydonkc/h4i-calpoly-team7/issues/27)). Frontend integration and a validated creation form are tracked in [#28](https://github.com/jaydonkc/h4i-calpoly-team7/issues/28) and [#29](https://github.com/jaydonkc/h4i-calpoly-team7/issues/29). The acceptance demo must create a class on the deployed app, read it back, and confirm it remains after refresh; loading sample data alone does not satisfy this check.
-
-See [Vercel deployment notes](docs/vercel-deployment.md) and [Supabase setup](docs/supabase-auth-setup.md) for configuration and limitations.
-
-## Getting Started And Contributing
-
-Use Node.js 22 and npm. Clone the repository and start from the development branch:
+Use Node.js 22 and npm:
 
 ```sh
-git clone https://github.com/jaydonkc/h4i-calpoly-team7.git
-cd h4i-calpoly-team7
-git switch dev
 npm ci
 cp .env.local.example .env.local
-```
-
-If `.env.local` already exists, preserve it and add only missing variables.
-
-| Variable                               | Purpose                                                                         |
-| -------------------------------------- | ------------------------------------------------------------------------------- |
-| `MONGO_URI`                            | Server-only Atlas connection string. Obtain it securely from the project owner. |
-| `NEXT_PUBLIC_SUPABASE_URL`             | Supabase project URL; included in the example file.                             |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase public client key; included in the example file.                       |
-
-Replace the Atlas password placeholder before using database routes. Keep `.env.local`, database passwords, and Supabase secret/service-role keys out of Git. On Vercel, save variables in **Project Settings → Environment Variables**, select the appropriate Production/Preview environment, and redeploy after changes. Do not hardcode database credentials in application source.
-
-```sh
 npm run dev
 ```
 
-Open [localhost:3000](http://localhost:3000). Before requesting review, run:
+Preserve an existing `.env.local`. Fill in `MONGO_URI` with the Atlas application credential; keep all credentials out of Git. The Supabase URL and publishable key are public client configuration.
+
+Creating classes through the API requires a server-only `GYM_ADMIN_USER_IDS` list of Supabase user UUIDs, or an `admin` role in trusted Supabase `app_metadata`. Member-editable `user_metadata` never grants access. An empty list grants nobody access unless they have the trusted role. Apply the same configuration in Vercel when releasing. Authorized staff also receive class creation, editing, and removal controls on the Classes page; these controls are hidden from ordinary members.
+
+## Class data
+
+The schedule always reads MongoDB. The curated lineup in `src/data/classes.json` is used by the explicit weekly publishing command, never as a fallback when the database fails.
+
+```sh
+NODE_ENV=development npm run seed:classes
+NODE_ENV=development npx tsx scripts/refresh-class-content.ts
+```
+
+The weekly publisher creates eight classes per day with stable IDs tied to each date. Re-running it updates those entries; past weeks retain their IDs. The content refresh normalizes existing curated classes and locations while preserving dates, IDs, capacity, and reservations. Neither command deletes custom classes.
+
+## Membership rules
+
+All plans have the same location and group-class access in this fictional app. Student, Standard, and Premium are story choices with different displayed prices. No card is requested and no payment is processed. A simulated membership lasts one month with no recurring billing; selecting another plan starts a new simulated period. Separately granted complimentary memberships are preserved.
+
+## Verification and release
 
 ```sh
 npm run lint
 npm run typecheck
 npm test
+ACCOUNT_INTEGRATION_TESTS=1 npx vitest run tests/account-repository.integration.test.ts
 npm run build
 ```
 
-Follow [getting-started.md](docs/getting-started.md) for setup details and [contributing.md](docs/contributing.md) for the branch and pull-request workflow. Changes should be reviewed on `dev` before release to `main`.
+The integration suite uses isolated MongoDB collections and removes its test collections afterward. It tests profile/preferences persistence, reservations and capacity, cancellation, and checkout transactions. Run only against the development database.
 
-Account profiles, preferences, reservations, and demo checkout history persist in MongoDB and are linked to verified Supabase identities. See [Account data](docs/account-data.md) for API contracts and persistence checks. Demo checkout does not process payments.
+Feature PRs target `dev`. Production tracks `main`. Before release, verify deployed instant signup, login returns, booking/refresh/cancellation, simulated checkout persistence, signed-out protection, class creation through the protected API, and contact-message persistence. A build or deployment success does not establish those user flows.
 
-See [Classes API](docs/classes-api.md) for writable class fields, creation responses, form error handling, and verified development Atlas persistence checks.
+See [contributing](docs/contributing.md) and [release checklist](docs/release-checklist.md). Development preview: [Vercel dev app](https://h4i-calpoly-team7-git-dev-jaydonkchen-4999s-projects.vercel.app).
+
+## Public signup
+
+Email confirmation is disabled in the Supabase project for the event. New users sign in immediately after registration; email addresses are unverified. Custom SMTP is not configured, so recovery and confirmation-email controls are hidden. Set `NEXT_PUBLIC_AUTH_EMAIL_DELIVERY=true` only after configuring a sender that supports public recipients. Existing account email addresses remain read-only while email delivery is unavailable.

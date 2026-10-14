@@ -1,5 +1,6 @@
-import { beforeEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import type { ReactElement, ReactNode } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import ClassCard from "@/components/classes/ClassCard";
 import type { FitnessClass } from "@/types/fitness-class";
 
@@ -12,7 +13,7 @@ const mock = vi.hoisted(() => ({
 }));
 vi.mock("react", async (original) => ({
   ...(await original<typeof import("react")>()),
-  useState: (value: unknown) => [value, vi.fn()],
+  useState: (value: unknown) => [typeof value === "function" ? value() : value, vi.fn()],
   useRef: (value: unknown) => ({ current: value }),
   useEffect: vi.fn(),
 }));
@@ -53,7 +54,10 @@ function action(node: ReactNode): () => Promise<void> {
   }
   throw new Error("Reservation button not found");
 }
+afterEach(() => vi.useRealTimers());
 beforeEach(() => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-10-13T12:00:00-07:00"));
   vi.clearAllMocks();
   mock.signedIn = true;
   mock.reservations = [];
@@ -98,4 +102,35 @@ it("opens login with the selected class for signed-out visitors", async () => {
   expect(new URL(mock.push.mock.calls[0][0], "https://gym.example").searchParams.get("next")).toContain(
     "day=2026-10-14&class=class-id",
   );
+});
+
+it("does not reserve or send visitors to login for a class that has started", async () => {
+  mock.signedIn = false;
+  const past = { ...fitnessClass, date: "2000-01-01" };
+  await action(ClassCard({ fitnessClass: past }))();
+  expect(mock.reserve).not.toHaveBeenCalled();
+  expect(mock.push).not.toHaveBeenCalled();
+});
+it.each([
+  ["2026-10-14T18:00:00-07:00", "In progress"],
+  ["2026-10-14T19:00:00-07:00", "Completed"],
+  ["2026-10-15T12:00:00-07:00", "Completed"],
+])("shows the class status at %s and blocks new bookings", async (now, status) => {
+  vi.setSystemTime(new Date(now));
+  mock.signedIn = false;
+  const card = ClassCard({ fitnessClass });
+  const html = renderToStaticMarkup(card);
+  expect(html).toContain(`aria-label="${status}: Demo Class"`);
+  expect(html).toContain(`>${status}</button>`);
+  expect(html).toContain('disabled=""');
+  await action(card)();
+  expect(mock.reserve).not.toHaveBeenCalled();
+  expect(mock.push).not.toHaveBeenCalled();
+});
+it("disables cancellation of an existing past reservation as in PR 49", async () => {
+  const past = { ...fitnessClass, date: "2000-01-01" };
+  mock.reservations = [past];
+  await action(ClassCard({ fitnessClass: past }))();
+  expect(mock.cancel).not.toHaveBeenCalled();
+  expect(renderToStaticMarkup(ClassCard({ fitnessClass: past }))).toContain('aria-label="Completed: Demo Class"');
 });

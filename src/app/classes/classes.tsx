@@ -1,14 +1,15 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { createPortal } from "react-dom";
+import Link from "next/link";
+import BookingNotice from "@/components/classes/BookingNotice";
 import { useEffect, useRef, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { useAuth } from "@/components/AuthProvider";
+import ClassesLoading from "./loading";
 import ClassCard from "@/components/classes/ClassCard";
 import Icon from "@/components/classes/Icon";
 import MultiSelectFilter from "@/components/classes/MultiSelectFilter";
 import { classCategories, type ClassCategory, type ClassSchedule, type FitnessClass } from "@/types/fitness-class";
-type FilterMenu = "categories" | "durations" | "levels" | "instructors";
-type FilterDimension = "category" | "duration" | "level" | "instructor";
+type FilterMenu = "categories" | "durations" | "levels" | "instructors" | "locations";
+type FilterDimension = "category" | "duration" | "level" | "instructor" | "location";
 
 type ClassesPageProps = {
   initialSchedule: ClassSchedule;
@@ -18,11 +19,18 @@ type ClassesPageProps = {
 };
 
 export default function ClassesPage({ initialSchedule, errorMessage = null, onRetry, onRefresh }: ClassesPageProps) {
-  const router = useRouter();
   const { preferences, profileLoading, profileError, user, isLoading, reservationsError, retryAccount } = useAuth();
   const preferenceApplied = useRef<string | null | undefined>(undefined);
   const returnApplied = useRef(false);
-  const today = initialSchedule.days.find((item) => item.isToday)?.date ?? initialSchedule.days[0]?.date ?? "";
+  const currentDay = initialSchedule.days.find((item) => item.isToday)?.date;
+  const today = currentDay ?? initialSchedule.days[0]?.date ?? "";
+  function weekLink(offset: number) {
+    const firstDay = initialSchedule.days[0]?.date;
+    if (!firstDay) return "/classes";
+    const date = new Date(`${firstDay}T00:00:00Z`);
+    date.setUTCDate(date.getUTCDate() + offset * 7);
+    return `/classes?week=${date.toISOString().slice(0, 10)}`;
+  }
   const classList = initialSchedule.classes;
 
   const [day, setDay] = useState(today),
@@ -30,10 +38,12 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
     [draftDurations, setDraftDurations] = useState<string[]>([]),
     [draftLevels, setDraftLevels] = useState<string[]>([]),
     [draftInstructors, setDraftInstructors] = useState<string[]>([]),
+    [draftLocations, setDraftLocations] = useState<string[]>([]),
     [appliedCategories, setAppliedCategories] = useState<ClassCategory[]>([]),
     [appliedDurations, setAppliedDurations] = useState<string[]>([]),
     [appliedLevels, setAppliedLevels] = useState<string[]>([]),
     [appliedInstructors, setAppliedInstructors] = useState<string[]>([]),
+    [appliedLocations, setAppliedLocations] = useState<string[]>([]),
     [openFilter, setOpenFilter] = useState<FilterMenu | null>(null);
   const [bookedClass, setBookedClass] = useState<FitnessClass | null>(null);
   useEffect(() => {
@@ -62,9 +72,10 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
         (appliedCategories.length === 0 || appliedCategories.includes(item.category)) &&
         (appliedDurations.length === 0 || appliedDurations.includes(item.duration)) &&
         (appliedLevels.length === 0 || appliedLevels.includes(item.level)) &&
-        (appliedInstructors.length === 0 || appliedInstructors.includes(item.coach)),
+        (appliedInstructors.length === 0 || appliedInstructors.includes(item.coach)) &&
+        (appliedLocations.length === 0 || appliedLocations.includes(item.location ?? item.room)),
     );
-  }, [day, appliedCategories, appliedDurations, appliedLevels, appliedInstructors, classList]);
+  }, [day, appliedCategories, appliedDurations, appliedLevels, appliedInstructors, appliedLocations, classList]);
 
   const durations = useMemo(
     () =>
@@ -84,6 +95,11 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
     [initialSchedule.classes],
   );
 
+  const locations = useMemo(
+    () => Array.from(new Set(classList.map((item) => item.location ?? item.room))).sort(),
+    [classList],
+  );
+
   function toggleCategory(category: ClassCategory) {
     setDraftCategories((current) =>
       current.includes(category) ? current.filter((item) => item !== category) : [...current, category],
@@ -95,6 +111,7 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
     setAppliedDurations(draftDurations);
     setAppliedLevels(draftLevels);
     setAppliedInstructors(draftInstructors);
+    setAppliedLocations(draftLocations);
     setOpenFilter(null);
     onRefresh?.();
   }
@@ -126,45 +143,76 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
           ? item.coach === value
           : draftInstructors.length === 0 || draftInstructors.includes(item.coach);
 
-      return matchesCategory && matchesDuration && matchesLevel && matchesInstructor;
+      const matchesLocation =
+        dimension === "location"
+          ? (item.location ?? item.room) === value
+          : draftLocations.length === 0 || draftLocations.includes(item.location ?? item.room);
+      return matchesCategory && matchesDuration && matchesLevel && matchesInstructor && matchesLocation;
     }).length;
   }
+  if (errorMessage === "loading") return <ClassesLoading />;
   return (
-    <div id="top">
-      <div className="classes-back-row">
-        <button type="button" className="classes-back-link" onClick={() => router.back()}>
-          <span aria-hidden="true">←</span> Back
-        </button>
-      </div>
-      <header className="classes-header">
-        <div className="shell">
-          <h1>Classes</h1>
-        </div>
-      </header>
+    <div>
       <section className="schedule shell" id="schedule">
         <div className="heading">
           <div>
-            <small>THIS WEEK</small>
+            <small>{currentDay ? "THIS WEEK" : "CLASS SCHEDULE"}</small>
             <h2>{initialSchedule.weekLabel}</h2>
           </div>
-          <button className="today" disabled={!today} onClick={() => setDay(today)}>
-            <Icon name="calendar" /> Jump to today
-          </button>
-        </div>
-        <div className="days" role="tablist" aria-label="Schedule dates">
-          {initialSchedule.days.map((item) => (
-            <button
-              role="tab"
-              aria-selected={day === item.date}
-              className={day === item.date ? "selected" : ""}
-              key={item.date}
-              onClick={() => setDay(item.date)}
-            >
-              <small>{item.label}</small>
-              <strong>{Number(item.date.slice(-2))}</strong>
-              {item.isToday && <i>Today</i>}
+          {currentDay ? (
+            <button className="today" onClick={() => setDay(currentDay)}>
+              <Icon name="calendar" /> Jump to today
             </button>
-          ))}
+          ) : (
+            <Link className="today" href="/classes" prefetch={false}>
+              <Icon name="calendar" /> Jump to today
+            </Link>
+          )}
+        </div>
+        <div className="week-row">
+          <Link className="week-arrow" href={weekLink(-1)} prefetch={false} aria-label="Previous week">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden="true">
+              <path d="m14 6-6 6 6 6" />
+            </svg>
+          </Link>
+          <div className="days" role="tablist" aria-label="Schedule dates">
+            {initialSchedule.days.map((item, index) => (
+              <button
+                role="tab"
+                aria-selected={day === item.date}
+                tabIndex={day === item.date ? 0 : -1}
+                onKeyDown={(event) => {
+                  const count = initialSchedule.days.length;
+                  const next =
+                    event.key === "ArrowRight"
+                      ? (index + 1) % count
+                      : event.key === "ArrowLeft"
+                        ? (index + count - 1) % count
+                        : event.key === "Home"
+                          ? 0
+                          : event.key === "End"
+                            ? count - 1
+                            : null;
+                  if (next === null) return;
+                  event.preventDefault();
+                  setDay(initialSchedule.days[next].date);
+                  event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>("[role=tab]")[next]?.focus();
+                }}
+                className={day === item.date ? "selected" : ""}
+                key={item.date}
+                onClick={() => setDay(item.date)}
+              >
+                <small>{item.label}</small>
+                <strong>{Number(item.date.slice(-2))}</strong>
+                {item.isToday && <i>Today</i>}
+              </button>
+            ))}
+          </div>
+          <Link className="week-arrow" href={weekLink(1)} prefetch={false} aria-label="Next week">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden="true">
+              <path d="m10 6 6 6-6 6" />
+            </svg>
+          </Link>
         </div>
         {reservationsError && (
           <p role="alert">
@@ -232,6 +280,20 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
               isOpen={openFilter === "instructors"}
               onOpenChange={() => toggleFilter("instructors")}
             />
+            <MultiSelectFilter
+              label="Location"
+              title="Filter by location"
+              options={locations.map((location) => ({
+                value: location,
+                label: location,
+                count: getFacetCount("location", location),
+              }))}
+              selected={draftLocations}
+              onToggle={(value) => toggleValue(value, setDraftLocations)}
+              onClear={() => setDraftLocations([])}
+              isOpen={openFilter === "locations"}
+              onOpenChange={() => toggleFilter("locations")}
+            />
             <button type="button" className="apply-filters" onClick={applyFilters}>
               Apply Filters
             </button>
@@ -277,8 +339,6 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
               <p>There aren’t any matching classes on this day. Try another day or reset your filter.</p>
             </div>
           )
-        ) : errorMessage === "loading" ? (
-          <p role="status">Loading Classes...</p>
         ) : (
           <div>
             <p role="alert">{errorMessage}</p>
@@ -288,22 +348,7 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
           </div>
         )}
       </section>
-      {bookedClass &&
-        createPortal(
-          <div className="booking-popup" role="status" aria-live="polite">
-            <span>
-              <Icon name="check" />
-            </span>
-            <div>
-              <strong>Class Booked!</strong>
-              <small>{bookedClass.title}</small>
-            </div>
-            <button type="button" aria-label="Dismiss confirmation" onClick={() => setBookedClass(null)}>
-              ×
-            </button>
-          </div>,
-          document.body,
-        )}
+      <BookingNotice fitnessClass={bookedClass} onDismiss={() => setBookedClass(null)} />
     </div>
   );
 }

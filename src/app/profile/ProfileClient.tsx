@@ -1,5 +1,7 @@
 "use client";
 
+import { emailDeliveryEnabled } from "@/lib/auth/features";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { safeNextPath } from "@/lib/auth/redirect";
@@ -132,8 +134,8 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
       return;
     }
     const password = String(form.get("password") ?? "");
-    if (password.length < 8 || !form.get("terms")) {
-      setMessage("Use at least 8 characters and accept the terms to continue.");
+    if (password.length < 8) {
+      setMessage("Use at least 8 characters for your password.");
       return;
     }
     void submit(async () => {
@@ -143,7 +145,9 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
         router.refresh();
       } else
         setMessage(
-          "Check your email for a confirmation link. Open it in this browser, then log in. If you already have an account, use Log In or reset your password.",
+          emailDeliveryEnabled
+            ? "Check your email for a confirmation link. Open it in this browser, then log in."
+            : "This account was not signed in. If you already have an account, log in with your password.",
         );
     });
   }
@@ -269,9 +273,9 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
               )}
             </dl>
             {membership ? (
-              <button className={styles.accountAction} type="button" disabled title="Digital barcode coming soon">
-                View Barcode
-              </button>
+              <Link className={styles.accountAction} href="/purchase">
+                Change Membership
+              </Link>
             ) : (
               <Link className={styles.accountAction} href="/purchase">
                 View Memberships
@@ -310,20 +314,39 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
                 <div className={styles.editNameRow}>
                   <label>
                     First name
-                    <input name="firstName" defaultValue={user.firstName} autoComplete="given-name" required />
+                    <input
+                      name="firstName"
+                      defaultValue={user.firstName}
+                      autoComplete="given-name"
+                      maxLength={80}
+                      required
+                    />
                   </label>
                   <label>
                     Last name
-                    <input name="lastName" defaultValue={user.lastName} autoComplete="family-name" required />
+                    <input
+                      name="lastName"
+                      defaultValue={user.lastName}
+                      autoComplete="family-name"
+                      maxLength={80}
+                      required
+                    />
                   </label>
                 </div>
                 <label>
                   Email
-                  <input name="email" type="email" defaultValue={user.email} autoComplete="email" required />
+                  <input
+                    name="email"
+                    type="email"
+                    defaultValue={user.email}
+                    autoComplete="email"
+                    readOnly={!emailDeliveryEnabled}
+                    required
+                  />
                 </label>
                 <label>
                   Phone number <span className={styles.optional}>(optional)</span>
-                  <input name="phone" type="tel" defaultValue={user.phone} autoComplete="tel" />
+                  <input name="phone" type="tel" defaultValue={user.phone} autoComplete="tel" maxLength={30} />
                 </label>
                 {profileMessage && <p role="alert">{profileMessage}</p>}
                 <div className={styles.editActions}>
@@ -415,6 +438,7 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
                           aria-label={`Unenroll from ${fitnessClass.title}`}
                           onClick={(event) => {
                             unenrollTrigger.current = event.currentTarget;
+                            setProfileMessage("");
                             setPendingUnenrollment(fitnessClass);
                           }}
                         >
@@ -474,7 +498,7 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
         <div className={styles.accountGrid}>
           <AccountPreferences />
           <section className={styles.accountCard} aria-labelledby="orders-title">
-            <h2 id="orders-title">Demo Checkout History</h2>
+            <h2 id="orders-title">Membership History</h2>
             <p>No payments or automatic renewals are processed.</p>
             {ordersLoading ? (
               <p role="status">Loading checkout history…</p>
@@ -486,13 +510,13 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
               <ul>
                 {orders.map((order) => (
                   <li key={order.id}>
-                    {order.plan} — ${(order.amountCents / 100).toFixed(2)} simulated,{" "}
+                    {order.plan} — ${(order.amountCents / 100).toFixed(2)} plan price,{" "}
                     {new Date(order.createdAt).toLocaleDateString("en-US", { timeZone: "America/Los_Angeles" })}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p>No demo checkouts yet.</p>
+              <p>No membership selections yet.</p>
             )}
           </section>
         </div>
@@ -544,8 +568,13 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
                 {pending ? "Sending…" : view === "recovery" ? "Send reset link" : "Resend confirmation"}
               </button>
             </form>
-            <button className={styles.textButton} type="button" disabled={pending} onClick={() => changeView("login")}>
-              Back to login
+            <button
+              className={styles.textButton}
+              type="button"
+              disabled={pending}
+              onClick={() => changeView(view === "recovery" ? "login" : "signup")}
+            >
+              {view === "recovery" ? "Back to login" : "Back to create account"}
             </button>
           </>
         ) : view === "login" ? (
@@ -582,22 +611,16 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
               </button>
             </form>
 
-            <button
-              className={styles.textButton}
-              type="button"
-              disabled={pending}
-              onClick={() => changeView("recovery")}
-            >
-              Forgot password?
-            </button>
-            <button
-              className={styles.textButton}
-              type="button"
-              disabled={pending}
-              onClick={() => changeView("confirmation")}
-            >
-              Resend confirmation email
-            </button>
+            {emailDeliveryEnabled && (
+              <button
+                className={styles.textButton}
+                type="button"
+                disabled={pending}
+                onClick={() => changeView("recovery")}
+              >
+                Forgot password?
+              </button>
+            )}
 
             <p className={styles.signup}>
               New here?{" "}
@@ -612,11 +635,25 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
               <div className={styles.nameRow}>
                 <div className={styles.field}>
                   <label htmlFor="signup-first-name">First name</label>
-                  <input id="signup-first-name" name="firstName" type="text" autoComplete="given-name" required />
+                  <input
+                    id="signup-first-name"
+                    name="firstName"
+                    type="text"
+                    autoComplete="given-name"
+                    maxLength={80}
+                    required
+                  />
                 </div>
                 <div className={styles.field}>
                   <label htmlFor="signup-last-name">Last name</label>
-                  <input id="signup-last-name" name="lastName" type="text" autoComplete="family-name" required />
+                  <input
+                    id="signup-last-name"
+                    name="lastName"
+                    type="text"
+                    autoComplete="family-name"
+                    maxLength={80}
+                    required
+                  />
                 </div>
               </div>
 
@@ -633,7 +670,14 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
               <label htmlFor="signup-phone">
                 Phone number <span className={styles.optional}>(optional)</span>
               </label>
-              <input id="signup-phone" name="phone" type="tel" placeholder="(805) 555-0147" autoComplete="tel" />
+              <input
+                id="signup-phone"
+                name="phone"
+                type="tel"
+                placeholder="(805) 555-0147"
+                autoComplete="tel"
+                maxLength={30}
+              />
 
               <label htmlFor="signup-password">Password</label>
               <input
@@ -646,10 +690,7 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
                 required
               />
 
-              <label className={styles.terms} htmlFor="signup-terms">
-                <input id="signup-terms" name="terms" type="checkbox" required />
-                <span>I agree to the Terms of Service and Privacy Policy.</span>
-              </label>
+              <p>Create your account and start booking classes.</p>
 
               {message && (
                 <p className={styles.status} role="alert">
@@ -661,6 +702,17 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
                 {pending ? "Creating account…" : "Create Account"}
               </button>
             </form>
+
+            {emailDeliveryEnabled && (
+              <button
+                className={styles.textButton}
+                type="button"
+                disabled={pending}
+                onClick={() => changeView("confirmation")}
+              >
+                Resend confirmation email
+              </button>
+            )}
 
             <p className={styles.signup}>
               Already have an account?{" "}

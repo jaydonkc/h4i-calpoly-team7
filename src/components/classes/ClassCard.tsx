@@ -1,5 +1,6 @@
 "use client";
 
+import { getClassStatus } from "@/lib/classes/class-start";
 import { useRouter } from "next/navigation";
 import { classReturnPath, loginPath } from "@/lib/auth/redirect";
 import { formatClassTime } from "@/types/account";
@@ -28,6 +29,11 @@ export default function ClassCard({ fitnessClass, onBooked, onCanceled }: ClassC
   } = useAuth();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
   const busy = useRef(false);
   const reserveButton = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -46,7 +52,11 @@ export default function ClassCard({ fitnessClass, onBooked, onCanceled }: ClassC
     (reservedClass) => reservedClass.id === fitnessClass.id && reservedClass.date === fitnessClass.date,
   );
 
+  const status = getClassStatus(fitnessClass.date, fitnessClass.time, fitnessClass.end, now);
+  const hasStarted = status !== "Upcoming";
+
   async function toggleReservation() {
+    if (hasStarted) return;
     if (!isUserSignedIn) {
       router.push(loginPath(classReturnPath(String(fitnessClass.id), fitnessClass.date)));
       return;
@@ -79,7 +89,9 @@ export default function ClassCard({ fitnessClass, onBooked, onCanceled }: ClassC
       </div>
       <div className="table-cell classmain" data-label="Class">
         <div>
-          <mark>{fitnessClass.category}</mark>
+          <mark className={{ Strength: "coral", Cardio: "yellow", "Mind & Body": "blue" }[fitnessClass.category]}>
+            {fitnessClass.category}
+          </mark>
         </div>
         <h3>{fitnessClass.title}</h3>
         <p className="class-description">{fitnessClass.description}</p>
@@ -90,7 +102,7 @@ export default function ClassCard({ fitnessClass, onBooked, onCanceled }: ClassC
       </div>
       <div className="table-cell" data-label="Location">
         <Icon name="pin" />
-        <span>{fitnessClass.room}</span>
+        <span>{fitnessClass.location ?? fitnessClass.room}</span>
       </div>
       <div className="table-cell" data-label="Duration">
         {fitnessClass.duration}
@@ -106,13 +118,22 @@ export default function ClassCard({ fitnessClass, onBooked, onCanceled }: ClassC
         ref={reserveButton}
         className={`reserve ${isBooked ? "cancel" : ""}`}
         aria-pressed={isUserSignedIn ? isBooked : undefined}
-        aria-label={isUserSignedIn ? undefined : `Log in to reserve ${fitnessClass.title}`}
+        aria-label={
+          isLoading || pending
+            ? undefined
+            : hasStarted
+              ? `${status}: ${fitnessClass.title}`
+              : isUserSignedIn
+                ? undefined
+                : `Log in to reserve ${fitnessClass.title}`
+        }
         disabled={
           isLoading ||
           pending ||
           (isUserSignedIn && reservationsLoading) ||
           (isUserSignedIn && Boolean(reservationsError)) ||
-          (isUserSignedIn && !isBooked && fitnessClass.spots === 0)
+          (isUserSignedIn && !isBooked && fitnessClass.spots === 0) ||
+          hasStarted
         }
         onClick={toggleReservation}
       >
@@ -120,13 +141,15 @@ export default function ClassCard({ fitnessClass, onBooked, onCanceled }: ClassC
           ? "Checking session…"
           : pending
             ? "Saving…"
-            : isUserSignedIn
-              ? isBooked
-                ? "Cancel"
-                : fitnessClass.spots === 0
-                  ? "Full"
-                  : "Reserve"
-              : "Log in to reserve"}
+            : hasStarted
+              ? status
+              : isUserSignedIn
+                ? isBooked
+                  ? "Cancel"
+                  : fitnessClass.spots === 0
+                    ? "Full"
+                    : "Reserve"
+                : "Log in to reserve"}
       </button>
       {error && (
         <p role="alert" className="reservation-error">

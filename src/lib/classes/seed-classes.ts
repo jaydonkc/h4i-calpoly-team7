@@ -3,6 +3,7 @@ import { getGymCalendarDate, toIsoDate } from "@/lib/classes/class-dates";
 import { Types } from "mongoose";
 import sampleSchedule from "@/data/classes.json";
 import FitnessClassModel from "@/database/userSchema";
+import { coachIdForName } from "@/lib/coaches/seed-coaches";
 
 export async function seedClasses(today = new Date()) {
   if (process.env.NODE_ENV !== "development") {
@@ -12,23 +13,35 @@ export async function seedClasses(today = new Date()) {
   const monday = getGymCalendarDate(today);
   monday.setUTCDate(monday.getUTCDate() - ((monday.getUTCDay() + 6) % 7));
 
-  const records = sampleSchedule.classes.map((sample, index) => {
-    const { id, color, ...fields } = sample;
-    // Spread the examples across the current week, cycling back after Sunday.
-    const classDate = new Date(monday);
-    classDate.setUTCDate(monday.getUTCDate() + (index % 7));
-    const date = toIsoDate(classDate);
-    // A stable, seed-specific ObjectId lets later runs update the same example.
-    const hexId = createHash("sha256").update(`fitness-maxxing:seed-class:${id}`).digest("hex").slice(0, 24);
-    return new FitnessClassModel({ ...fields, date, _id: new Types.ObjectId(hexId) });
-  });
+  const records = Array.from({ length: 7 }, (_, day) =>
+    sampleSchedule.classes.map((sample) => {
+      const { id, color, ...fields } = sample;
+      // Publish the full class lineup for each day of the current week.
+      const classDate = new Date(monday);
+      classDate.setUTCDate(monday.getUTCDate() + day);
+      const date = toIsoDate(classDate);
+      // A date-specific ObjectId preserves past bookings and makes reruns idempotent.
+      const hexId = createHash("sha256").update(`fitness-maxxing:seed-class:${id}:${date}`).digest("hex").slice(0, 24);
+      return new FitnessClassModel({
+        ...fields,
+        coachId: coachIdForName(fields.coach),
+        date,
+        _id: new Types.ObjectId(hexId),
+      });
+    }),
+  ).flat();
 
-  // Validate every example before writing any of them.
+  // Validate every class before writing any of them.
   await Promise.all(records.map((record) => record.validate()));
 
   for (const record of records) {
     const { _id, ...fields } = record.toObject();
-    await FitnessClassModel.updateOne({ _id }, { $set: fields }, { upsert: true, runValidators: true });
+    // Match older imports by date/title too, without replacing their IDs or staff edits.
+    await FitnessClassModel.updateOne(
+      { date: fields.date, title: fields.title },
+      { $setOnInsert: { ...fields, _id } },
+      { upsert: true, runValidators: true },
+    );
   }
 
   return records.length;

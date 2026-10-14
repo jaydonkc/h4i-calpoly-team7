@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { gymLocations } from "@/data/site-content";
 import ContactForm from "@/components/ContactForm";
 import styles from "./contact.module.css";
 
@@ -6,45 +8,28 @@ export default function Contact() {
     <div className={styles.contactPage}>
       <section className={styles.formColumn} aria-labelledby="contact-title">
         <h1 id="contact-title">Get in Touch</h1>
-        <p>Have a question? Send us a message and we’ll get back to you as soon as possible.</p>
+        <p>
+          Questions, class ideas, or a challenge to one of our extremely decorated coaches? Leave a message in the gym
+          inbox.
+        </p>
         <ContactForm />
       </section>
 
       <aside className={styles.details} aria-label="Contact details and frequently asked questions">
         <section>
-          <h2>Contact Information</h2>
-          <address>
-            <a href="mailto:hello@fitnessmaxxing.example">
-              <span aria-hidden="true">✉</span>
-              hello@fitnessmaxxing.example
-            </a>
-            <a href="tel:+18055550147">
-              <span aria-hidden="true">☎</span>
-              (805) 555-0147
-            </a>
-            <span>
-              <span aria-hidden="true">●</span>
-              San Luis Obispo, California
-            </span>
-          </address>
+          <h2>The front desk</h2>
+          <p>Leave a message for the team. You can ask about memberships, classes, or your next visit.</p>
+          <Link href="/gym-info">Meet the team →</Link>
         </section>
-
         <section>
-          <h2>Follow Us</h2>
-          <a
-            className={styles.instagram}
-            href="https://www.instagram.com/fitnessmaxxing_demo/"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="@fitnessmaxxing_demo on Instagram"
-          >
-            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <rect x="3" y="3" width="18" height="18" rx="5" />
-              <circle cx="12" cy="12" r="4" />
-              <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
-            </svg>
-            @fitnessmaxxing_demo
-          </a>
+          <h2>Locations &amp; Hours</h2>
+          {gymLocations.map((location) => (
+            <address key={location.name}>
+              <strong>{location.name}</strong>
+              <span>{location.address}</span>
+              <span>{location.hours}</span>
+            </address>
+          ))}
         </section>
 
         <section>
@@ -60,11 +45,11 @@ export default function Contact() {
             </details>
             <details>
               <summary>Locations &amp; Hours</summary>
-              <p>Location hours and full addresses are pending review.</p>
+              <p>Find opening hours for our clubs in the list above. Choose your location and plan your next visit.</p>
             </details>
             <details>
               <summary>Other</summary>
-              <p>Use the demo email or phone number above for other questions.</p>
+              <p>Log in and leave your question in the gym inbox. Your message is saved for the team to read.</p>
             </details>
           </div>
         </section>

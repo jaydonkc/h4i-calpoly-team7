@@ -509,7 +509,8 @@
 }
 
 .textButton {
-  margin-top: 1rem;
+  display: block;
+  margin: 1rem auto 0;
   font-size: 0.8rem;
 }
 

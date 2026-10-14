@@ -6,18 +6,21 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Fitness Maxxing",
-  description: "Explore gym classes, meet our coaches, and try the Fitness Maxxing demo.",
+  description: "Big energy, legendary coaches, and classes for your next training arc.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
+        <a className="skip-link" href="#main-content">
+          Skip to content
+        </a>
         <AuthProvider>
           <header className="site-header">
             <Navbar />
           </header>
-          <main>{children}</main>
+          <main id="main-content">{children}</main>
           <Footer />
         </AuthProvider>
       </body>
