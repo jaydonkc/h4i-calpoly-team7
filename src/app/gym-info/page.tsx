@@ -78,6 +78,7 @@ export default async function GymInfoPage() {
   let coaches: Coach[] = [];
   try {
     coaches = await listCoaches();
+    coaches.sort((a, b) => Number(a.name === "Jaydon Chen") - Number(b.name === "Jaydon Chen"));
   } catch {
     /* Show the roster unavailable state. */
   }
