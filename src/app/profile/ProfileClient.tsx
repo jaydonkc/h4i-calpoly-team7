@@ -533,8 +533,13 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
                 {pending ? "Sending…" : view === "recovery" ? "Send reset link" : "Resend confirmation"}
               </button>
             </form>
-            <button className={styles.textButton} type="button" disabled={pending} onClick={() => changeView("login")}>
-              Back to login
+            <button
+              className={styles.textButton}
+              type="button"
+              disabled={pending}
+              onClick={() => changeView(view === "recovery" ? "login" : "signup")}
+            >
+              {view === "recovery" ? "Back to login" : "Back to create account"}
             </button>
           </>
         ) : view === "login" ? (
@@ -578,14 +583,6 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
               onClick={() => changeView("recovery")}
             >
               Forgot password?
-            </button>
-            <button
-              className={styles.textButton}
-              type="button"
-              disabled={pending}
-              onClick={() => changeView("confirmation")}
-            >
-              Resend confirmation email
             </button>
 
             <p className={styles.signup}>
@@ -650,6 +647,15 @@ export default function ProfileClient({ loginOnly = false }: { loginOnly?: boole
                 {pending ? "Creating account…" : "Create Account"}
               </button>
             </form>
+
+            <button
+              className={styles.textButton}
+              type="button"
+              disabled={pending}
+              onClick={() => changeView("confirmation")}
+            >
+              Resend confirmation email
+            </button>
 
             <p className={styles.signup}>
               Already have an account?{" "}
