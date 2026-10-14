@@ -7,7 +7,7 @@ import ClassesLoading from "./loading";
 import ClassCard from "@/components/classes/ClassCard";
 import Icon from "@/components/classes/Icon";
 import MultiSelectFilter from "@/components/classes/MultiSelectFilter";
-import { hasClassStarted } from "@/lib/classes/class-start";
+import { getClassStatus } from "@/lib/classes/class-start";
 import { classCategories, type ClassCategory, type ClassSchedule, type FitnessClass } from "@/types/fitness-class";
 type FilterMenu = "categories" | "durations" | "levels" | "instructors" | "locations";
 type FilterDimension = "category" | "duration" | "level" | "instructor" | "location";
@@ -48,6 +48,11 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
     [appliedLocations, setAppliedLocations] = useState<string[]>([]),
     [openFilter, setOpenFilter] = useState<FilterMenu | null>(null);
   const [bookedClass, setBookedClass] = useState<FitnessClass | null>(null);
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 60_000);
     return () => window.clearInterval(timer);
@@ -83,8 +88,9 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
           (appliedLocations.length === 0 || appliedLocations.includes(item.location ?? item.room)),
       )
       .sort(
-        (first, second) =>
-          Number(hasClassStarted(first.date, first.time, now)) - Number(hasClassStarted(second.date, second.time, now)),
+        (a, b) =>
+          Number(getClassStatus(a.date, a.time, a.end, now) === "Completed") -
+          Number(getClassStatus(b.date, b.time, b.end, now) === "Completed"),
       );
   }, [day, appliedCategories, appliedDurations, appliedLevels, appliedInstructors, appliedLocations, classList, now]);
 

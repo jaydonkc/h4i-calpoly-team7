@@ -118,3 +118,41 @@ it("keeps loading, empty and error states distinct", () => {
   expect(error).toContain("Reload");
   expect(error).not.toContain("Rest day, for now.");
 });
+
+it("places completed classes last while retaining time order in both groups", () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-10-30T12:00:00-07:00"));
+  const schedule = scheduleFor(week, "2026-10-30");
+  const base: FitnessClass = {
+    id: "early",
+    date: "2026-10-30",
+    title: "Early completed class",
+    category: "Cardio",
+    time: "08:00",
+    end: "09:00",
+    coach: "Alex",
+    room: "Studio",
+    level: "Beginner",
+    duration: "60 min",
+    spots: 10,
+    description: "Example",
+  };
+  schedule.classes = [
+    base,
+    { ...base, id: "just-ended", title: "Just completed class", time: "11:00", end: "12:00" },
+    { ...base, id: "ongoing", title: "Ongoing class", time: "11:30", end: "12:30" },
+    { ...base, id: "afternoon", title: "Afternoon class", time: "13:00", end: "14:00" },
+    { ...base, id: "evening", title: "Evening class", time: "18:00", end: "19:00" },
+  ];
+  const html = renderToStaticMarkup(createElement(ClassesPage, { initialSchedule: schedule }));
+  const expected = [
+    "Ongoing class",
+    "Afternoon class",
+    "Evening class",
+    "Early completed class",
+    "Just completed class",
+  ];
+  for (let i = 1; i < expected.length; i++) {
+    expect(html.indexOf(expected[i - 1])).toBeLessThan(html.indexOf(expected[i]));
+  }
+});
