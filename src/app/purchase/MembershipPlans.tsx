@@ -83,7 +83,7 @@ export default function MembershipPlans() {
 
         <div className="planTier">
           {tiers.map((tier) => (
-            <article key={tier.name}>
+            <article key={tier.name} className={tier.name === "Standard" ? "standardTier" : undefined}>
               <h3 className="tierName">{tier.name}</h3>
               <div className="tierPrice">{tier.price}</div>
               <p className="tierDescription">{tier.description}</p>

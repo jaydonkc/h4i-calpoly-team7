@@ -62,10 +62,7 @@ describe("login return destinations and errors", () => {
   );
   it.each([
     [{ code: "invalid_credentials", status: 400 }, "Incorrect email or password. Please try again."],
-    [
-      { code: "email_not_confirmed", status: 400 },
-      "Confirm your email before logging in. You can resend the confirmation below.",
-    ],
+    [{ code: "email_not_confirmed", status: 400 }, "Confirm your email before logging in."],
     [{ status: 429 }, "Too many login attempts. Please wait a moment and try again."],
     [new TypeError("private network detail"), "Unable to log in right now. Check your connection and try again."],
   ])("shows a clear safe error for %j", (error, message) => {
