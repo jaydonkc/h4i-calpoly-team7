@@ -73,6 +73,11 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
   }, [initialSchedule.days, profileLoading]);
   const classes = useMemo(() => {
     const list = classList.filter((item) => item.date === day);
+    const availabilityRank = (item: FitnessClass) => {
+      const status = getClassStatus(item.date, item.time, item.end, now);
+      if (status === "Completed") return 2;
+      return status === "Upcoming" && item.spots > 0 ? 0 : 1;
+    };
     return list
       .filter(
         (item) =>
@@ -82,11 +87,7 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
           (appliedInstructors.length === 0 || appliedInstructors.includes(item.coach)) &&
           (appliedLocations.length === 0 || appliedLocations.includes(item.location ?? item.room)),
       )
-      .sort(
-        (a, b) =>
-          Number(getClassStatus(a.date, a.time, a.end, now) === "Completed") -
-          Number(getClassStatus(b.date, b.time, b.end, now) === "Completed"),
-      );
+      .sort((a, b) => availabilityRank(a) - availabilityRank(b));
   }, [day, appliedCategories, appliedDurations, appliedLevels, appliedInstructors, appliedLocations, classList, now]);
 
   const durations = useMemo(
