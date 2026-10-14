@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { gymLocations } from "@/data/site-content";
+import Image from "next/image";
+import { gymLocations, coachHeadshots } from "@/data/site-content";
 import { classRepository } from "@/lib/classes/class-repository";
 import type { ClassCategory } from "@/types/fitness-class";
 import "./info.css";
@@ -113,6 +114,24 @@ export default async function GymInfoPage() {
             {coaches.map((coach) => (
               <article key={coach.name}>
                 <div className="card-heading">
+                  <div className="coach-headshot">
+                    {coachHeadshots[coach.name] ? (
+                      <Image
+                        src={coachHeadshots[coach.name]}
+                        alt={`Headshot of ${coach.name}`}
+                        width={80}
+                        height={80}
+                        sizes="80px"
+                      />
+                    ) : (
+                      <span aria-hidden="true">
+                        {coach.name
+                          .split(" ")
+                          .map((name) => name[0])
+                          .join("")}
+                      </span>
+                    )}
+                  </div>
                   <div>
                     <h3>{coach.name}</h3>
                     <p>{coach.specialties}</p>
