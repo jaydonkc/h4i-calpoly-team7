@@ -908,37 +908,6 @@
   }
 }
 
-.class-create-form {
-  max-width: 680px;
-}
-.class-create-form fieldset {
-  display: grid;
-  gap: 10px;
-  padding: 24px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-}
-.class-create-form input,
-.class-create-form select,
-.class-create-form textarea {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  background: white;
-  color: var(--ink);
-  font: inherit;
-}
-.class-create-form button {
-  padding: 14px;
-  border: 0;
-  background: var(--lime);
-  cursor: pointer;
-}
-.class-create-form small {
-  color: #a04b38;
-}
-
 .week-row {
   display: grid;
   grid-template-columns: 32px minmax(0, 1fr) 32px;

@@ -39,12 +39,3 @@ a:focus-visible {
 .skip-link:focus {
   top: 12px;
 }
-.admin-inbox {
-  max-width: 900px;
-  margin: auto;
-  padding: 48px 24px;
-}
-.admin-inbox article {
-  padding: 24px 0;
-  border-bottom: 1px solid #d8d6cf;
-}

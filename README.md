@@ -7,8 +7,8 @@ Fitness Maxxing is a fictional gym with an intentionally playful identity. Coach
 - Supabase signup, email confirmation, login, logout, password recovery, and server-protected account pages.
 - MongoDB profiles and preferences, class reservations with transactional capacity checks, and idempotent simulated membership checkout.
 - Server-rendered class schedules streamed behind a loading shell; client filters, location selection, and booking refreshes.
-- Administrator class creation at `/classes/new`, with input validation and a MongoDB-backed schedule.
-- Signed-in contact messages saved to the gym inbox at `/admin/messages`. No email, SMS, or external messaging service is used.
+- Protected class creation through `POST /api/classes`, with input validation and MongoDB persistence.
+- Signed-in contact messages saved to MongoDB. No email, SMS, or external messaging service is used.
 - Finished fictional coach bios, four locations, opening hours, membership descriptions, and FAQs.
 
 ## Local setup
@@ -23,7 +23,7 @@ npm run dev
 
 Preserve an existing `.env.local`. Fill in `MONGO_URI` with the Atlas application credential; keep all credentials out of Git. The Supabase URL and publishable key are public client configuration.
 
-Administrator access requires a server-only `GYM_ADMIN_USER_IDS` list of Supabase user UUIDs, or an `admin` role in trusted Supabase `app_metadata`. Member-editable `user_metadata` never grants access. An empty list grants nobody access unless they have the trusted role. Apply the same configuration in Vercel when releasing.
+Creating classes through the API requires a server-only `GYM_ADMIN_USER_IDS` list of Supabase user UUIDs, or an `admin` role in trusted Supabase `app_metadata`. Member-editable `user_metadata` never grants access. An empty list grants nobody access unless they have the trusted role. Apply the same configuration in Vercel when releasing. The website has no administrator screens.
 
 ## Class data
 
@@ -52,6 +52,6 @@ npm run build
 
 The integration suite uses isolated MongoDB collections and removes its test collections afterward. It tests profile/preferences persistence, reservations and capacity, cancellation, and checkout transactions. Run only against the development database.
 
-Feature PRs target `dev`. Production tracks `main`. Before release, verify the deployed signup/confirmation flow, login returns, booking/refresh/cancellation, simulated checkout persistence, signed-out protection, administrator class creation, and contact inbox. A build or deployment success does not establish those user flows.
+Feature PRs target `dev`. Production tracks `main`. Before release, verify the deployed signup/confirmation flow, login returns, booking/refresh/cancellation, simulated checkout persistence, signed-out protection, class creation through the protected API, and contact-message persistence. A build or deployment success does not establish those user flows.
 
 See [contributing](docs/contributing.md) and [release checklist](docs/release-checklist.md). Development preview: [Vercel dev app](https://h4i-calpoly-team7-git-dev-jaydonkchen-4999s-projects.vercel.app).
