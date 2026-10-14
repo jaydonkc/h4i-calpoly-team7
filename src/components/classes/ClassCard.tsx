@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import type { FitnessClass } from "@/types/fitness-class";
 import Icon from "./Icon";
+import { hasClassStarted } from "@/lib/classes/class-start";
 
 type ClassCardProps = {
   fitnessClass: FitnessClass;
@@ -67,6 +68,8 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
     }
   }
 
+  const hasStarted = hasClassStarted(fitnessClass.date, fitnessClass.time);
+
   return (
     <article className="classcard" id={`class-${fitnessClass.id}-${fitnessClass.date}`}>
       <div className="table-cell class-time" data-label="Time">
@@ -108,7 +111,8 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
           pending ||
           (isUserSignedIn && reservationsLoading) ||
           (isUserSignedIn && Boolean(reservationsError)) ||
-          (isUserSignedIn && !isBooked && fitnessClass.spots === 0)
+          (isUserSignedIn && !isBooked && fitnessClass.spots === 0) ||
+          hasStarted
         }
         onClick={toggleReservation}
       >
@@ -116,13 +120,15 @@ export default function ClassCard({ fitnessClass }: ClassCardProps) {
           ? "Checking session…"
           : pending
             ? "Saving…"
-            : isUserSignedIn
-              ? isBooked
-                ? "Cancel"
-                : fitnessClass.spots === 0
-                  ? "Full"
-                  : "Reserve"
-              : "Log in to reserve"}
+            : hasStarted
+              ? "Class has already started"
+              : isUserSignedIn
+                ? isBooked
+                  ? "Cancel"
+                  : fitnessClass.spots === 0
+                    ? "Full"
+                    : "Reserve"
+                : "Log in to reserve"}
       </button>
       {error && (
         <p role="alert" className="reservation-error">
