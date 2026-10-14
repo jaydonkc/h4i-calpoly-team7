@@ -368,30 +368,18 @@
   background: var(--classes-paper);
 }
 
-.class-table-header,
 .classcard {
   display: grid;
-  grid-template-columns: 105px minmax(230px, 1.8fr) minmax(105px, 0.9fr) minmax(90px, 0.8fr) 75px 90px 85px 125px;
-  column-gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 24px;
   align-items: center;
+  min-height: 150px;
+  padding: 24px;
+  border-bottom: 1px solid var(--classes-line);
 }
 
 .class-table-header {
-  min-height: 48px;
-  padding: 0 20px;
-  border-bottom: 1px solid var(--classes-line);
-  color: var(--classes-muted);
-  background: var(--classes-cream);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.classcard {
-  min-height: 150px;
-  padding: 20px;
-  border-bottom: 1px solid var(--classes-line);
+  display: none;
 }
 
 .classcard:last-child {
@@ -399,10 +387,24 @@
 }
 
 .table-cell {
+  position: relative;
   min-width: 0;
+  padding-top: 18px;
   color: #535a56;
   font-size: 0.82rem;
   line-height: 1.45;
+}
+
+.table-cell::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #7a827c;
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  content: attr(data-label);
 }
 
 .table-cell:not(.classmain):not(.class-time) {
@@ -434,7 +436,13 @@
 }
 
 .classcard .classmain {
-  padding: 0;
+  grid-column: 1 / -1;
+  grid-row: 1;
+  padding: 18px 0 0;
+}
+
+.classcard .reserve {
+  grid-column: 1 / -1;
 }
 
 .classmain mark {
@@ -503,7 +511,7 @@
 
 #top .reserve {
   display: flex;
-  width: auto;
+  width: 100%;
   min-width: 82px;
   align-items: center;
   justify-content: center;
@@ -694,46 +702,6 @@
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@media (max-width: 1100px) {
-  .class-table-header {
-    display: none;
-  }
-
-  .classcard {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px 24px;
-    padding: 24px;
-  }
-
-  .table-cell {
-    position: relative;
-    padding-top: 18px;
-  }
-
-  .table-cell::before {
-    position: absolute;
-    top: 0;
-    left: 0;
-    color: #7a827c;
-    font-size: 0.52rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    content: attr(data-label);
-  }
-
-  .classcard .classmain {
-    grid-column: 1 / -1;
-    grid-row: 1;
-    padding-top: 18px;
-  }
-
-  .classcard .reserve {
-    grid-column: 1 / -1;
-    width: 100%;
   }
 }
 
