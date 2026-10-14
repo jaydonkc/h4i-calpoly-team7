@@ -69,7 +69,6 @@ Invalid cases: malformed JSON, blank title, impossible date, unknown category, i
 
 A network failure during an in-flight write can have an uncertain outcome: check GET before retrying a submitted class to avoid duplicates. Idempotency is outside this minimal endpoint.
 
-
 ## Staff class management and coaches
 
 The classes page shows creation, editing, and removal controls only for a server-verified gym administrator or an account in `GYM_ADMIN_USER_IDS`. Every mutation repeats authorization on the server and checks the request origin; client visibility never grants access.
