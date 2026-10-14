@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import type { FitnessClass } from "@/types/fitness-class";
 import Icon from "./Icon";
+import { getClassStatus } from "@/lib/classes/class-start";
 
 type ClassCardProps = {
   fitnessClass: FitnessClass;
