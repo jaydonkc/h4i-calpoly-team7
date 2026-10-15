@@ -335,6 +335,26 @@
   font-size: 0.72rem;
 }
 
+.reset-filters {
+  padding: 0.62rem 1rem;
+  border: 1px solid var(--classes-green);
+  border-radius: 999px;
+  color: var(--classes-green);
+  background: var(--classes-paper);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.reset-filters:hover {
+  background: var(--classes-soft-green);
+}
+
+.reset-filters:focus-visible {
+  outline: 2px solid var(--classes-green);
+  outline-offset: 3px;
+}
+
 #top .apply-filters {
   padding: 0.62rem 1rem;
   border: 1px solid var(--classes-green);
@@ -754,6 +774,7 @@
 
   .filter-menu,
   .filter-trigger,
+  .reset-filters,
   .apply-filters {
     width: 100%;
   }
@@ -998,6 +1019,7 @@
   }
 
   .filter-menu.open,
+  .reset-filters,
   .apply-filters {
     grid-column: 1 / -1;
   }

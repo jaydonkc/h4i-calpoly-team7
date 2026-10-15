@@ -46,6 +46,7 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
     [appliedInstructors, setAppliedInstructors] = useState<string[]>([]),
     [appliedLocations, setAppliedLocations] = useState<string[]>([]),
     [openFilter, setOpenFilter] = useState<FilterMenu | null>(null);
+  const hasClassesOnDay = classList.some((item) => item.date === day);
   const [bookedClass, setBookedClass] = useState<FitnessClass | null>(null);
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
@@ -131,6 +132,22 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
 
   function toggleFilter(filter: FilterMenu) {
     setOpenFilter((current) => (current === filter ? null : filter));
+  }
+
+  function resetFilters() {
+    // Preserve an explicit reset when this account's saved preferences finish loading.
+    preferenceApplied.current = user?.id ?? null;
+    setDraftCategories([]);
+    setDraftDurations([]);
+    setDraftLevels([]);
+    setDraftInstructors([]);
+    setDraftLocations([]);
+    setAppliedCategories([]);
+    setAppliedDurations([]);
+    setAppliedLevels([]);
+    setAppliedInstructors([]);
+    setAppliedLocations([]);
+    setOpenFilter(null);
   }
 
   function toggleValue(value: string, setValues: Dispatch<SetStateAction<string[]>>) {
@@ -310,6 +327,9 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
             <button type="button" className="apply-filters" onClick={applyFilters}>
               Apply Filters
             </button>
+            <button type="button" className="reset-filters" onClick={resetFilters}>
+              Reset filters
+            </button>
           </div>
           <span>
             {classes.length} {classes.length === 1 ? "class" : "classes"}
@@ -348,8 +368,17 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
                 <span>z</span>
                 <span>z</span>
               </b>
-              <h3>Rest day, for now.</h3>
-              <p>There aren’t any matching classes on this day. Try another day or reset your filter.</p>
+              <h3>{hasClassesOnDay ? "No classes match your filters." : "Rest day, for now."}</h3>
+              <p>
+                {hasClassesOnDay
+                  ? "Try fewer filters or reset them to see all classes on this day."
+                  : "There are no classes scheduled on this day. Try another day."}
+              </p>
+              {hasClassesOnDay && (
+                <button type="button" className="reset-filters" onClick={resetFilters}>
+                  Reset filters
+                </button>
+              )}
             </div>
           )
         ) : (
