@@ -6,6 +6,7 @@ import type { Membership } from "@/types/membership";
 import { isAuthProviderUnavailable, signInErrorMessage } from "@/lib/auth/errors";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import { AccountRequestError } from "@/lib/account/request-error";
 import {
   defaultPreferences,
   type Preferences,
@@ -203,7 +204,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ...(body ? { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {}),
     });
     const result = await response.json();
-    if (!response.ok) throw new Error(result.error ?? "Unable to save or load your account. Please try again.");
+    if (!response.ok)
+      throw new AccountRequestError(
+        result.error ?? "Unable to save or load your account. Please try again.",
+        response.status,
+      );
     return result;
   }
 

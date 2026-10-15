@@ -335,6 +335,18 @@
   font-size: 0.72rem;
 }
 
+.booking-conflict {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--classes-line);
+  border-radius: 8px;
+  background: var(--classes-soft-green);
+}
+
+.booking-conflict p {
+  margin: 0 0 0.75rem;
+}
+
 .class-search {
   display: grid;
   gap: 0.5rem;

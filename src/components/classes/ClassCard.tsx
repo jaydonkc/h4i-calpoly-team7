@@ -6,6 +6,7 @@ import { classReturnPath, loginPath } from "@/lib/auth/redirect";
 import { formatClassTime } from "@/types/account";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
+import { AccountRequestError } from "@/lib/account/request-error";
 import type { FitnessClass } from "@/types/fitness-class";
 import Icon from "./Icon";
 
@@ -13,9 +14,10 @@ type ClassCardProps = {
   fitnessClass: FitnessClass;
   onBooked?: (fitnessClass: FitnessClass) => void;
   onCanceled?: (fitnessClass: FitnessClass) => void;
+  onBookingConflict?: (message: string) => void;
 };
 
-export default function ClassCard({ fitnessClass, onBooked, onCanceled }: ClassCardProps) {
+export default function ClassCard({ fitnessClass, onBooked, onCanceled, onBookingConflict }: ClassCardProps) {
   const router = useRouter();
   const {
     isUserSignedIn,
@@ -74,7 +76,13 @@ export default function ClassCard({ fitnessClass, onBooked, onCanceled }: ClassC
         onBooked?.(fitnessClass);
       }
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Unable to update your reservation.");
+      if (!isBooked && error instanceof AccountRequestError && [404, 409].includes(error.status) && onBookingConflict) {
+        onBookingConflict(
+          `${error.message} Your booking was not completed. Please review the latest schedule before trying again.`,
+        );
+      } else {
+        setError(error instanceof Error ? error.message : "Unable to update your reservation.");
+      }
     } finally {
       busy.current = false;
       setPending(false);
