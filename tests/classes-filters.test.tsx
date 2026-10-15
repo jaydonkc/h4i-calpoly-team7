@@ -59,6 +59,37 @@ function chooseFilter(label: string, option: string) {
   fireEvent.click(screen.getByRole("checkbox", { name: new RegExp(option) }));
 }
 
+it("closes a dropdown on mouse leave while preserving draft and applied selections", () => {
+  render(<ClassesPage initialSchedule={schedule} />);
+  const trigger = screen.getByText("Class types", { selector: "summary > span" }).closest("summary")!;
+  const menu = trigger.closest("details")!;
+  chooseFilter("Class types", "Strength");
+  fireEvent.mouseLeave(menu);
+  expect(menu.open).toBe(false);
+  expect(trigger.querySelector("b")?.textContent).toBe("1");
+  fireEvent.click(trigger);
+  expect(screen.getByRole("checkbox", { name: /Strength/ }).getAttribute("aria-checked")).toBe("true");
+  fireEvent.click(screen.getByRole("button", { name: "Apply Filters" }));
+  expect(screen.queryByText("Morning Yoga")).toBeNull();
+  fireEvent.click(trigger);
+  fireEvent.mouseLeave(menu);
+  expect(menu.open).toBe(false);
+  expect(screen.getByText("Strength Basics")).toBeTruthy();
+  expect(screen.queryByText("Morning Yoga")).toBeNull();
+  fireEvent.mouseLeave(menu);
+  expect(menu.open).toBe(false);
+});
+
+it("keeps the dropdown open while the pointer moves from its trigger to an option", () => {
+  render(<ClassesPage initialSchedule={schedule} />);
+  const trigger = screen.getByText("Class types", { selector: "summary > span" }).closest("summary")!;
+  fireEvent.click(trigger);
+  const option = screen.getByRole("checkbox", { name: /Strength/ });
+  fireEvent.mouseOut(trigger, { relatedTarget: option });
+  fireEvent.mouseOver(option, { relatedTarget: trigger });
+  expect(trigger.closest("details")!.open).toBe(true);
+});
+
 it("immediately resets all applied and draft filters and closes the dropdown", () => {
   render(<ClassesPage initialSchedule={schedule} />);
   chooseFilter("Class types", "Strength");
