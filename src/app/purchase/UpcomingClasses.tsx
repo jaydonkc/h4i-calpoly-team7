@@ -13,6 +13,7 @@ export default function UpcomingClasses({ initialClasses }: { initialClasses: Fi
   const [classes, setClasses] = useState(initialClasses);
   const [booked, setBooked] = useState<FitnessClass | null>(null);
   const [error, setError] = useState("");
+  const [bookingError, setBookingError] = useState("");
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     const controller = new AbortController();
@@ -32,6 +33,14 @@ export default function UpcomingClasses({ initialClasses }: { initialClasses: Fi
   }, [reservationsRevision, attempt]);
   return (
     <div id="top" className="purchase-upcoming-classes">
+      {bookingError && (
+        <div className="booking-conflict">
+          <p role="alert">{bookingError}</p>
+          <button type="button" className="reset-filters" onClick={() => setBookingError("")}>
+            Dismiss
+          </button>
+        </div>
+      )}
       {error && (
         <p role="alert">
           {error}{" "}
@@ -54,6 +63,10 @@ export default function UpcomingClasses({ initialClasses }: { initialClasses: Fi
             <ClassCard
               fitnessClass={item}
               onBooked={setBooked}
+              onBookingConflict={(message) => {
+                setBookingError(message);
+                setAttempt((value) => value + 1);
+              }}
               onCanceled={(canceled) =>
                 setBooked((current) => (current?.id === canceled.id && current.date === canceled.date ? null : current))
               }

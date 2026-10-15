@@ -3,6 +3,7 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import ClassesPage from "@/app/classes/classes";
+import UpcomingClasses from "@/app/purchase/UpcomingClasses";
 import { AccountRequestError } from "@/lib/account/request-error";
 import type { ClassSchedule, FitnessClass } from "@/types/fitness-class";
 
@@ -41,7 +42,10 @@ const schedule: ClassSchedule = {
 };
 
 beforeEach(() => vi.resetAllMocks());
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 it.each([
   [409, "This class is full."],
@@ -84,4 +88,22 @@ it("keeps ordinary failures on the card without claiming a rejected booking or r
   await waitFor(() => expect(screen.getByRole("alert").textContent).toBe("Service temporarily unavailable."));
   expect(refresh).not.toHaveBeenCalled();
   expect(mocks.reserve).toHaveBeenCalledTimes(1);
+});
+
+it.each([404, 409])("refreshes purchase availability after a booking conflict (%s)", async (status) => {
+  const fetchSchedule = vi
+    .fn()
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ success: true, data: schedule }) })
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ success: true, data: { ...schedule, classes: [] } }) });
+  vi.stubGlobal("fetch", fetchSchedule);
+  mocks.reserve.mockRejectedValueOnce(new AccountRequestError("This class is no longer available.", status));
+  render(<UpcomingClasses initialClasses={[fitnessClass]} />);
+  await waitFor(() => expect(fetchSchedule).toHaveBeenCalledTimes(1));
+  fireEvent.click(screen.getByRole("button", { name: "Reserve" }));
+  await waitFor(() => expect(screen.getByText("No upcoming classes are scheduled this week.")).toBeTruthy());
+  expect(fetchSchedule).toHaveBeenCalledTimes(2);
+  expect(screen.getByRole("alert").textContent).toContain("Your booking was not completed.");
+  expect(mocks.reserve).toHaveBeenCalledTimes(1);
+  fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+  expect(screen.queryByRole("alert")).toBeNull();
 });
