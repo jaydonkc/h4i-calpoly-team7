@@ -31,6 +31,9 @@ export default function MultiSelectFilter<T extends string>({
     <details
       className={`filter-menu ${isOpen ? "open" : ""}`}
       open={isOpen}
+      onMouseLeave={() => {
+        if (isOpen) onOpenChange();
+      }}
       onKeyDown={(event) => {
         if (event.key === "Escape" && isOpen) {
           event.preventDefault();
