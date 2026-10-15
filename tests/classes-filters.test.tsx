@@ -86,7 +86,7 @@ it("offers a reset for filtered results and keeps the selected day", () => {
   fireEvent.click(screen.getByRole("tab", { name: /THU/ }));
   chooseFilter("Class types", "Strength");
   fireEvent.click(screen.getByRole("button", { name: "Apply Filters" }));
-  const empty = screen.getByRole("heading", { name: "No classes match your filters." }).parentElement!;
+  const empty = screen.getByRole("heading", { name: "No classes match your search or filters." }).parentElement!;
   fireEvent.click(within(empty).getByRole("button", { name: "Reset filters" }));
   expect(screen.getByText("Thursday Yoga")).toBeTruthy();
   expect(screen.queryByText("Morning Yoga")).toBeNull();
@@ -96,7 +96,7 @@ it("distinguishes an unscheduled day from filtered-out classes", () => {
   render(<ClassesPage initialSchedule={schedule} />);
   fireEvent.click(screen.getByRole("tab", { name: /FRI/ }));
   expect(screen.getByText("There are no classes scheduled on this day. Try another day.")).toBeTruthy();
-  expect(screen.queryByText("No classes match your filters.")).toBeNull();
+  expect(screen.queryByText("No classes match your search or filters.")).toBeNull();
 });
 
 it("clears a saved default category without changing the account preference", () => {
@@ -106,6 +106,42 @@ it("clears a saved default category without changing the account preference", ()
   fireEvent.click(screen.getByRole("button", { name: "Reset filters" }));
   expect(screen.getByText("Morning Yoga")).toBeTruthy();
   expect(account.defaultClassCategory).toBe("Strength");
+});
+
+it("searches titles immediately, ignoring case and surrounding whitespace", () => {
+  render(<ClassesPage initialSchedule={schedule} />);
+  const search = screen.getByRole("searchbox", { name: "Search classes" });
+  fireEvent.change(search, { target: { value: "  YoGA  " } });
+  expect(screen.getByText("Morning Yoga")).toBeTruthy();
+  expect(screen.queryByText("Strength Basics")).toBeNull();
+  expect(screen.queryByText("Thursday Yoga")).toBeNull();
+  expect(screen.getByRole("status").textContent).toBe("1 class");
+  fireEvent.change(search, { target: { value: "   " } });
+  expect(screen.getByText("Strength Basics")).toBeTruthy();
+});
+
+it("combines search with filters and resets both from empty results", () => {
+  render(<ClassesPage initialSchedule={schedule} />);
+  chooseFilter("Class types", "Strength");
+  fireEvent.click(screen.getByRole("button", { name: "Apply Filters" }));
+  const search = screen.getByRole("searchbox", { name: "Search classes" });
+  fireEvent.change(search, { target: { value: "yoga" } });
+  const empty = screen.getByRole("heading", { name: "No classes match your search or filters." }).parentElement!;
+  fireEvent.click(within(empty).getByRole("button", { name: "Reset filters" }));
+  expect((search as HTMLInputElement).value).toBe("");
+  expect(screen.getByText("Morning Yoga")).toBeTruthy();
+  expect(screen.getByText("Strength Basics")).toBeTruthy();
+});
+
+it("keeps the search across day changes and updates dropdown counts", () => {
+  render(<ClassesPage initialSchedule={schedule} />);
+  fireEvent.change(screen.getByRole("searchbox"), { target: { value: "yoga" } });
+  fireEvent.click(screen.getByText("Class types", { selector: "summary > span" }));
+  expect(screen.getByRole("checkbox", { name: /Strength/ }).textContent).toContain("0");
+  expect(screen.getByRole("checkbox", { name: /Mind & Body/ }).textContent).toContain("1");
+  fireEvent.click(screen.getByRole("tab", { name: /THU/ }));
+  expect(screen.getByText("Thursday Yoga")).toBeTruthy();
+  expect(screen.queryByText("Morning Yoga")).toBeNull();
 });
 
 it("preserves an explicit reset while saved preferences are still loading", () => {
