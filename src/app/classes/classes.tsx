@@ -150,6 +150,8 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
 
   function resetFilters() {
     setSearch("");
+    // Preserve an explicit reset when this account's saved preferences finish loading.
+    preferenceApplied.current = user?.id ?? null;
     setDraftCategories([]);
     setDraftDurations([]);
     setDraftLevels([]);
