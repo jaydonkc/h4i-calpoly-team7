@@ -50,6 +50,7 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
   const [bookedClass, setBookedClass] = useState<FitnessClass | null>(null);
   const [now, setNow] = useState(() => new Date());
   const [search, setSearch] = useState("");
+  const [bookingError, setBookingError] = useState("");
   const searchTerm = search.trim().toLowerCase();
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
@@ -264,6 +265,14 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
             </button>
           </p>
         )}
+        {bookingError && (
+          <div className="booking-conflict">
+            <p role="alert">{bookingError}</p>
+            <button type="button" className="reset-filters" onClick={() => setBookingError("")}>
+              Dismiss
+            </button>
+          </div>
+        )}
         <label className="class-search">
           Search classes
           <input
@@ -374,6 +383,10 @@ export default function ClassesPage({ initialSchedule, errorMessage = null, onRe
                   key={fitnessClass.id}
                   fitnessClass={fitnessClass}
                   onBooked={setBookedClass}
+                  onBookingConflict={(message) => {
+                    setBookingError(message);
+                    onRefresh?.();
+                  }}
                   onCanceled={(canceled) =>
                     setBookedClass((current) =>
                       current?.id === canceled.id && current.date === canceled.date ? null : current,
