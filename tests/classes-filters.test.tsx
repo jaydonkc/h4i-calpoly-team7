@@ -5,11 +5,12 @@ import { afterEach, expect, it, vi } from "vitest";
 import ClassesPage from "@/app/classes/classes";
 import type { ClassSchedule, FitnessClass } from "@/types/fitness-class";
 
-const account = vi.hoisted(() => ({ defaultClassCategory: "All" }));
+const account = vi.hoisted(() => ({ defaultClassCategory: "All", profileLoading: false }));
 vi.mock("@/components/AuthProvider", () => ({
   useAuth: () => ({
     preferences: { defaultClassCategory: account.defaultClassCategory },
-    profileLoading: false,
+    profileLoading: account.profileLoading,
+    user: { id: "member" },
     isLoading: false,
   }),
 }));
@@ -21,6 +22,7 @@ vi.mock("@/components/classes/BookingNotice", () => ({ default: () => null }));
 afterEach(() => {
   cleanup();
   account.defaultClassCategory = "All";
+  account.profileLoading = false;
 });
 
 const base: FitnessClass = {
@@ -103,5 +105,17 @@ it("clears a saved default category without changing the account preference", ()
   expect(screen.queryByText("Morning Yoga")).toBeNull();
   fireEvent.click(screen.getByRole("button", { name: "Reset filters" }));
   expect(screen.getByText("Morning Yoga")).toBeTruthy();
+  expect(account.defaultClassCategory).toBe("Strength");
+});
+
+it("preserves an explicit reset while saved preferences are still loading", () => {
+  account.profileLoading = true;
+  const view = render(<ClassesPage initialSchedule={schedule} />);
+  fireEvent.click(screen.getByRole("button", { name: "Reset filters" }));
+  account.defaultClassCategory = "Strength";
+  account.profileLoading = false;
+  view.rerender(<ClassesPage initialSchedule={schedule} />);
+  expect(screen.getByText("Morning Yoga")).toBeTruthy();
+  expect(screen.getByText("Strength Basics")).toBeTruthy();
   expect(account.defaultClassCategory).toBe("Strength");
 });
